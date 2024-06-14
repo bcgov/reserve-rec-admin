@@ -1,0 +1,167 @@
+<div class="card mb-3">
+  <div class="card-header">
+    <h4 class="card-title">Checkout setup</h4>
+  </div>
+  <div class="card-body">
+    <div class="d-flex row">
+      <div class="col">
+        <ngds-picklist-input
+          label="Service"
+          [control]="form?.controls?.['service']"
+          [selectionListItems]="services"
+          [selectionListTemplate]="serviceTemplate"
+          [resetButton]="true"
+        >
+        </ngds-picklist-input>
+      </div>
+      <div class="col">
+        <ngds-number-input
+          label="Price"
+          [control]="form?.controls?.['price']"
+          [padDecimals]="true"
+          [decimalPlaces]="2"
+          [resetButton]="true"
+        >
+          <i
+            ngdsInputPrepend
+            class="bi bi-currency-dollar ms-2"
+          ></i>
+        </ngds-number-input>
+      </div>
+      <div *ngIf="service === 'bambora'">
+        <div class="col">
+          <ngds-picklist-input
+            label="Card Brand"
+            [control]="form?.controls?.['cardBrand']"
+            [selectionListItems]="cardBrands"
+            [selectionListTemplate]="cardBrandTemplate"
+            [resetButton]="true"
+          >
+          </ngds-picklist-input>
+        </div>
+        <div class="col">
+          <ngds-picklist-input
+            label="Action"
+            [control]="form?.controls?.['action']"
+            [selectionListItems]="actions"
+            [disabled]="!form?.controls?.['cardBrand'].value"
+            [resetButton]="true"
+          >
+          </ngds-picklist-input>
+        </div>
+      </div>
+      <div *ngIf="service === 'stripe'">
+        <div class="col">
+          <ngds-picklist-input
+            label="Category"
+            [control]="form?.controls?.['stripe_category']"
+            [selectionListItems]="categories"
+            [resetButton]="true"
+          >
+          </ngds-picklist-input>
+        </div>
+        <div *ngIf="form?.controls?.['stripe_category'].value === 'brand'">
+          <div class="col">
+            <ngds-picklist-input
+              label="Card Brand"
+              [control]="form?.controls?.['stripe_cardBrand']"
+              [selectionListItems]="stripe_cardBrands"
+              [resetButton]="true"
+            >
+            </ngds-picklist-input>
+          </div>
+        </div>
+        <div *ngIf="form?.controls?.['stripe_category'].value === 'country'">
+          <div class="col">
+            <ngds-typeahead-input
+              label="Card Countries"
+              [control]="form?.controls?.['stripe_cardCountry']"
+              [selectionListItems]="stripe_cardCountries"
+              [resetButton]="true"
+            >
+            </ngds-typeahead-input>
+          </div>
+        </div>
+        <div *ngIf="form?.controls?.['stripe_category'].value === 'declined'">
+          <div class="col">
+            <ngds-typeahead-input
+              label="Card Declined"
+              [control]="form?.controls?.['stripe_declined']"
+              [selectionListItems]="stripe_declined"
+              [resetButton]="true"
+            >
+            </ngds-typeahead-input>
+          </div>
+        </div>
+        <div *ngIf="form?.controls?.['stripe_category'].value === 'fraud'">
+          <div class="col">
+            <ngds-typeahead-input
+              label="Card Fraud"
+              [control]="form?.controls?.['stripe_fraud']"
+              [selectionListItems]="stripe_fraud"
+              [resetButton]="true"
+            >
+            </ngds-typeahead-input>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    class="m-3 btn btn-secondary"
+    (click)="resetForm()"
+  >Reset</button>
+  <div class="container mb-3">
+    <div class="card">
+      <div class="d-flex align-items-center mx-3 justify-content-between">
+        <div>Card number: <strong>{{cardNumber}}</strong></div>
+        <button
+          class="btn"
+          (click)="copyToClipboard(cardNumber)"
+        ><i class="bi bi-copy"></i></button>
+      </div>
+      <div class="d-flex align-items-center mx-3 justify-content-between">
+        <div>Card CVV: <strong>{{cardCvv}}</strong></div>
+        <button
+          class="btn"
+          (click)="copyToClipboard(cardCvv)"
+        ><i class="bi bi-copy"></i></button>
+      </div>
+      <div class="d-flex align-items-center mx-3 justify-content-between">
+        <div>Card Expiry: <strong>{{cardExpiry}}</strong></div>
+        <button
+          class="btn"
+          (click)="copyToClipboard(cardExpiry)"
+        ><i class="bi bi-copy"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template
+  #cardBrandTemplate
+  let-data="data"
+>
+  <div class="d-flex justify-content-between mx-3 my-2 align-items-center">
+    <div class="me-2">{{data?.display}}</div>
+    <img
+      [src]="getCCImage(data?.value)"
+      [alt]="data?.display"
+      [width]="30"
+    >
+  </div>
+</ng-template>
+
+<ng-template
+  #serviceTemplate
+  let-data="data"
+>
+  <div class="d-flex justify-content-between mx-3 my-2 align-items-center">
+    <div class="me-2">{{data?.display}}</div>
+    <img
+      [src]="data?.icon"
+      [alt]="data?.display"
+      [width]="30"
+    >
+  </div>
+</ng-template>

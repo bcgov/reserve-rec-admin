@@ -1,0 +1,38 @@
+<div class="card p-1 bg-light mb-3 overflow-scroll result-list">
+  <h2 class="text-center">API results</h2>
+  <div *ngFor="let data of dataList">
+    <div *ngIf="data?.type === 'token'">
+      <div class="card mb-1">
+        <div class="card-body">
+          <h4 class="card-title">Token</h4>
+          <div
+            class="card-text d-flex row"
+            innerHtml="{{printObj(data?.result)}}"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="data?.type === 'profile'">
+      <div class="card mb-1">
+        <div class="card-body" [ngClass]="getProfileClass(data?.result)">
+          <h4 class="card-title">Profile</h4>
+          <div
+            class="card-text d-flex row"
+            innerHtml="{{printObj(data?.result)}}"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="data?.type === 'payment'">
+      <div class="card mb-1">
+        <div class="card-body" [ngClass]="getPaymentClass(data?.result)">
+          <h4 class="card-title">Payment</h4>
+          <div
+            class="card-text d-flex row"
+            innerHtml="{{printObj(data?.result, true)}}"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

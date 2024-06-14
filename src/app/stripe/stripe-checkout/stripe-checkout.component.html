@@ -1,0 +1,70 @@
+<!-- Mounting checkout -->
+
+<div
+  class="mb-3"
+  id="checkout"
+>
+</div>
+
+<div class="mb-5">
+  <form
+    class="m-3"
+    id="payment-form"
+  >
+    <div id="payment-element">
+    </div>
+
+    <div
+      id="payment-message"
+      class="hidden"
+    ></div>
+  </form>
+  <button
+      *ngIf="showPmtButton"
+      class="btn btn-warning w-100 rounded-pill mb-2"
+      id="submit"
+      (click)="handleSubmit($event)"
+      (submit)="handleSubmit($event)"
+    >
+      <div
+        class="spinner hidden"
+        id="spinner"
+      ></div>
+      <span id="button-text">PAY NOW</span>
+    </button>
+</div>
+
+<div class="col-xs-2 text-center">
+  <button
+    id="pay-button"
+    class="btn btn-info w-100 rounded-pill mb-2"
+    [disabled]="!checkStripeCheckoutSession()"
+    (click)="stripeHostedCheckout()"
+  >
+    Pay with Stripe Payment Portal
+  </button>
+  <button
+    id="pay-button"
+    class="btn btn-info w-100 rounded-pill mb-2"
+    [disabled]="!checkStripeCheckoutSession()"
+    (click)="createEmbeddedPayment()"
+  >
+    Create Embedded Payment Form
+  </button>
+  <button
+    id="pay-button"
+    class="btn btn-info w-100 mb-2 rounded-pill"
+    [disabled]="!checkStripeCheckoutSession()"
+    (click)="renderCustomFlow()"
+  >
+    Pay Inline with Stripe Custom Payment Flow
+  </button>
+</div>
+
+
+
+<div class="row">
+  <div class="col-lg-12 text-center">
+    <div id="feedback"></div>
+  </div>
+</div>

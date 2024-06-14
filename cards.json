@@ -1,0 +1,42 @@
+[
+    {
+        "id": "always-blocked",
+        "name": "Always blocked",
+        "number": "4100000000000019"
+    },
+    {
+        "id": "highest-risk",
+        "name": "Highest risk",
+        "number": "4000000000004954"
+    },
+    {
+        "id": "elevated-risk",
+        "name": "Elevated risk",
+        "number": "4000000000009235"
+    },
+    {
+        "id": "cvc-check-fails",
+        "name": "CVC check fails",
+        "number": "4000000000000101"
+    },
+    {
+        "id": "postal-code-check-fails",
+        "name": "Postal code check fails",
+        "number": "4000000000000036"
+    },
+    {
+        "id": "line1-check-fails",
+        "name": "Line1 check fails",
+        "number": "4000000000000028"
+    },
+    {
+        "id": "address-checks-fail",
+        "name": "Address checks fail",
+        "number": "4000000000000010"
+    },
+    {
+        "id": "address-unavailable",
+        "name": "Address unavailable",
+        "number": "4000000000000044"
+    }
+]

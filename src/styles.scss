@@ -1,0 +1,14 @@
+@import "@digitalspace/bcparks-bootstrap-theme/dist/scss/variables";
+/* You can add global styles to this file, and also import other style files */
+body {
+  background-image: linear-gradient($primary-nav, $primary-nav);
+  height: 100vh;
+  width: 100vw;
+}
+
+.bambora{
+  background-image: linear-gradient($primary-nav, #5C2D91);
+}
+.stripe {
+  background-image: linear-gradient($primary-nav, #008CDD);
+}

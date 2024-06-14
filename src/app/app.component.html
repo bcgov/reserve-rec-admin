@@ -1,0 +1,25 @@
+<div class="container">
+  <h1 class="text-light text-center">Payment Services</h1>
+</div>
+
+<div class="bg">
+  <div class="d-flex row m-3">
+    <div class="container col-12 col-md-6">
+      <app-setup-form
+        (formChange)="onSetupChange($event)"
+        (price)="setPrice($event)"
+      ></app-setup-form>
+      <app-result-list [dataList]="dataList">
+      </app-result-list>
+    </div>
+    <div class="container col-12 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="text-center">Transaction Details</h3>
+          <app-profile [amount]="price" (formChange)="onProfileChange($event)"></app-profile>
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

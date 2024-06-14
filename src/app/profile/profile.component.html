@@ -1,0 +1,242 @@
+<div class="d-flex align-items-center mb-5">
+  <div class="border p-2 me-2 bg-light col">
+    <div class="d-flex row">
+      <div
+        *ngIf="amount"
+        class="col-auto"
+      >
+        <div class="text-muted text-center"> <i class="bi bi-cart"></i>&nbsp;Your cart:
+        </div>
+        <img
+          src="/assets/gorf_cube.gif"
+          alt="Rotating frog cube"
+          width="100px"
+          class="img-fluid"
+        />
+      </div>
+      <div class="col">
+        <div
+          *ngIf="amount"
+          class="d-flex justify-content-between"
+        >
+          <div>1 x Rotating frog cube gif:</div>
+          <div>${{basePriceStr}}</div>
+        </div>
+        <div
+          *ngIf="amount"
+          class="d-flex justify-content-between"
+        >
+          <div>Tax (15%):</div>
+          <div>${{taxStr}}</div>
+        </div>
+        <hr *ngIf="amount">
+        <div class="d-flex justify-content-between">
+          <div> <strong>Total (CAD):</strong></div>
+          <div><strong>${{amountStr}}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <ngds-picklist-input
+      [control]="form?.controls?.['order']?.controls?.['trnLanguage']"
+      [selectionListItems]="languages"
+      placeholder="Language"
+    >
+    </ngds-picklist-input>
+  </div>
+</div>
+
+<!-- Card holder name -->
+
+<!-- <div class="d-flex justify-content-center mb-3">
+  <ngds-toggle-input
+    label="Card holder name is the same as the billing contact"
+    [control]="form?.controls?.['differentCardHolderName']"
+  >
+  </ngds-toggle-input>
+</div>  -->
+
+<div
+  class="d-flex row mb-4"
+>
+  <div class="d-flex row mb-4 align-items-center">
+    <div class="col">
+      <ngds-text-input
+        [control]="form?.controls?.['order']?.controls?.['trnCardOwner']"
+        placeholder="Cardholder's Name"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+  <hr>
+</div>
+
+<!-- Billing -->
+
+<div class="d-flex justify-content-center mb-3">
+  <ngds-toggle-input
+    label="Add billing information"
+    [control]="form?.controls?.['showBilling']"
+  >
+  </ngds-toggle-input>
+</div>
+
+<div
+  *ngIf="form?.controls?.['showBilling'].value"
+  class="d-flex row mb-4"
+>
+
+  <h3 class="text-center">Billing Information</h3>
+
+  <div class="d-flex row mb-4 align-items-center">
+    <div class="col">
+      <ngds-text-input
+        [control]="form?.controls?.['billing']?.controls?.['ordName']"
+        placeholder="Name"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+  <div class="d-flex row mb-4">
+    <div class="col-md-6 col-12">
+      <ngds-text-input
+        [control]="form?.controls?.['billing']?.controls?.['ordAddress1']"
+        placeholder="Address line 1"
+      >
+      </ngds-text-input>
+    </div>
+    <div class="col-md-6 col-12">
+      <ngds-text-input
+        [control]="form?.controls?.['billing']?.controls?.['ordAddress2']"
+        placeholder="Address line 2"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+  <div class="d-flex row mb-4">
+    <div class="col-12 col-md-6 col-lg-3">
+      <ngds-text-input
+        [control]="form?.controls?.['billing']?.controls?.['ordCity']"
+        placeholder="City"
+      >
+      </ngds-text-input>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <ngds-typeahead-input
+        [control]="form?.controls?.['billing']?.controls?.['ordProvince']"
+        [selectionListItems]="provinces"
+        placeholder="Province"
+      >
+      </ngds-typeahead-input>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <ngds-typeahead-input
+        [control]="form?.controls?.['billing']?.controls?.['ordCountry']"
+        [selectionListItems]="countries"
+        placeholder="Country"
+      >
+      </ngds-typeahead-input>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <ngds-text-input
+        [control]="form?.controls?.['billing']?.controls?.['ordPostalCode']"
+        placeholder="Postal Code"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+  <div class="d-flex row mb-4">
+    <div class="col-md-6 col-12">
+      <ngds-text-input
+        [control]="form?.controls?.['shipping']?.controls?.['shipEmailAddress']"
+        placeholder="Email"
+      >
+      </ngds-text-input>
+    </div>
+    <div class="col-md-6 col-12">
+      <ngds-text-input
+        [control]="form?.controls?.['shipping']?.controls?.['shipPhoneAddress']"
+        placeholder="Phone number"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+
+  <!-- Shipping -->
+
+  <div class="d-flex justify-content-center mb-3">
+    <ngds-toggle-input
+      label="Shipping info is the same as billing info"
+      [control]="form?.controls?.['differentShipping']"
+    >
+    </ngds-toggle-input>
+  </div>
+
+  <div
+    *ngIf="!form?.controls?.['differentShipping'].value"
+    class="d-flex row mb-4"
+  >
+    <hr>
+
+    <h3 class="text-center">Shipping Information</h3>
+
+    <div class="d-flex row mb-4 align-items-center">
+      <div class="col">
+        <ngds-text-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipName']"
+          placeholder="Recipient Name"
+        >
+        </ngds-text-input>
+      </div>
+    </div>
+    <div class="d-flex row mb-4">
+      <div class="col-md-6 col-12">
+        <ngds-text-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipAddress1']"
+          placeholder="Address line 1"
+        >
+        </ngds-text-input>
+      </div>
+      <div class="col-md-6 col-12">
+        <ngds-text-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipAddress2']"
+          placeholder="Address line 2"
+        >
+        </ngds-text-input>
+      </div>
+    </div>
+    <div class="d-flex row mb-4">
+      <div class="col-12 col-md-6 col-lg-3">
+        <ngds-text-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipCity']"
+          placeholder="City"
+        >
+        </ngds-text-input>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <ngds-typeahead-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipProvince']"
+          [selectionListItems]="provinces"
+          placeholder="Province"
+        >
+        </ngds-typeahead-input>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <ngds-typeahead-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipCountry']"
+          [selectionListItems]="countries"
+          placeholder="Country"
+        >
+        </ngds-typeahead-input>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <ngds-text-input
+          [control]="form?.controls?.['shipping']?.controls?.['shipPostalCode']"
+          placeholder="Postal Code"
+        >
+        </ngds-text-input>
+      </div>
+    </div>
+  </div>
+</div>

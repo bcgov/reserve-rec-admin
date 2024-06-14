@@ -1,0 +1,101 @@
+<script src='https://libs.na.bambora.com/customcheckout/1/customcheckout.js'></script>
+
+
+
+<!-- Add form -->
+<h3 class="text-center">Payment Method</h3>
+<form
+  id="checkout-form"
+  class="d-flex row text-center"
+>
+  <div
+    class="col-12 col-sm-6 has-feedback"
+    id="card-number-bootstrap"
+  >
+    <div
+      id="card-number"
+      class="form-control d-flex align-items-center"
+    ></div>
+    <label
+      class="help-block"
+      for="card-number"
+      id="card-number-error"
+    ></label>
+  </div>
+  <div
+    class="col-4 col-sm-3 has-feedback"
+    id="card-cvv-bootstrap"
+  >
+    <div
+      id="card-cvv"
+      class="form-control d-flex align-items-center"
+    ></div>
+    <label
+      class="help-block"
+      for="card-cvv"
+      id="card-cvv-error"
+    ></label>
+  </div>
+  <div
+    class="col-4 col-sm-3 has-feedback"
+    id="card-expiry-bootstrap"
+  >
+    <div
+      id="card-expiry"
+      class="form-control d-flex align-items-center"
+    ></div>
+    <label
+      class="help-block"
+      for="card-expiry"
+      id="card-expiry-error"
+    ></label>
+  </div>
+</form>
+<div class="col-xs-2 text-center">
+  <button
+    id="pay-button"
+    class="btn btn-outline-success w-100 mb-2 rounded-pill"
+    [disabled]="!checkValidity()"
+    (click)="createPaymentToken()"
+  >
+    Create Payment Token
+  </button>
+  <button
+    id="pay-button"
+    class="btn btn-outline-success w-100 mb-2 rounded-pill"
+    [disabled]="!checkValidityProfile()"
+    (click)="createPaymentProfile()"
+  >
+    Create Payment Profile
+  </button>
+  <button
+    id="pay-button"
+    class="btn btn-success w-100 rounded-pill mb-2"
+    [disabled]="!checkValidityBambora()"
+    (click)="createBamboraPayment()"
+  >
+    Pay with Bambora Payment Portal
+  </button>
+  <!-- <button
+    id="pay-button"
+    class="btn btn-success w-100 rounded-pill mb-2"
+    [disabled]="!checkValidityOTP()"
+    (click)="createOneTimePayment()"
+  >
+    One-Time Payment (No Payment Profile)
+  </button> -->
+  <button
+    id="pay-button"
+    class="btn btn-success w-100 mb-2 rounded-pill"
+    [disabled]="!checkValidityCCPayment()"
+    (click)="createCreditCardPayment()"
+  >
+    Pay Inline with Credit Card
+  </button>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 text-center">
+    <div id="feedback"></div>
+  </div>
+</div>
