@@ -31,6 +31,7 @@ export class KeycloakService {
   ) { }
 
   async init() {
+    console.log("INIT");
     // Load up the config service data
     this.keycloakEnabled = this.configService.config['KEYCLOAK_ENABLED'];
     this.keycloakUrl = this.configService.config['KEYCLOAK_URL'];
