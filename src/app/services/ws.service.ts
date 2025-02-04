@@ -20,12 +20,11 @@ export class WebsocketService {
         throw new Error('WebSocket URL is required.');
       }
       this.ws = new WebSocket(url);
-      const self = this;
       this.ws.onopen = () => {
         console.log('WebSocket connection opened');
-        self.ws.onmessage = (event: MessageEvent) => self.handleMessage(event);
-        self.ws.onerror = (event: Event) => self.handleError(event);
-        self.ws.onclose = (event: CloseEvent) => self.handleClose(event);
+        this.ws.onmessage = (event: MessageEvent) => this.handleMessage(event);
+        this.ws.onerror = (event: Event) => this.handleError(event);
+        this.ws.onclose = (event: CloseEvent) => this.handleClose(event);
       };
     } catch (error) {
       console.error('Failed to create WebSocket:', error);
