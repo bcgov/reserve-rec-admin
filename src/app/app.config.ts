@@ -11,15 +11,17 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { provideToastr } from 'ngx-toastr';
 import { AmplifyService } from './services/amplify.service';
+import { WebsocketService } from './services/ws.service';
 
 export function initConfig(
   configService: ConfigService,
-  autoFetchService: AutoFetchService,
-  amplifyService: AmplifyService
+  amplifyService: AmplifyService,
+  websocketService: WebsocketService
 ) {
   return async () => {
     await configService.init();
     await amplifyService.init();
+    await websocketService.init(configService.config['WEBSOCKET_URL']);
   };
 }
 
@@ -31,7 +33,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initConfig,
-      deps: [ConfigService, AutoFetchService, AmplifyService],
+      deps: [ConfigService, AmplifyService, WebsocketService],
       multi: true
     },
     ConfigService,

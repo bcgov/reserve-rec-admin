@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Amplify } from "aws-amplify";
 import { ConfigService } from './config.service';
+import { promises } from 'fs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ export class AmplifyService {
   constructor(private configService: ConfigService) {
   }
 
-  init() {
+  async init() {
     Amplify.configure({
       Auth: {
         Cognito: {
@@ -28,5 +29,6 @@ export class AmplifyService {
         },
       },
     });
+    return Promise.resolve();
   }
 }
