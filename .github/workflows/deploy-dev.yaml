@@ -53,6 +53,8 @@ jobs:
 
           # Variables
           API_STAGE: ${{ vars.API_STAGE }}
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
 
         run: |
           echo "Deploying $ADMIN_STACK_NAME"
