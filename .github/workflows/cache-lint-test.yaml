@@ -1,0 +1,59 @@
+name: Cache, lint and test
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  install:
+    name: Install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          cache: yarn
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install --silent --frozen-lockfile
+    strategy:
+      matrix:
+        node-version: [20.x]
+  lint:
+    name: Lint
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          cache: yarn
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install --silent --frozen-lockfile
+      - run: yarn lint
+    strategy:
+      matrix:
+        node-version: [20.x]
+  test:
+    name: Test
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      ### Install if no cache exists ###
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          cache: yarn
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install --silent --frozen-lockfile
+      - run: yarn test-ci
+    strategy:
+      matrix:
+        node-version: [20.x]
