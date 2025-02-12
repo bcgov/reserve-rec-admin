@@ -87,9 +87,10 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET: ${{ vars.ADMIN_STACK_NAME }}-${{ vars.ENVIRONMENT_STAGE }}
+          S3_BUCKET: ${{ vars.ADMIN_STACK_NAME }}-${{ vars.S3_BUCKET_ADMIN }}
           DIR_NAME: ${{ github.sha }}
         run: |
+          echo "Deploying to $S3_BUCKET/$DIR_NAME"
           aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
           aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
           aws s3 sync dist s3://$S3_BUCKET/latest
