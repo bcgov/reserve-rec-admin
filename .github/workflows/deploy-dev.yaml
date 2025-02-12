@@ -58,6 +58,30 @@ jobs:
           echo "Deploying $ADMIN_STACK_NAME"
           cdk deploy $ADMIN_STACK_NAME --require-approval never --rollback
 
+      ### Install if no cache exists ###
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - run: yarn install --silent --frozen-lockfile
+
+      ### Build if no cache exists ###
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            **dist
+          key: ${{ github.sha }}-dist
+      - name: Run yarn build
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        env:
+          GH_HASH: ${{ github.sha }}
+        run: |
+          sed 's@localConfigEndpoint@'true'@g' src/env.js.template | sed 's@localGHHash@'"$GH_HASH"'@g' > src/env.js
+          yarn build
+
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
