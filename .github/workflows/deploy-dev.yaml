@@ -50,6 +50,7 @@ jobs:
         env:
           # Secrets
           ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
+          RESERVE_REC_API_ID: ${{ secrets.RESERVE_REC_API_ID }}
 
           # Variables
           API_STAGE: ${{ vars.API_STAGE }}
