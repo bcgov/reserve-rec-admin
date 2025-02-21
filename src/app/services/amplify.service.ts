@@ -14,9 +14,9 @@ export class AmplifyService {
     Amplify.configure({
       Auth: {
         Cognito: {
-          userPoolId: this.configService.config['PUBLIC_USER_POOL_ID'],
-          userPoolClientId: this.configService.config['PUBLIC_USER_POOL_CLIENT_ID'],
-          identityPoolId: this.configService.config['PUBLIC_IDENTITY_POOL_ID'],
+          userPoolId: this.configService.config['ADMIN_USER_POOL_ID'],
+          userPoolClientId: this.configService.config['ADMIN_USER_POOL_CLIENT_ID'],
+          identityPoolId: this.configService.config['ADMIN_IDENTITY_POOL_ID'],
           loginWith: {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
