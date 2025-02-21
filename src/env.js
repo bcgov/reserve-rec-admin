@@ -9,8 +9,8 @@
   // Environment name
   window.__env.ENVIRONMENT = "local"; // local | dev | test | prod
 
-  window.__env.API_LOCATION = "http://localhost:3000";
-  window.__env.API_PATH = "/api";
+  window.__env.API_LOCATION = "http://localhost:3000/";
+  window.__env.API_PATH = "api";
   window.__env.GH_HASH = "local-build";
   window.__env.ADMIN_USER_POOL_ID = "ca-central-1_nXF7h0SwT";
   window.__env.ADMIN_USER_POOL_CLIENT_ID = "7ui3kd8505rkv1duknj57en10o";
