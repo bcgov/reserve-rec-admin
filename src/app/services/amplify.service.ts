@@ -14,15 +14,15 @@ export class AmplifyService {
     Amplify.configure({
       Auth: {
         Cognito: {
-          userPoolId: this.configService.config['USER_POOL_ID'],
-          userPoolClientId: this.configService.config['USER_POOL_CLIENT_ID'],
-          identityPoolId: this.configService.config['IDENTITY_POOL_ID'],
+          userPoolId: this.configService.config['ADMIN_USER_POOL_ID'],
+          userPoolClientId: this.configService.config['ADMIN_USER_POOL_CLIENT_ID'],
+          identityPoolId: this.configService.config['ADMIN_IDENTITY_POOL_ID'],
           loginWith: {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
-              scopes: ['openid'],
-              redirectSignIn: ['http://localhost:4300/callback'],
-              redirectSignOut: ['http://localhost:4300/logout'],
+              scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
+              redirectSignIn: ['http://localhost:4300'],
+              redirectSignOut: ['http://localhost:4300'],
               responseType: 'code',
             }
           },

@@ -25,7 +25,7 @@ export class ConfigService {
     // Initially set the configuration and see if we should be contacting our hostname endpoint for
     // any configuration data.
     this.configuration = window['__env'];
-    this.build = this.configuration['GH_HASH'];
+    this.build = this.configuration?.['GH_HASH'] || 'local';
 
     if (this.configuration['configEndpoint'] === true) {
       try {
