@@ -7,11 +7,11 @@ import { RouterModule } from '@angular/router';
 import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
 
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [CommonModule, RouterModule,],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+    selector: 'app-header',
+    imports: [CommonModule, RouterModule,],
+    templateUrl: './header.component.html',
+    styleUrl: './header.component.scss',
+    standalone: true
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() showSideBar = true;

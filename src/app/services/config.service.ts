@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 
 declare global {
   interface Window { __env: any; }
@@ -65,7 +64,7 @@ export class ConfigService {
     // The delay is increased based on the fibonacci sequence.
     while (true) {
       try {
-        return (await firstValueFrom(this.httpClient.get<any>(`/api/config`)))['data'];
+        return (await this.httpClient.get<any>(`/api/config`).toPromise())['data'];
       } catch (err) {
         console.log(err);
         const delay = n1 + n2;
