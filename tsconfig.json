@@ -25,7 +25,6 @@
     ],
     // Overrides
     "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true,
     "strictNullChecks": false
   },
   "angularCompilerOptions": {

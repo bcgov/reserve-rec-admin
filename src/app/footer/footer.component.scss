@@ -1,4 +1,4 @@
-@import "@digitalspace/bcparks-bootstrap-theme/dist/scss/variables";
+@use "../../assets/styles/index" as *;
 
 .footer-admin {
   background-color: $primary-nav;
