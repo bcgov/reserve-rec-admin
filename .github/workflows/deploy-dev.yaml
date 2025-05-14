@@ -16,10 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Secrets
   ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
-
-  # Variables
   S3_BUCKET: ${{ vars.S3_BUCKET }}
 
 jobs:
