@@ -15,6 +15,14 @@ concurrency:
   group: deploy-reserve-rec-admin
   cancel-in-progress: false
 
+env:
+  # Secrets
+  ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
+  RESERVE_REC_API_ID: ${{ secrets.RESERVE_REC_API_ID }}
+
+  # Variables
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -47,16 +55,6 @@ jobs:
 
       ## CDK Deploy
       - name: CDK Deploy
-        env:
-          # Secrets
-          ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
-          RESERVE_REC_API_ID: ${{ secrets.RESERVE_REC_API_ID }}
-
-          # Variables
-          API_STAGE: ${{ vars.API_STAGE }}
-          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
-
         run: |
           echo "Deploying $ADMIN_STACK_NAME"
           cdk deploy $ADMIN_STACK_NAME --require-approval never --rollback
@@ -89,7 +87,6 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET: ${{ vars.S3_BUCKET_ADMIN }}
           DIR_NAME: ${{ github.sha }}
         run: |
           echo "Deploying to $S3_BUCKET/$DIR_NAME"
@@ -97,8 +94,8 @@ jobs:
           aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
           aws s3 sync dist s3://$S3_BUCKET/latest
 
-      - name: Invalidate CloudFront
-        uses: chetan/invalidate-cloudfront-action@v2
-        env:
-          DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
-          PATHS: "/*"
+      # - name: Invalidate CloudFront
+      #   uses: chetan/invalidate-cloudfront-action@v2
+      #   env:
+      #     DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
+      #     PATHS: "/*"
