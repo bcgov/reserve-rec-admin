@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -9,7 +9,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule]
 })
-export class SidebarComponent implements OnDestroy {
+export class SidebarComponent {
   @HostBinding('class.is-toggled')
   public hide = false;
 
@@ -31,8 +31,6 @@ export class SidebarComponent implements OnDestroy {
   onNavigate(route) {
   }
 
-  ngOnDestroy() {
-  }
 
   getPathFromUrl(url) {
     return url.split('?')[0];

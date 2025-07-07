@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'parks-management-component',
+  selector: 'app-parks-management-component',
   imports: [CommonModule],    
   templateUrl: './parks-managment.component.html',
   styleUrls: ['./parks-managment.component.scss']

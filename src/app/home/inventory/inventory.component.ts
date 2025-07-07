@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'inventory-component',
+    selector: 'app-inventory-component',
     imports: [CommonModule],
     templateUrl: './inventory.component.html',
     styleUrl: './inventory.component.scss'
