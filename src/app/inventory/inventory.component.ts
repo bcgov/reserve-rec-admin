@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-parks-management-component',
-  imports: [CommonModule],    
-  templateUrl: './parks-managment.component.html',
-  styleUrls: ['./parks-managment.component.scss']
+  selector: 'app-inventory-component',
+  imports: [CommonModule],
+  templateUrl: './inventory.component.html',
+  styleUrls: ['./inventory.component.scss']
 })
-export class ParksManagementComponent {
+export class InventoryComponent {
   goToPark() {
     console.log('Go to park');
   }

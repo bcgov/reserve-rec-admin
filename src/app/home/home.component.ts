@@ -4,18 +4,21 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut, fetchUserAttributes } from 'aws-amplify/auth';
 import { SearchComponent } from './search/search.component';
-import { ParksManagementComponent } from './parks-management/parks-managment.component';
-import { InventoryComponent } from './inventory/inventory.component';
+import { InventoryComponent } from '../inventory/inventory.component';
+import { SalesComponent } from '../sales/sales.component';
+import { ReportsComponent } from '../reports/reports.component';
+import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 @Component({
     selector: 'app-home',
-    imports: [CommonModule, SearchComponent, ParksManagementComponent, InventoryComponent],
+    imports: [CommonModule, SearchComponent, SalesComponent, InventoryComponent, ReportsComponent, NgdsFormsModule
+    ],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
 isAuthenticed = false;
 isAdmin = false;
-    
+
 constructor(public amplifyService: AmplifyService, private router: Router) {}
 async ngOnInit() {
     try {

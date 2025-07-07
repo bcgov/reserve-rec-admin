@@ -3856,6 +3856,13 @@
     bootstrap "^5.3.3"
     jquery "^3.6.0"
 
+"@digitalspace/ngds-forms@^0.0.120":
+  version "0.0.120"
+  resolved "https://registry.yarnpkg.com/@digitalspace/ngds-forms/-/ngds-forms-0.0.120.tgz#f01668ad4483b77dc71eb05730d34454edc04918"
+  integrity sha512-zUfjDid+3NBNMYhQTfd0zR/WBGB6WeC2GJpfUwv6rXkE0E4nwn6BVk5TcTPSMKOiTMxO0WehMn0QHWsIioVd9A==
+  dependencies:
+    tslib "^2.3.0"
+
 "@discoveryjs/json-ext@0.6.3":
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.6.3.tgz#f13c7c205915eb91ae54c557f5e92bddd8be0e83"
@@ -11097,6 +11104,11 @@ lru-cache@^5.1.1:
   integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
   dependencies:
     yallist "^3.0.2"
+
+luxon@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.6.1.tgz#d283ffc4c0076cb0db7885ec6da1c49ba97e47b0"
+  integrity sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==
 
 magic-string@0.30.17:
   version "0.30.17"

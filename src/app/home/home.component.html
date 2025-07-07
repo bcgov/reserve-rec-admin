@@ -1,10 +1,10 @@
 <div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 60vh;">
-  
+
   <div *ngIf="!isAuthenticed" class="w-100 d-flex flex-column align-items-center">
     <h2 class="text-center mb-5">Welcome to Reserve Rec Admin</h2>
     <button class="btn btn-primary" (click)="goToLogin()">Log In</button>
   </div>
-  
+
   <div *ngIf="isAuthenticed && !isAdmin" class="w-100 d-flex flex-column align-items-center">
     <h2 class="text-center mb-5">Welcome to Reserve Rec Admin</h2>
     <p class="fs-4 text-success">You need to request access!! Create a form to submit email to cognito user pool</p>
@@ -29,15 +29,15 @@
         <app-search-component></app-search-component>
       </div>
       <div class="p-3 border rounded bg-light">
-        <h4>Parks Management</h4>
-        <app-parks-management-component></app-parks-management-component>
+        <h4>Inventory Management</h4>
+        <app-inventory-component></app-inventory-component>
       </div>
     </div>
     <!-- Right Column: Inventory -->
     <div class="col-md-6">
       <div class="h-100 p-3 border rounded bg-light">
-        <h4>Inventory</h4>
-        <app-inventory-component></app-inventory-component>
+        <h4>Sales Management</h4>
+        <app-sales-component></app-sales-component>
       </div>
     </div>
   </div>
@@ -47,6 +47,7 @@
     <div class="col">
       <div class="p-3 border rounded bg-light">
         <h4>Reports</h4>
+        <app-reports></app-reports>
       </div>
     </div>
   </div>

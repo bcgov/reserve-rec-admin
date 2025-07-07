@@ -1,19 +1,13 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { LogoutComponent } from './logout/logout.component';
-import { CallbackComponent } from './callback/callback.component';
-import { LoginComponent } from './login/login.component';
-import { HomeComponent } from './home/home.component';
+import { Routes } from '@angular/router';
+import { UserGuard } from './guards/user.guard';
 
 export const routes: Routes = [
-  { path: 'logout', component: LogoutComponent },
-  { path: 'callback', component: CallbackComponent },
-  { path: 'login', component: LoginComponent },
-  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: '', loadComponent: () => import('./home/home.component').then(mod => mod.HomeComponent) },
+  { path: 'dashboard', redirectTo: '', pathMatch: 'full' },
+  { path: 'login', loadComponent: () => import('./login/login.component').then(mod => mod.LoginComponent) },
+  { path: 'logout', loadComponent: () => import('./logout/logout.component').then(mod => mod.LogoutComponent), canActivate: [UserGuard] },
+  { path: 'sales', loadComponent: () => import('./sales/sales.component').then(mod => mod.SalesComponent), canActivate: [UserGuard] },
+  { path: 'customers', loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent), canActivate: [UserGuard]  },
+  { path: 'inventory', loadComponent: () => import('./inventory/inventory.component').then(mod => mod.InventoryComponent), canActivate: [UserGuard]  },
+  {path: 'reports', loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent), canActivate: [UserGuard]  },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
