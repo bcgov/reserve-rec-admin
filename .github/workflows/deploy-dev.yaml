@@ -86,10 +86,10 @@ jobs:
           S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
           DIR_NAME: ${{ github.sha }}
         run: |
-          echo "Deploying to $S3_BUCKET/$DIR_NAME"
-          aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
-          aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
-          aws s3 sync dist s3://$S3_BUCKET/latest
+          echo "Deploying to $S3_BUCKET_ADMIN/$DIR_NAME"
+          aws s3 sync dist s3://$S3_BUCKET_ADMIN/$DIR_NAME
+          aws s3 rm s3://$S3_BUCKET_ADMIN/ --recursive --exclude "*" --include "latest/*"
+          aws s3 sync dist s3://$S3_BUCKET_ADMIN/latest
 
       # - name: Invalidate CloudFront
       #   uses: chetan/invalidate-cloudfront-action@v2
