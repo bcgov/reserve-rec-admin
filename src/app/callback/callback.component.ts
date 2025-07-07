@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AmplifyService } from '../services/amplify.service';
 
 @Component({
     selector: 'app-callback',
@@ -9,7 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class CallbackComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor(private route: ActivatedRoute, private router: Router, private authService: AmplifyService) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {

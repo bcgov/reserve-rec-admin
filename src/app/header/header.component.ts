@@ -4,7 +4,8 @@ import { ConfigService } from '../services/config.service';
 import { SidebarService } from '../services/sidebar.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
+import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut, fetchUserAttributes } from 'aws-amplify/auth';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-header',
@@ -28,7 +29,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     protected configService: ConfigService,
     protected sidebarService: SidebarService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private router: Router,
   ) {
     this.subscriptions.add(
       sidebarService.routes.subscribe((routes) => {
@@ -47,7 +49,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Check if user is already signed in, throws if not
       await getCurrentUser();
       this.isAuthenticed = true;
-    } catch (e) {
+     } catch (e) {
       console.log(e);
     }
 
@@ -63,18 +65,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }, 15000);
   }
 
-  public async onLoginLogoutCLick(inOrOut: string) {
+  public async onLoginLogoutClick(inOrOut: string) {
+    
     if (inOrOut === 'login') {
-      await signInWithRedirect({
-        provider: {
-          custom: 'AzureIDIR'
-        }
-      });
+      this.router.navigate(['/login']);
     } else {
-      await signOut();
+      signOut();
     }
   }
 
+  async logUser() {
+    try {
+        const user = await fetchUserAttributes();
+       
+    } catch (err) {
+        console.log('No authenticated user:', err);
+    }
+  }
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
