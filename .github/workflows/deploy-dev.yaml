@@ -84,7 +84,7 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}-{{ vars.ENVIRONMENT }}
+          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
           DIR_NAME: ${{ github.sha }}
         run: |
           echo "Deploying to $S3_BUCKET_ADMIN/$DIR_NAME"
