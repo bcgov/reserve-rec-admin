@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Router } from '@angular/router';
-import { AmplifyService } from '../services/amplify.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +15,7 @@ import { AmplifyService } from '../services/amplify.service';
 })
 export class LoginComponent {
 
-  constructor(private router: Router, private authService: AmplifyService) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   onLogin(provider: string) {
     this.authService.loginWithProvider(provider);

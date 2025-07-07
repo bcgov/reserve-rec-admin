@@ -2,13 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-inventory-component',
+    selector: 'app-sales-component',
     imports: [CommonModule],
-    templateUrl: './inventory.component.html',
-    styleUrl: './inventory.component.scss'
+    templateUrl: './sales.component.html',
+    styleUrl: './sales.component.scss'
 })
-export class InventoryComponent {
-  numberOfPermits = 0; 
+export class SalesComponent {
+  numberOfPermits = 0;
 
   seeAll() {
     console.log('See all permits');
