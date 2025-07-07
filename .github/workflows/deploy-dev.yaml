@@ -18,6 +18,7 @@ concurrency:
 env:
   ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
   S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
+  ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
 jobs:
   deploy:
