@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection, inject, provideAppInitializer } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
-import { routes } from './app.routes';
+import { routes } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { AutoFetchService } from './services/auto-fetch.service';

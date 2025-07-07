@@ -1,1 +1,56 @@
-<p>home works!</p>
+<div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 60vh;">
+  
+  <div *ngIf="!isAuthenticed" class="w-100 d-flex flex-column align-items-center">
+    <h2 class="text-center mb-5">Welcome to Reserve Rec Admin</h2>
+    <button class="btn btn-primary" (click)="goToLogin()">Log In</button>
+  </div>
+  
+  <div *ngIf="isAuthenticed && !isAdmin" class="w-100 d-flex flex-column align-items-center">
+    <h2 class="text-center mb-5">Welcome to Reserve Rec Admin</h2>
+    <p class="fs-4 text-success">You need to request access!! Create a form to submit email to cognito user pool</p>
+  </div>
+
+  <div *ngIf="isAuthenticed && isAdmin" class="w-100 d-flex flex-column align-items-center">
+
+    <div class="container py-4">
+
+  <!-- Title here -->
+  <div class="row mb-here4">
+    <div class="col">
+      <h1 class="display-5">Reservations System</h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="mb-3 p-3 border rounded bg-light">
+        <h4>Search</h4>
+        <search-component></search-component>
+      </div>
+      <div class="p-3 border rounded bg-light">
+        <h4>Parks Management</h4>
+        <parks-management-component></parks-management-component>
+      </div>
+    </div>
+    <!-- Right Column: Inventory -->
+    <div class="col-md-6">
+      <div class="h-100 p-3 border rounded bg-light">
+        <h4>Inventory</h4>
+        <inventory-component></inventory-component>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Row -->
+  <div class="row">
+    <div class="col">
+      <div class="p-3 border rounded bg-light">
+        <h4>Reports</h4>
+      </div>
+    </div>
+  </div>
+
+</div>
+  </div>
+</div>

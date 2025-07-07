@@ -1,0 +1,34 @@
+<div class="container">
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h5>Location</h5>
+      <select class="form-select" aria-label="Select location">
+        <option selected>All</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <h5>Date</h5>
+      <div class="d-flex">
+        <select class="form-select me-2" aria-label="Start date">
+          <option selected>Start Date</option>
+        </select>
+        <select class="form-select" aria-label="End date">
+          <option selected>End Date</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h2 class="text-primary">{{ numberOfPermits }}</h2>
+      <h3>Permits Booked</h3>
+    </div>
+    <div class="col d-flex justify-content-end">
+      <button class="btn btn-outline-primary me-2" (click)="seeAll()">See All</button>
+      <button class="btn btn-primary" (click)="createNew()">Create New</button>
+    </div>
+  </div>
+
+</div>

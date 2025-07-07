@@ -1,0 +1,29 @@
+<div class="login-bg d-flex align-items-center justify-content-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 bg-white p-5 rounded shadow my-5">
+        <h2 class="mb-4 text-center">Reservations</h2>
+        <p class="text-center mb-4">Select the ID you want to use to log into the Reservations system.</p>
+        
+        <div class="d-flex flex-column align-items-center">
+          <button class="btn btn-primary btn-m mb-0 w-50" (click)="onLogin('bcsc')">
+            Log In with BC Services Card
+          </button>
+          <p>
+           <a 
+            href="https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup" 
+            target="_blank" 
+            rel="noopener" 
+            class="mb-2 mt-0">
+             <i class="fa-regular fa-gear"></i>
+            Set up the BC Services Card App
+          </a></p>
+          <button class="btn btn-primary btn-m mb-4 w-50" (click)="onLogin('idir')">
+            Log In with IDIR
+          </button>
+        </div>
+       
+      </div>
+    </div>
+  </div>
+</div>
