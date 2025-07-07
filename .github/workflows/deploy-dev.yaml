@@ -17,7 +17,7 @@ concurrency:
 
 env:
   ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
-  S3_BUCKET: ${{ vars.S3_BUCKET }}
+  S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
 
 jobs:
   deploy:
@@ -83,7 +83,7 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
           DIR_NAME: ${{ github.sha }}
         run: |
           echo "Deploying to $S3_BUCKET/$DIR_NAME"
