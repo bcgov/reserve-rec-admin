@@ -29,7 +29,7 @@
     "@aws-amplify/ui": "^6.5.0",
     "@aws-amplify/ui-angular": "^5.0.24",
     "@digitalspace/bcparks-bootstrap-theme": "^1.4.6",
-    "@digitalspace/ngds-forms": "^0.0.120",
+    "@digitalspace/ngds-forms": "^0.0.123",
     "@popperjs/core": "^2.11.8",
     "@types/bootstrap": "^5.2.10",
     "aws-amplify": "^6.6.1",

@@ -1,0 +1,12 @@
+.card {
+  &:hover {
+    .card-header {
+      background-color: #e9ecef;
+    }
+    .card-body {
+      background-color: #f8f9fa;
+    }
+    cursor: pointer;
+    box-shadow: 1px 1px 1px 1px grey;
+  }
+}

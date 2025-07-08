@@ -23,6 +23,7 @@ export class SearchService {
       text: query
     };
     try {
+      this.clearSearchResults();
       this.loadingService.addToFetchList(Constants.dataIds.SEARCH_RESULTS);
       const res: any[] = (await lastValueFrom(this.apiService.post(`search`, queryParams)))['data']['hits'];
       this.dataService.setItemValue(Constants.dataIds.SEARCH_RESULTS, res);
@@ -33,5 +34,9 @@ export class SearchService {
       this.loggerService.error(error);
       return null; // Return null or handle the error as needed
     }
+  }
+
+  clearSearchResults() {
+    this.dataService.setItemValue(Constants.dataIds.SEARCH_RESULTS, []);
   }
 }
