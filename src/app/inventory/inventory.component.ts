@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { SearchService } from '../services/search.service';
 import { LoadingService } from '../services/loading.service';
+import { SearchResultsTableComponent } from './search-results-table/search-results-table.component';
 
 @Component({
   selector: 'app-inventory-component',
-  imports: [CommonModule, NgdsFormsModule],
+  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent],
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.scss']
 })
@@ -16,7 +17,8 @@ export class InventoryComponent implements OnInit {
 
   constructor(
     protected searchService: SearchService,
-    protected loadingService: LoadingService
+    protected loadingService: LoadingService,
+    protected cdr: ChangeDetectorRef
   ) {
 
   }
@@ -29,9 +31,11 @@ export class InventoryComponent implements OnInit {
 
   async search() {
     const query = this.form.get('search').value;
+    const searchValue = this.form.get('search');
     const res = await this.searchService.searchByQuery(query);
-    console.log('res:', res);
+    this.cdr.detectChanges();
   }
+
 
   goToPark() {
     console.log('Go to park');

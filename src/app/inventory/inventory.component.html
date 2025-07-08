@@ -5,7 +5,7 @@
     [label]="'BC Parks Reservation Service Data Lookup'"
     [placeholder]="'Search for protected areas, facilities, activities, or other data'"
     [resetButton]="true"
-    [loadWhile]="loadingService.isLoading()"
+    [loadWhile]="loadingService?.loading()"
     aria-label="Search for protected areas, facilities, activities, or other data"
     (keyup.enter)="search()"
   >
@@ -14,10 +14,14 @@
       class="btn btn-primary"
       type="submit"
       (click)="search()"
-      disabled="loadingService.isLoading()"
+      [disabled]="form.get('search')?.disabled"
     >
       <i class="me-1 fa-regular fa-magnifying-glass"></i>
       Search
     </button>
   </ngds-text-input>
+</section>
+<section>
+  <app-search-results-table
+  ></app-search-results-table>
 </section>
