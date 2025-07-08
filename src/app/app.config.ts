@@ -12,15 +12,18 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { AuthService } from './services/auth.service';
 import { WebsocketService } from './services/ws.service';
+import { ApiService } from './services/api.service';
 
 export function initConfig(
   configService: ConfigService,
   authService: AuthService,
+  apiService: ApiService,
   websocketService: WebsocketService
 ) {
   return async () => {
     await configService.init();
     await authService.init();
+    apiService.init();
     await websocketService.init(configService.config['WEBSOCKET_URL']);
   };
 }
@@ -31,7 +34,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAppInitializer(() => {
-        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(WebsocketService));
+        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService));
         return initializerFn();
       }),
     ConfigService,

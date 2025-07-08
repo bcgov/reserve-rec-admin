@@ -35,6 +35,7 @@
     "aws-amplify": "^6.6.1",
     "aws-cdk": "2.179.0",
     "aws-cdk-lib": "2.179.0",
+    "bootstrap-icons": "^1.13.1",
     "constructs": "^10.0.0",
     "guid-typescript": "^1.0.9",
     "luxon": "^3.6.1",

@@ -1,3 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+@use "bootstrap-icons/font/bootstrap-icons.css";
+
 // regular style toast
 @use 'ngx-toastr/toastr';
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --amplify-components-button-primary-background-color: rgba(1, 51, 102, 1);
+    --amplify-components-tabs-item-active-color: rgba(1, 51, 102, 1);
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+app-root {
+  min-height: 100vh;
+}

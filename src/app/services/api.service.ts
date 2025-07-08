@@ -1,7 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Subscription, merge, of, fromEvent, map, throwError, catchError } from 'rxjs';
 import { ConfigService } from './config.service';
+import { AuthService } from './auth.service';
+
 
 @Injectable({
   providedIn: 'root',
@@ -9,14 +11,19 @@ import { ConfigService } from './config.service';
 export class ApiService implements OnDestroy {
   public token: string;
   public isMS: boolean; // IE, Edge, etc
-  networkStatus: boolean = false;
+  networkStatus = false;
   networkStatus$: Subscription = Subscription.EMPTY;
   private headers;
+  private http: HttpClient;
 
   apiPath: string;
   env: 'local' | 'dev' | 'test' | 'prod';
 
-  constructor(private http: HttpClient, private configService: ConfigService) { }
+  constructor(private configService: ConfigService,
+    private authService: AuthService
+  ) {
+    this.http = inject(HttpClient);
+  }
 
   // Provide a getter for others to check current state.
   get isNetworkOffline() {
@@ -32,8 +39,6 @@ export class ApiService implements OnDestroy {
   }
 
   init() {
-    console.log('API Service Initializing...');
-    console.log('API Service Config:', this.configService.config);
     // If config is setting api, override.
     if (this.configService.config['API_LOCATION']) {
       if (this.configService.config['API_PATH'] && this.configService.config['API_LOCATION'] !== 'http://localhost:3000') {
@@ -45,7 +50,7 @@ export class ApiService implements OnDestroy {
       this.apiPath = window.location.origin + '/api';
     }
 
-    this.headers = new HttpHeaders().set('x-api-key', this.configService.config['API_KEY']);
+    this.headers = this.initHeaders();
     if (!this.headers) {
       console.log('No API key provided.');
     }
@@ -54,9 +59,17 @@ export class ApiService implements OnDestroy {
     this.checkNetworkStatus();
   }
 
+  initHeaders() {
+    return new HttpHeaders().set('x-api-key', this.configService.config['API_KEY']);
+  }
+
   checkNetworkStatus() {
+    console.log('navigator:', navigator);
     this.networkStatus = navigator.onLine;
-    this.networkStatus$ = merge(of(null), fromEvent(window, 'online'), fromEvent(window, 'offline'))
+    this.networkStatus$ = merge(of(null),
+      fromEvent(window, 'online'),
+      fromEvent(window, 'offline')
+    )
       .pipe(map(() => navigator.onLine))
       .subscribe((status) => {
         console.log(status === false ? 'Network Offline' : 'Network Online');
@@ -71,18 +84,17 @@ export class ApiService implements OnDestroy {
   get(pk, queryParamsObject = null as any) {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
-      return this.http
-        .get<any>(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
-        .pipe(catchError(this.errorHandler));
-    } else {
-      throw 'Network Offline';
-    }
-  }
-
-  put(pathArray, obj, queryParamsObject = null as any) {
-    if (this.networkStatus) {
-      const url = this.buildUrl(this.apiPath, pathArray, queryParamsObject);
-      return this.http.put<any>(`${url}`, obj, { headers: this.headers }).pipe(catchError(this.errorHandler));
+      // If logged in, add the JWT token to the headers.
+      if (this.authService.jwtToken) {
+        this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
+        return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
+          .pipe(catchError(this.errorHandler));
+      } else {
+        this.headers = this.headers.append('Authorization', `guest`);
+        console.log('calling as guest');
+        return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
+          .pipe(catchError(this.errorHandler));
+      }
     } else {
       throw 'Network Offline';
     }
@@ -91,9 +103,19 @@ export class ApiService implements OnDestroy {
   post(pk, obj, queryParamsObject = null as any) {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
-      return this.http
-        .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers })
-        .pipe(catchError(this.errorHandler));
+      // If logged in, append the JWT token to the headers.
+      if (this.authService.jwtToken) {
+        this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
+        return this.http
+          .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers })
+          .pipe(catchError(this.errorHandler));
+      } else {
+        this.headers = this.headers.append('Authorization', `guest`);
+        console.log('calling as guest');
+        return this.http
+          .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers })
+          .pipe(catchError(this.errorHandler));
+      }
     } else {
       throw 'Network Offline';
     }
@@ -119,14 +141,6 @@ export class ApiService implements OnDestroy {
       queryString = queryString.substring(1);
     }
     return queryString;
-  }
-
-  public getArrayFromSearchResults(data) {
-    const res = [];
-    for (const record of data.data.hits) {
-      res.push(record._source);
-    }
-    return res;
   }
 
   private buildUrl(apiPath, pathArray, queryParamsObject) {

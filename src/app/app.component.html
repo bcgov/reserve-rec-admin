@@ -1,14 +1,13 @@
 <div class="d-flex flex-column vh-100">
   <app-header></app-header>
 
-  <div class="flex-grow-1 d-flex" style="min-height:0;">
-    <div style="flex: 0 0 20%; max-width: 20%;">
+  <div class="content d-flex row h-100">
+    <div class="col-md-auto">
       <app-sidebar></app-sidebar>
-    </div>
-    <div style="flex: 1 1 80%; overflow:auto;">
-      <router-outlet></router-outlet>
-    </div>
+      </div>
+      <div class="col">
+      <router-outlet/>
+      </div>
   </div>
-
   <app-footer></app-footer>
 </div>

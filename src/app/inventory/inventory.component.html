@@ -1,14 +1,23 @@
-<div class="mb-3">
-  <p>Location<p>
-  <div class="d-flex align-items-center">
-    <select class="form-select me-2" aria-label="Select location">
-      <option selected disabled>Please select</option>
-      <!-- figure out populating options later -->
-    </select>
-    <button class="btn btn-primary" type="button" (click)="goToPark()">Go</button>
-  </div>
-</div>
-<div class="d-flex justify-content-end mt-3">
-  <button class="btn btn-primary me-2" type="button" (click)="showAlerts()">Alerts</button>
-  <button class="btn btn-primary" type="button" (click)="showClosures()">Closures</button>
-</div>
+<section class="container my-5">
+  <h3>Inventory Management</h3>
+  <ngds-text-input
+    [control]="form.get('search')"
+    [label]="'BC Parks Reservation Service Data Lookup'"
+    [placeholder]="'Search for protected areas, facilities, activities, or other data'"
+    [resetButton]="true"
+    [loadWhile]="loadingService.isLoading()"
+    aria-label="Search for protected areas, facilities, activities, or other data"
+    (keyup.enter)="search()"
+  >
+    <button
+      ngdsInputAppend
+      class="btn btn-primary"
+      type="submit"
+      (click)="search()"
+      disabled="loadingService.isLoading()"
+    >
+      <i class="me-1 fa-regular fa-magnifying-glass"></i>
+      Search
+    </button>
+  </ngds-text-input>
+</section>
