@@ -1,4 +1,7 @@
-<div class="card mb-2" (click)="onSelect(data)">
+<button
+  class="card mb-2 w-100 p-0 text-start"
+  (click)="onSelect(data)"
+>
   <div class="card-header">
     <div class="row d-flex justify-content-between align-items-center">
       <div class="col-auto">
@@ -27,6 +30,22 @@
         <div class="mb-2">
           <strong>Last Updated:</strong> {{data?.lastUpdated | date:'short'}}
         </div>
+        <div
+          *ngIf="data?.gzCollectionId || data?.fcCollectionId || data?.acCollectionId"
+          class="mb-2"
+        >
+          <strong>Collection ID: </strong>
+          <div class="badge bg-secondary">{{data?.gzCollectionId || data?.fcCollectionId || data?.acCollectionId || 'No
+            ID available.'}}</div>
+        </div>
+        <div *ngIf="data?.facilityType">
+          <strong>Facility Type: </strong>
+          <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.facilityType}}</span>
+        </div>
+        <div *ngIf="data?.activityType">
+          <strong>Activity Type: </strong>
+          <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.activityType}}</span>
+        </div>
       </div>
       <div class="col-auto">
         <img
@@ -34,8 +53,9 @@
           [src]="data.imageUrl"
           alt="{{data.displayName}} image"
           class="img-fluid rounded"
-          style="max-width: 150px; max-height: 150px;"/>
+          style="max-width: 150px; max-height: 150px;"
+        />
       </div>
     </div>
   </div>
-</div>
+</button>
