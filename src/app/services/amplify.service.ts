@@ -5,6 +5,7 @@ import { LoggerService } from './logger.service';
 import { signInWithRedirect, fetchUserAttributes, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { Router } from '@angular/router';
+import { throwIfEmpty } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -28,8 +29,8 @@ export class AmplifyService {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
               scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-              redirectSignIn: ['http://localhost:4300'],
-              redirectSignOut: ['http://localhost:4300'],
+              redirectSignIn: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
+              redirectSignOut: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
               responseType: 'code',
             }
           },
@@ -48,7 +49,7 @@ export class AmplifyService {
     // Use Amplify's signInWithRedirect method to initiate the OAuth flow instead of custome method
     signInWithRedirect({ provider: { custom: idpName } });
   }
-  
+
 
 
 
@@ -123,13 +124,13 @@ export class AmplifyService {
               //This is just kicking user out to login page. TODO: Add a modal to confirm logout or stay logged in?
               if (currentTime >= refreshTokenExp) {
                 this.loggerService.info('Refresh token expired. Logging out...');
-                await this.logout(); 
-                this.router.navigate(['/login']); 
+                await this.logout();
+                this.router.navigate(['/login']);
               }
             }
           }, refreshInterval);
         }
-      } 
+      }
     }catch (error) {
       console.error('Error setting refresh token:', error);
       await this.logout(); // Log out on error
@@ -141,7 +142,7 @@ export class AmplifyService {
   //Use this to ensure signal gets cleared
   async logout() {
     await signOut();
-    this.updateUser(null); 
+    this.updateUser(null);
     this.session.set(null);
     console.log('User logged out', this.user);
     this.router.navigate(['/']);
@@ -151,10 +152,10 @@ export class AmplifyService {
     try {
       const userAttributes = await fetchUserAttributes();
       console.log('Fetching current user attributes...', userAttributes);
-      return userAttributes || null; 
+      return userAttributes || null;
     } catch (error) {
       this.loggerService.error(`Error fetching current user: ${error}`);
-      return null; 
+      return null;
     }
   }
 
