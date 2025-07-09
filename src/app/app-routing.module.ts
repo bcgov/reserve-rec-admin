@@ -11,6 +11,13 @@ export const routes: Routes = [
   { path: 'customers', loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent), canActivate: [UserGuard] },
   // Inventory
   { path: 'inventory', loadComponent: () => import('./inventory/inventory.component').then(mod => mod.InventoryComponent), canActivate: [UserGuard] },
+  {
+    path: 'inventory/create', loadComponent: () => import('./inventory/create-inventory/create-inventory.component').then(mod => mod.CreateInventoryComponent), canActivate: [UserGuard], children: [
+      { path: 'geozone', loadComponent: () => import('./inventory/create-inventory/geozone-create/geozone-create.component').then(mod => mod.GeozoneCreateComponent) },
+      { path: 'facility', loadComponent: () => import('./inventory/create-inventory/facility-create/facility-create.component').then(mod => mod.FacilityCreateComponent) },
+      { path: 'activity', loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent) },
+    ],
+  },
   { path: 'inventory/geozone/:gzCollectionId/:geozoneId', loadComponent: () => import('./inventory/geozone/geozone.component').then(mod => mod.GeozoneComponent), canActivate: [UserGuard], resolve: { geozone: GeozoneResolver } },
   { path: 'reports', loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent), canActivate: [UserGuard] },
 ];

@@ -64,7 +64,7 @@ export class ConfigService {
     // The delay is increased based on the fibonacci sequence.
     while (true) {
       try {
-        return (await this.httpClient.get<any>(`/api/config`).toPromise())['data'];
+        return (await this.httpClient.get<any>(`/api/config?config=admin`).toPromise())['data'];
       } catch (err) {
         console.log(err);
         const delay = n1 + n2;

@@ -5,10 +5,11 @@ import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { SearchService } from '../services/search.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchResultsTableComponent } from './search-results-table/search-results-table.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-inventory-component',
-  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent],
+  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, RouterLink],
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.scss']
 })

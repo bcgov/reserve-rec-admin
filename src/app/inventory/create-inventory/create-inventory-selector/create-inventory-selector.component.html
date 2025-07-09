@@ -1,0 +1,18 @@
+<div class="h-100 selector-button border border-3 rounded" [ngClass]="getButtonClasses()">
+  <button
+    [disabled]="disabled"
+    class="selector-body btn d-flex flex-column align-items-center p-3 position-relative"
+    [routerLink]="link"
+  >
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-white text-primary">
+      <i *ngIf="!disabled" class="fa-solid fa-plus fa-xl mb-2"></i>
+      <i *ngIf="disabled" class="fa-solid fa-hourglass-half fa-xl mb-2"></i>
+    </span>
+    <i class="{{ icon }} fa-2xl mt-3 mb-4 text-primary"></i>
+    <h3
+      class="text-center badge mx-3 "
+      [ngClass]="titleClasses"
+    >{{ title }}</h3>
+    <div class="text-center">{{ description }}</div>
+
+  </button>

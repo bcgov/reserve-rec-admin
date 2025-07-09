@@ -1,0 +1,69 @@
+<section class="container my-5">
+  <h3>Create New Inventory</h3>
+  <div class="mb-3">
+    Select the type of inventory item you want to create:
+  </div>
+  <div class="row mb-3">
+    <div class="btn-group gap-4">
+      <div class="col">
+        <app-create-inventory-selector
+          class="col-md-4 mb-3 "
+          title="GEOZONE"
+          titleClasses="bg-warning rounded-pill text-dark"
+          description="Geozones are geospatial regions defined by a bounding box that group together activities and facilities that are interrelated."
+          icon="fa-solid fa-map-location-dot"
+          link="/inventory/create/geozone"
+        ></app-create-inventory-selector>
+      </div>
+      <div class="col">
+        <app-create-inventory-selector
+          class="col-md-4 mb-3"
+          title="FACILITY"
+          titleClasses="bg-primary rounded-pill"
+          description="Facilities are specific geospatial locations defined by a latitude and longitude and can represent the location of campgrounds, trails, structures, natural features, and other amenities."
+          icon="fa-solid fa-location-dot"
+          link="/inventory/create/facility"
+        ></app-create-inventory-selector>
+      </div>
+      <div class="col">
+        <app-create-inventory-selector
+          class="col-md-4 mb-3"
+          title="ACTIVITY"
+          titleClasses="bg-danger rounded-pill"
+          description="Activities are specific experiences that are offered at facilities or within geozones, such as camping, day use experiences, boating, and more."
+          icon="fa-solid fa-campground"
+          link="/inventory/create/activity"
+        ></app-create-inventory-selector>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="btn-group gap-4">
+      <div class="col">
+        <app-create-inventory-selector
+          class="col-md-4 mb-3 "
+          title="PRODUCT"
+          titleClasses="bg-info rounded-pill text-dark"
+          description="**Not yet available** Products are instances of activities paired with specific policies that govern how and when the activity can be booked, and are what users will ultimately purchase."
+          icon="fa-solid fa-ticket"
+          link="/"
+          [disabled]="true"
+        ></app-create-inventory-selector>
+      </div>
+      <div class="col">
+        <app-create-inventory-selector
+          class="col-md-4 mb-3 "
+          title="POLICY"
+          titleClasses="bg-secondary rounded-pill"
+          description="**Not yet available** Policies are simple rulesets govern how an activity can be booked, such as cancellation policies, booking windows, fee structures, party sizes, and more."
+          icon="fa-solid fa-file-pen"
+          link="/"
+          [disabled]="true"
+        ></app-create-inventory-selector>
+      </div>
+      <div class="col">
+      </div>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+</section>

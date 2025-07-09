@@ -1,25 +1,39 @@
 <section class="container my-5">
   <h3>Inventory Management</h3>
-  <ngds-text-input
-    [control]="form.get('search')"
-    [label]="'BC Parks Reservation Service Data Lookup'"
-    [placeholder]="'Search for protected areas, facilities, activities, or other data'"
-    [resetButton]="true"
-    [loadWhile]="loadingService?.loading()"
-    aria-label="Search for protected areas, facilities, activities, or other data"
-    (keyup.enter)="search()"
-  >
-    <button
-      ngdsInputAppend
-      class="btn btn-primary"
-      type="submit"
-      (click)="search()"
-      [disabled]="form.get('search')?.disabled"
-    >
-      <i class="me-1 fa-regular fa-magnifying-glass"></i>
-      Search
-    </button>
-  </ngds-text-input>
+  <div class="row">
+    <div class="col">
+      <ngds-text-input
+        [control]="form.get('search')"
+        [label]="'BC Parks Reservation Service Data Lookup'"
+        [placeholder]="'Search for protected areas, facilities, activities, or other data'"
+        [resetButton]="true"
+        [loadWhile]="loadingService?.loading()"
+        aria-label="Search for protected areas, facilities, activities, or other data"
+        (keyup.enter)="search()"
+      >
+        <button
+          ngdsInputAppend
+          class="btn btn-primary"
+          type="submit"
+          (click)="search()"
+          [disabled]="form.get('search')?.disabled"
+        >
+          <i class="me-1 fa-regular fa-magnifying-glass"></i>
+          Search
+        </button>
+      </ngds-text-input>
+
+    </div>
+    <div class="col-auto d-flex align-items-bottom">
+      <button
+        class="btn btn-success float-end"
+        [routerLink]="['/inventory/create']"
+      >
+        <i class="fa-solid fa-plus me-1"></i>
+        Create New Inventory Item
+      </button>
+    </div>
+  </div>
   <ngds-toggle-input
     [control]="form.get('showFilters')"
     [label]="'Search filters'"
