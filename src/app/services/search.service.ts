@@ -18,14 +18,15 @@ export class SearchService {
     private loadingService: LoadingService
   ) { }
 
-  async searchByQuery(query: string) {
-    const queryParams = {
-      text: query
-    };
+  async searchByQuery(query:string, terms: any = null, filters: any = null){
+    const body = {
+      text: query,
+      ...terms
+    }
     try {
       this.clearSearchResults();
       this.loadingService.addToFetchList(Constants.dataIds.SEARCH_RESULTS);
-      const res: any[] = (await lastValueFrom(this.apiService.post(`search`, queryParams)))['data']['hits'];
+      const res: any[] = (await lastValueFrom(this.apiService.post(`search`, body, filters)))['data']['hits'];
       this.dataService.setItemValue(Constants.dataIds.SEARCH_RESULTS, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.SEARCH_RESULTS);
       return res; // Return the results for further processing if needed
