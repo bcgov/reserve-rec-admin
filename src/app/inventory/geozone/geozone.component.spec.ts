@@ -1,22 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SearchResultComponent } from './search-result.component';
-import { ConfigService } from '../../../services/config.service';
+import { GeozoneComponent } from './geozone.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
-describe('SearchResultComponent', () => {
-  let component: SearchResultComponent;
-  let fixture: ComponentFixture<SearchResultComponent>;
+describe('GeozoneComponent', () => {
+  let component: GeozoneComponent;
+  let fixture: ComponentFixture<GeozoneComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SearchResultComponent],
-      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting()]
+      imports: [GeozoneComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SearchResultComponent);
+    fixture = TestBed.createComponent(GeozoneComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

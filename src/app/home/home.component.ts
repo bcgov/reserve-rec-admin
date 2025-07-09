@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AmplifyService } from '../services/amplify.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -15,11 +15,11 @@ import { NgdsFormsModule } from '@digitalspace/ngds-forms';
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
 isAuthenticed = false;
 isAdmin = false;
 
-constructor(public amplifyService: AmplifyService, private router: Router) {}
+constructor(public amplifyService: AmplifyService, private router: Router, protected cdr: ChangeDetectorRef) {}
 async ngOnInit() {
     try {
       // Check if user is already signed in, throws if not
@@ -37,5 +37,10 @@ async ngOnInit() {
 
   goToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy(): void {
+    this.cdr.detectChanges();
+    this.cdr.detach();
   }
 }

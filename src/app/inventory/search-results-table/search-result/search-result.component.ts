@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoadingService } from '../../../services/loading.service';
 
 @Component({
   selector: 'app-search-result',
@@ -12,8 +13,10 @@ export class SearchResultComponent {
   @Input() data: any;
 
   constructor(
-    protected router: Router
-  ) {}
+    protected router: Router,
+    protected loadingService: LoadingService,
+    protected cdr: ChangeDetectorRef
+  ) { }
 
   getBadgeClass(schema) {
     switch (schema) {
@@ -53,25 +56,27 @@ export class SearchResultComponent {
     let route: any = null;
     switch (data?.schema) {
       case 'protectedArea':
-        route = `/protected-area/${data?.orcs}`;
+        route = `inventory/protected-area/${data?.orcs}`;
         break;
       case 'facility':
-        route = `/facility/${data?.fcCollectionId}/${data?.facilityType}/${data?.facilityId}`;
+        route = `inventory/facility/${data?.fcCollectionId}/${data?.facilityType}/${data?.facilityId}`;
         break;
       case 'activity':
-        route = `/activity/${data?.acCollectionId}/${data?.activityType}/${data?.activityId}`;
+        route = `inventory/activity/${data?.acCollectionId}/${data?.activityType}/${data?.activityId}`;
         break;
       case 'product':
-        route = `/product/${data.id}`;
+        route = `inventory/product/${data.id}`;
         break;
       case 'geozone':
-        route = `/geozone/${data?.gzCollectionId}/${data?.geozoneId}`;
+        route = `inventory/geozone/${data?.gzCollectionId}/${data?.geozoneId}`;
         break;
       default:
         console.warn('Unknown schema type:', data?.schema);
     }
     if (route) {
+      console.log('route:', route);
       this.router.navigate([route]);
+      this.cdr.detectChanges();
     }
   }
 }

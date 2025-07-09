@@ -1,3 +1,8 @@
 body, .app-root {
   background: #f0f2f5;
 }
+
+.main-content {
+  min-height: calc(100vh - 195px);
+  padding-top: auto;
+}

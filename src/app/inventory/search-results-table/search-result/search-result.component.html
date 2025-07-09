@@ -1,5 +1,7 @@
 <button
   class="card mb-2 w-100 p-0 text-start"
+  [disabled]="loadingService?.loading()"
+  [ngClass]="{'load-while': loadingService?.loading()}"
   (click)="onSelect(data)"
 >
   <div class="card-header">
@@ -9,7 +11,7 @@
       </div>
       <div class="col-auto">
         <div
-          class="badge d-flex justify-content-between align-items-center"
+          class="badge d-flex justify-content-between align-items-center rounded-pill px-2"
           [ngClass]="getBadgeClass(data?.schema)"
         >
           <i

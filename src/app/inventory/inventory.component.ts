@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -12,7 +12,7 @@ import { SearchResultsTableComponent } from './search-results-table/search-resul
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.scss']
 })
-export class InventoryComponent implements OnInit {
+export class InventoryComponent implements OnInit, OnDestroy {
   public form;
 
   constructor(
@@ -47,5 +47,10 @@ export class InventoryComponent implements OnInit {
 
   showClosures() {
     console.log('Show closures');
+  }
+
+  ngOnDestroy(): void {
+    this.cdr.detectChanges();
+    this.cdr.detach();
   }
 }

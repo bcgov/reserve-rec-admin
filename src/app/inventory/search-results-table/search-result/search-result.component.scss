@@ -1,5 +1,5 @@
 .card {
-  &:hover {
+  &:hover:not(.load-while){
     .card-header {
       background-color: #e9ecef;
     }
