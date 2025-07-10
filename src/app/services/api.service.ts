@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, OnDestroy } from '@angular/core';
-import { Subscription, merge, of, fromEvent, map, throwError, catchError } from 'rxjs';
+import { Subscription, merge, of, fromEvent, map, throwError, catchError, pipe } from 'rxjs';
 import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
 
@@ -87,14 +87,15 @@ export class ApiService implements OnDestroy {
       // If logged in, add the JWT token to the headers.
       if (this.authService.jwtToken) {
         this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
-        return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
-          .pipe(catchError(this.errorHandler));
       } else {
         this.headers = this.headers.append('Authorization', `guest`);
         console.log('calling as guest');
-        return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
-          .pipe(catchError(this.errorHandler));
       }
+      return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers, observe: 'response' })
+        .pipe(
+          map(response => response?.body),
+          catchError(this.errorHandler)
+        );
     } else {
       throw 'Network Offline';
     }
@@ -106,16 +107,16 @@ export class ApiService implements OnDestroy {
       // If logged in, append the JWT token to the headers.
       if (this.authService.jwtToken) {
         this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
-        return this.http
-          .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers })
-          .pipe(catchError(this.errorHandler));
       } else {
         this.headers = this.headers.append('Authorization', `guest`);
         console.log('calling as guest');
-        return this.http
-          .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers })
-          .pipe(catchError(this.errorHandler));
       }
+      return this.http
+        .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
+        .pipe(
+          map(response => response?.body),
+          catchError(this.errorHandler)
+        );
     } else {
       throw 'Network Offline';
     }

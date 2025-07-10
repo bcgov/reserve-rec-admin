@@ -1,0 +1,18 @@
+.map-wrap {
+  position: relative;
+  border-radius: 5rem;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 500px;
+  // height: calc(100vh - 77px);
+  /* calculate height of the screen minus the heading */
+}
+
+.map {
+  position: relative;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}

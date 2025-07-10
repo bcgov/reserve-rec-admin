@@ -30,4 +30,17 @@ export class GeozoneService {
       this.loggerService.error(error);
     }
   }
+
+  async createGeozone(gzCollectionId, props) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
+      const res = (await lastValueFrom(this.apiService.post(`geozones/${gzCollectionId}`, props)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.loggerService.error(error);
+    }
+  }
 }

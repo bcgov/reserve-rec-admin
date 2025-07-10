@@ -1,1 +1,338 @@
-<p>geozone-create works!</p>
+<app-loadal #loadal></app-loadal>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Geozone</h4>
+    <div class="text-center mb-3">
+      Geozones are geospatial regions defined by a bounding box that group together activities and facilities that are
+      interrelated.
+    </div>
+  </div>
+</section>
+<hr>
+<section #collectionIdSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 1: Select Collection ID</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-collections"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Enter the <strong>Collection ID</strong> for the geozone you are creating. A <strong>Collection ID</strong> is an
+      identifier that differentiates groups of geozones, activities, and facilities within the system based on their
+      purpose, ownership, or intended audience.
+    </div>
+    <div class="mb-2">
+      Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.
+    </div>
+    <ngds-text-input
+      [control]="form.get('gzCollectionId')"
+      [label]="'Collection ID'"
+      [placeholder]="'Enter Collection ID'"
+      [resetButton]="true"
+    >
+    </ngds-text-input>
+  </div>
+</section>
+<hr>
+<section #mandatoryFieldsSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 2: Complete Mandatory Fields</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-properties"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Complete the mandatory fields for the geozone you are creating. These fields are required to ensure that the
+      geozone is properly defined and can be used within the system.
+    </div>
+    <div class="row w-100">
+      <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+        <ngds-text-input
+          class="mb-4"
+          [control]="form.get('mandatoryFields.displayName')"
+          [label]="'Display name'"
+          [placeholder]="'Type a display name for the geozone'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+        <div class="mb-4">
+          <strong>Location</strong>:
+          Use the <i class="fa-solid fa-location-dot"></i> pin on the map to select the geospatial location of the
+          geozone. The location could be the approximate centroid
+          of the geozone or a specific point within it. You can also manually enter the latitude and longitude
+          coordinates.
+          <div class="row mb-2">
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.location.latitude')"
+                [label]="'Latitude'"
+                [placeholder]="'Enter latitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.location.longitude')"
+                [label]="'Longitude'"
+                [placeholder]="'Enter longitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+          </div>
+          <button
+            class="btn btn-secondary mt-2 w-100"
+            (click)="centerMapOnLocation()"
+          >
+            Center Map on Location
+          </button>
+        </div>
+        <div class="mb-4">
+          <strong>Envelope</strong>:
+          Use the <strong>A</strong>, <strong>B</strong> grips on the map to select the geospatial envelope of the
+          geozone. The envelope is the rectangular bounding box
+          that completely contains the geozone. You can also manually enter the latitude and longitude coordinates.
+          <div class="row">
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.envelope.southwest.latitude')"
+                [label]="'Point A Latitude'"
+                [placeholder]="'Enter latitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.envelope.southwest.longitude')"
+                [label]="'Point A Longitude'"
+                [placeholder]="'Enter longitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.envelope.northeast.latitude')"
+                [label]="'Point B Latitude'"
+                [placeholder]="'Enter latitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.envelope.northeast.longitude')"
+                [label]="'Point B Longitude'"
+                [placeholder]="'Enter longitude'"
+                [resetButton]="true"
+              >
+              </ngds-number-input>
+            </div>
+          </div>
+          <button
+            class="btn btn-secondary mt-2 w-100"
+            (click)="zoomToEnvelopeLimits()"
+          >
+            Zoom to Envelope Limits
+          </button>
+        </div>
+        <div class="mb-3">
+          <strong>Zoom levels:</strong>
+          Set the maximum and minimum zoom levels for the geozone. The geozone will be visible within these zoom levels
+          on the map.
+          <div class="row">
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.minMapZoom')"
+                [label]="'Minimum Map Zoom Level (furthest out)'"
+                [placeholder]="'Enter zoom level'"
+                [resetButton]="true"
+              >
+                <button
+                  ngdsInputAppend
+                  class="btn btn-light border-start"
+                  (click)="centerMapOnLocation(form.get('mandatoryFields.minMapZoom').value)"
+                >
+                  <i class="fa-solid fa-magnifying-glass-minus"></i>
+                  <span class="visually-hidden">Zoom to level</span>
+                </button>
+              </ngds-number-input>
+            </div>
+            <div class="col">
+              <ngds-number-input
+                [control]="form.get('mandatoryFields.maxMapZoom')"
+                [label]="'Maximum Map Zoom Level (furthest in)'"
+                [placeholder]="'Enter zoom level'"
+                [resetButton]="true"
+              >
+                <button
+                  ngdsInputAppend
+                  class="btn btn-light border-start"
+                  (click)="centerMapOnLocation(form.get('mandatoryFields.maxMapZoom').value)"
+                >
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                  <span class="visually-hidden">Zoom to level</span>
+                </button>
+              </ngds-number-input>
+            </div>
+          </div>
+          <div>
+            <ngds-toggle-input
+              [control]="form.get('enforceZoomVisibility')"
+              [label]="'Hide geozone outside of zoom levels'"
+              [switch]="true"
+            >
+            </ngds-toggle-input>
+          </div>
+        </div>
+        <div class="mb-3">
+          <ngds-picklist-input
+            [control]="form.get('mandatoryFields.timezone')"
+            [label]="'Timezone'"
+            [selectionListItems]="timezones"
+            [autoSelectFirstItem]="true"
+            [placeholder]="'Select timezone'"
+            [resetButton]="true"
+          >
+          </ngds-picklist-input>
+        </div>
+      </div>
+      <div class="col-lg-6 d-flex flex-column text-center justify-content-center align-items-center">
+        <div class="my-2 h-100 w-100">
+          <div class="position-sticky sticky-top mt-2">
+            <h5>Geospatial information</h5>
+            <div class="w-100 border rounded-5 h-100 overflow-hidden">
+              <app-map
+                #mapComponent
+                [_markers]="_locationMarkers"
+                [_polygons]="_envelopeMarkers"
+                (markersChange)="updateLocationGeospatial($event)"
+                (gripsChange)="updateEnvelopeGeospatial($event)"
+                [hideObjectsOutsideZoom]="form.get('enforceZoomVisibility').value"
+              ></app-map>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section #optionalFieldsSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 3: Complete Optional Fields</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-properties"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Complete the optional fields for the geozone you are creating.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+      <ngds-toggle-input
+        [control]="form.get('isVisible')"
+        [switch]="true"
+        [label]="'Toggle public visibility of the geozone. If unchecked, the geozone will not be visible to public users.'"
+      ></ngds-toggle-input>
+      <ngds-text-input
+        [control]="form.get('description')"
+        [label]="'Description'"
+        [multiline]="true"
+        [placeholder]="'Enter a description for the geozone'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+      <ngds-number-input
+        [control]="form.get('orcs')"
+        [label]="'ORCS'"
+        [placeholder]="'Enter ORCS number'"
+        [resetButton]="true"
+      >
+      </ngds-number-input>
+      <ngds-text-input
+        [control]="form.get('searchTerms')"
+        [label]="'Additional Search Terms'"
+        [multiline]="true"
+        [placeholder]="'Enter terms separated by commas'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+      <ngds-text-input
+        [control]="form.get('adminNotes')"
+        [label]="'Administrative Notes'"
+        [multiline]="true"
+        [placeholder]="'Enter administrative notes'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+    </div>
+    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+      <ngds-text-input
+        [control]="form.get('imageUrl')"
+        [label]="'Image URL'"
+        [placeholder]="'Paste Image URL here'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+      <div
+        class="w-100 rounded-5 mt-2 border text-center text-muted d-flex align-items-center justify-content-center"
+        [ngStyle]="{'min-height': form.get('imageUrl').value ? 'auto' : '500px'}"
+      >
+        <img
+          [src]="form.get('imageUrl').value"
+          class="img-fluid rounded-5 p-1"
+          [class.border]="form.get('imageUrl').value"
+          width="100%"
+          height="auto"
+          alt="No image of {{form.get('mandatoryFields.displayName').value}}"
+        >
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section class="d-flex flex-column align-items-center justify-content-center my-5">
+  <div class="d-flex align-items-center mb-5">
+    <h5 class="text-center me-2 my-0">Step 4: Review and Submit</h5>
+  </div>
+  <button
+    class="btn btn-success"
+    (click)="submit()"
+  >
+    <i class="fa-solid fa-plus"></i>
+    <span class="ms-2">Create Geozone</span>
+  </button>
+</section>
