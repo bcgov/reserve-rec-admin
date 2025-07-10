@@ -1,4 +1,6 @@
-<app-loadal #loadal></app-loadal>
+<div *ngIf="loadingService?.loading()">
+  <app-loadal #loadal></app-loadal>
+</div>
 <section>
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <h4 class="text-center mb-5">Create New Geozone</h4>

@@ -19,6 +19,7 @@ export class LoadalComponent implements AfterViewInit, OnDestroy{
 
   ngAfterViewInit(): void {
     this.loadal = new bootstrap.Modal('#loadal');
+    this.show();
   }
 
   show() {
@@ -34,6 +35,7 @@ export class LoadalComponent implements AfterViewInit, OnDestroy{
   }
 
   ngOnDestroy(): void {
+    this.hide();
     this.dispose();
   }
 }

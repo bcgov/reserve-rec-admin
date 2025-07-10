@@ -25,11 +25,11 @@ export class GeozoneCreateComponent implements OnInit, AfterViewInit {
   public _maxMapZoom: WritableSignal<any> = signal(15);
   public defaultCoordinates = [-125.58725792949612, 49.52175870730247];
   public defaultEnvelopeCoordinates = [
-    [-126.6177343750002, 48.83445775236865], // southwest
-    [-124.57427734375025, 48.83445775236865], // southeast
-    [-124.57427734375025, 49.97817890145478], // northeast
     [-126.6177343750002, 49.97817890145478], // northwest
-    [-126.6177343750002, 48.83445775236865], // close polygon (back to southwest)
+    [-124.57427734375025, 49.97817890145478], // northeast
+    [-124.57427734375025, 48.83445775236865], // southeast
+    [-126.6177343750002, 48.83445775236865], // southwest
+    [-126.6177343750002, 49.97817890145478], // close polygon (back to northwest)
   ];
   public defaultGeozoneName = 'New Geozone';
   public markerOptions = {
@@ -75,7 +75,6 @@ export class GeozoneCreateComponent implements OnInit, AfterViewInit {
   ) {
     // Initialize the location marker with an empty array
     effect(() => {
-      this.toggleLoadel(this.loadingService.isLoading());
       this.updateLocationMarkers();
       this.updateEnvelopeMarkers();
     });
@@ -140,14 +139,6 @@ export class GeozoneCreateComponent implements OnInit, AfterViewInit {
         this.mapComponent?.updateMap();
       }
     });
-  }
-
-  toggleLoadel(isLoading) {
-    if (isLoading) {
-      this.loadal.show();
-    } else {
-      this.loadal.hide();
-    }
   }
 
   ngAfterViewInit(): void {

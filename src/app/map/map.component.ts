@@ -56,6 +56,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return m;
       });
       this.markersChange.emit(updatedMarkers);
+      this.updateMap();
     });
     return marker;
   }
