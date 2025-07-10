@@ -1,0 +1,29 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <h1 class="mb-3">Park Details</h1>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="text-muted mb-4">{{ protectedArea?.displayName }}</h4>
+          
+          <p><strong>ORCS:</strong> {{ protectedArea?.orcs }}</p>
+          <p>
+            <strong>Status:</strong>
+            <span [class.text-success]="protectedArea?.isVisible" [class.text-danger]="!protectedArea?.isVisible">
+              {{ protectedArea?.isVisible ? 'Open' : 'Closed' }}
+            </span>
+          </p>
+          <p><strong>Admin Notes:</strong><br>{{ protectedArea?.adminNotes }}</p>
+          <p class="text-muted mb-4">
+            <strong>Last updated:</strong><br>
+            {{ protectedArea?.lastUpdated | date:'yyyy-MM-dd - hh:mm a' }}
+          </p>
+
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-primary" (click)="editPark()">Edit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

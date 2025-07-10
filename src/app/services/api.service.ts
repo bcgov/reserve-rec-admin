@@ -122,6 +122,24 @@ export class ApiService implements OnDestroy {
     }
   }
 
+  put(pk, obj, queryParamsObject = null as any) {
+    if (this.networkStatus) {
+      const queryString = this.generateQueryString(queryParamsObject);
+      // If logged in, append the JWT token to the headers.
+      if (this.authService.jwtToken) {
+        this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
+        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj)
+          .pipe(catchError(this.errorHandler));
+      } else {
+        this.headers = this.headers.append('Authorization', `guest`);
+        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj)
+          .pipe(catchError(this.errorHandler));
+      }
+    } else {
+      throw 'Network Offline';
+    }
+  }
+
   delete(pk, queryParamsObject = null as any) {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
