@@ -1,11 +1,10 @@
 import { Component, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GeozoneDetailsComponent } from './geozone-details/geozone-details.component';
-import { GeozoneEditComponent } from './geozone-edit/geozone-edit.component';
 
 @Component({
   selector: 'app-geozone',
-  imports: [GeozoneDetailsComponent, GeozoneEditComponent],
+  imports: [GeozoneDetailsComponent],
   templateUrl: './geozone.component.html',
   styleUrl: './geozone.component.scss'
 })

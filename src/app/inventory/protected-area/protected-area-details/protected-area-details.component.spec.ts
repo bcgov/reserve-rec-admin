@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProtectedAreaService } from './protected-area-details.component';
+import { ProtectedAreaDetailsComponent } from './protected-area-details.component';
 
-describe('ProtectedAreaService', () => {
-  let component: ProtectedAreaService;
-  let fixture: ComponentFixture<ProtectedAreaService>;
+describe('ProtectedAreaDetailsComponent', () => {
+  let component: ProtectedAreaDetailsComponent;
+  let fixture: ComponentFixture<ProtectedAreaDetailsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProtectedAreaService]
+      imports: [ProtectedAreaDetailsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProtectedAreaService);
+    fixture = TestBed.createComponent(ProtectedAreaDetailsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

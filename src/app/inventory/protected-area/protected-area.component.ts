@@ -1,11 +1,9 @@
 import { Component, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProtectedAreaDetailsComponent } from './protected-area-details/protected-area-details.component';
-import { ProtectedAreaEditComponent } from './protected-area-edit/protected-area-edit.component';
 
 @Component({
   selector: 'app-protected-area',
-  imports: [ProtectedAreaDetailsComponent, ProtectedAreaEditComponent],
+  imports: [],
   templateUrl: './protected-area.component.html',
   styleUrl: './protected-area.component.scss'
 })

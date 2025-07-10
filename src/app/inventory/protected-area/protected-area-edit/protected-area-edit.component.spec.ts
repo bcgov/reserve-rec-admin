@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProtectedAreasEditComponent } from './protected-area-edit.component';
+import { ProtectedAreaEditComponent } from './protected-area-edit.component';
 
-describe('ProtectedAreasEditComponent', () => {
-  let component: ProtectedAreasEditComponent;
-  let fixture: ComponentFixture<ProtectedAreasEditComponent>;
+describe('ProtectedAreaEditComponent', () => {
+  let component: ProtectedAreaEditComponent;
+  let fixture: ComponentFixture<ProtectedAreaEditComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProtectedAreasEditComponent]
+      imports: [ProtectedAreaEditComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProtectedAreasEditComponent);
+    fixture = TestBed.createComponent(ProtectedAreaEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

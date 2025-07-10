@@ -8,7 +8,7 @@ export class ProtectedAreasResolver implements Resolve<any> {
 
   resolve(route: ActivatedRouteSnapshot) {
     const orcs = route.paramMap.get('orcs');
-    const protectedAreas = this.ProtectedAreaService.getProtectedAreaByOrcs(orcs); // Replace with actual global ID
+    const protectedAreas = this.ProtectedAreaService.getProtectedAreaByOrcs(orcs);
     return protectedAreas; // Assuming getProtectedAreasByOrcs returns an observable
   }
 }
