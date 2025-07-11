@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { AfterViewInit, Component, Input, signal, ViewChild, WritableSignal } from '@angular/core';
 import { MapComponent } from '../../../map/map.component';
+import { GeozoneEditComponent } from '../geozone-edit/geozone-edit.component';
 
 @Component({
   selector: 'app-geozone-details',
@@ -8,11 +9,11 @@ import { MapComponent } from '../../../map/map.component';
   templateUrl: './geozone-details.component.html',
   styleUrl: './geozone-details.component.scss'
 })
-export class GeozoneDetailsComponent implements AfterViewInit{
+export class GeozoneDetailsComponent implements AfterViewInit {
   @ViewChild('mapComponent') mapComponent!: MapComponent;
   @Input() set _data(value: any) {
     this.data = value;
-    this.updateEnvelope()
+    this.updateEnvelope();
     this.updateMarkers();
   }
   public data: any = null;
@@ -68,10 +69,12 @@ export class GeozoneDetailsComponent implements AfterViewInit{
         }]);
       }
     }
-    this.mapComponent?.map?.fitBounds([
-      this._envelope()[0].coordinates[0],
-      this._envelope()[0].coordinates[2]
-    ], { padding: 75 });
+    if (this._envelope()?.[0]?.coordinates?.length > 1) {
+      this.mapComponent?.map?.fitBounds([
+        this._envelope()[0]?.coordinates[0],
+        this._envelope()[0]?.coordinates[2]
+      ], { padding: 75 });
+    }
   }
 
 }
