@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ProtectedAreaComponent } from './protected-area.component';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ProtectedAreaComponent', () => {
   let component: ProtectedAreaComponent;
@@ -8,7 +11,8 @@ describe('ProtectedAreaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProtectedAreaComponent]
+      imports: [ProtectedAreaComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), provideToastr()],
     })
     .compileComponents();
 
