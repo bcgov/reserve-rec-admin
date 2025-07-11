@@ -1,0 +1,17 @@
+.search-term-pill {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+}
+
+.search-term-pill .ms-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 200px; // adjust as needed
+  display: inline-block;
+}

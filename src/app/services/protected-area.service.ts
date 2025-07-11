@@ -21,7 +21,8 @@ export class ProtectedAreaService {
 
   protectedAreaConfig = {
     isVisible: { type: 'boolean', required: false },
-    adminNotes: { type: 'string', required: false }
+    adminNotes: { type: 'string', required: false },
+    searchTerms: { type: 'string', required: false }
   };
 
   async getProtectedAreaByOrcs(orcs: string) {
@@ -70,6 +71,11 @@ export class ProtectedAreaService {
   }
 
   validateProtectedAreaObject(obj) {
+    // Search terms should be a comma-separated string
+    if (obj?.searchTerms) {
+      obj.searchTerms = obj.searchTerms.join(',');
+    }
+
     if (!obj || typeof obj !== 'object') {
       this.toastService.addMessage(
         `Invalid protected area object.`,
