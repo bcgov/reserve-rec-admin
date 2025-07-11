@@ -1,29 +1,34 @@
-import { Component, signal, WritableSignal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectorRef, Component, signal, WritableSignal } from '@angular/core';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { GeozoneDetailsComponent } from './geozone-details/geozone-details.component';
+import { CommonModule, UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-geozone',
-  imports: [GeozoneDetailsComponent],
+  imports: [GeozoneDetailsComponent, RouterOutlet, UpperCasePipe, CommonModule],
   templateUrl: './geozone.component.html',
   styleUrl: './geozone.component.scss'
 })
 export class GeozoneComponent {
-  public _geozoneData: WritableSignal<any[]> = signal([]);
+  public data;
 
   constructor(
     protected route: ActivatedRoute,
-    protected router: Router
+    protected router: Router,
+    protected cdr: ChangeDetectorRef
   ) {
     this.route.data.subscribe((data) => {
       if (data?.['geozone']) {
-        let nextData = data['geozone'];
-        if (data?.['geozone']?.items) {
-          nextData = data['geozone'].items[0];
-        }
-        this._geozoneData.set(nextData);
+        this.data = data?.['geozone'];
       }
     });
+  }
+
+  navToEdit() {
+    if (this.data?.gzCollectionId && this.data?.geozoneId) {
+      this.router.navigate([`/inventory/geozone/${this.data.gzCollectionId}/${this.data.geozoneId}/edit`]);
+    }
+    this.cdr.detectChanges();
   }
 
 }

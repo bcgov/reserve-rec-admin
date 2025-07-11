@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GeozoneDetailsComponent } from './geozone-details.component';
+import { provideRouter } from '@angular/router';
 
 describe('GeozoneDetailsComponent', () => {
   let component: GeozoneDetailsComponent;
@@ -8,7 +9,8 @@ describe('GeozoneDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GeozoneDetailsComponent]
+      imports: [GeozoneDetailsComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 

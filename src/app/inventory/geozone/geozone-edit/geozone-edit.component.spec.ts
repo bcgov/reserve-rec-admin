@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GeozoneEditComponent } from './geozone-edit.component';
+import { ConfigService } from '../../../services/config.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 describe('GeozoneEditComponent', () => {
   let component: GeozoneEditComponent;
@@ -8,7 +12,8 @@ describe('GeozoneEditComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GeozoneEditComponent]
+      imports: [GeozoneEditComponent],
+      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
     })
     .compileComponents();
 

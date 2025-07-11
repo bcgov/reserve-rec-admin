@@ -1,28 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GeozoneCreateComponent } from './geozone-create.component';
+import { GeozoneFormComponent } from './geozone-form.component';
 import { ConfigService } from '../../../services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 
-describe('GeozoneCreateComponent', () => {
-  let component: GeozoneCreateComponent;
-  let fixture: ComponentFixture<GeozoneCreateComponent>;
+describe('GeozoneFormComponent', () => {
+  let component: GeozoneFormComponent;
+  let fixture: ComponentFixture<GeozoneFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GeozoneCreateComponent],
-      providers: [
-        ConfigService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([])
-      ]
+      imports: [GeozoneFormComponent],
+      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
     })
-      .compileComponents();
+    .compileComponents();
 
-    fixture = TestBed.createComponent(GeozoneCreateComponent);
+    fixture = TestBed.createComponent(GeozoneFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,7 +1,8 @@
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
-import { AfterViewInit, Component, Input, signal, ViewChild, WritableSignal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, signal, ViewChild, WritableSignal } from '@angular/core';
 import { MapComponent } from '../../../map/map.component';
 import { GeozoneEditComponent } from '../geozone-edit/geozone-edit.component';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-geozone-details',
@@ -11,12 +12,7 @@ import { GeozoneEditComponent } from '../geozone-edit/geozone-edit.component';
 })
 export class GeozoneDetailsComponent implements AfterViewInit {
   @ViewChild('mapComponent') mapComponent!: MapComponent;
-  @Input() set _data(value: any) {
-    this.data = value;
-    this.updateEnvelope();
-    this.updateMarkers();
-  }
-  public data: any = null;
+  public geozone;
   public _markers: WritableSignal<any[]> = signal([]);
   public _envelope: WritableSignal<any[]> = signal([]);
   public markerOptions = {
@@ -26,6 +22,16 @@ export class GeozoneDetailsComponent implements AfterViewInit {
     fillColor: 'goldenrod',
     fillOpacity: 0.5,
   };
+
+  constructor(
+    protected router: Router,
+    protected cdr: ChangeDetectorRef,
+    protected route: ActivatedRoute
+  ) {
+    if (this.route.snapshot.data['geozone']) {
+      this.geozone = this.route.snapshot.data['geozone'];
+    }
+  }
 
   stringifyData(data: any): string {
     return JSON.stringify(data, null, 2);
@@ -38,24 +44,26 @@ export class GeozoneDetailsComponent implements AfterViewInit {
   }
 
   updateMarkers() {
-    if (this.data?.location?.coordinates) {
-      const coordinates = this.data.location.coordinates;
+    if (this.geozone?.location?.coordinates) {
+      const coordinates = this.geozone.location.coordinates;
       if (coordinates && coordinates.length === 2) {
         this._markers.set([{
           coordinates: [coordinates[0], coordinates[1]],
           options: this.markerOptions
         }]);
       }
-      this.mapComponent?.map?.fitBounds([
-        this._envelope()[0].coordinates[0],
-        this._envelope()[0].coordinates[2]
-      ], { padding: 75 });
+      if (this._envelope()?.[0]?.coordinates?.length > 1) {
+        this.mapComponent?.map?.fitBounds([
+          this._envelope()[0].coordinates[0],
+          this._envelope()[0].coordinates[2]
+        ], { padding: 75 });
+      }
     }
   }
 
   updateEnvelope() {
-    if (this.data?.envelope?.coordinates) {
-      const coordinates = this.data.envelope.coordinates;
+    if (this.geozone?.envelope?.coordinates) {
+      const coordinates = this.geozone.envelope.coordinates;
       if (coordinates && coordinates.length === 2) {
         this._envelope.set([{
           coordinates: [
@@ -76,5 +84,6 @@ export class GeozoneDetailsComponent implements AfterViewInit {
       ], { padding: 75 });
     }
   }
+
 
 }

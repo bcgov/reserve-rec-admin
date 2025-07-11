@@ -104,8 +104,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     const grips = [];
     if (this.showGrips) {
-      grips.push(this.createPolyGrip(coordinates[0], options?.gripAOptions));
-      grips.push(this.createPolyGrip(coordinates[2], options?.gripBOptions));
+      grips.push(this.createPolyGrip(coordinates[2], options?.gripAOptions));
+      grips.push(this.createPolyGrip(coordinates[0], options?.gripBOptions));
     }
     const polygonId = `polygon-${Date.now()}`;
     this.map.addSource(polygonId, {
