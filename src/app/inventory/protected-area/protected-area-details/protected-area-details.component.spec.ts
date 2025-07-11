@@ -5,7 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 
-fdescribe('ProtectedAreaDetailsComponent', () => {
+describe('ProtectedAreaDetailsComponent', () => {
   let component: ProtectedAreaDetailsComponent;
   let fixture: ComponentFixture<ProtectedAreaDetailsComponent>;
 
@@ -26,7 +26,7 @@ fdescribe('ProtectedAreaDetailsComponent', () => {
     fixture.detectChanges();
   });
 
-  fit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });
