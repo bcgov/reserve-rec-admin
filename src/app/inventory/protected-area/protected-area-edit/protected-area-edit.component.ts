@@ -48,7 +48,11 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
   }
 
   initForm() {
-    this.searchTerms = this.protectedArea?.searchTerms.split(',')
+    // Split the search terms string into an array if it exists.
+    if (this.protectedArea?.searchTerms.length > 0) {
+      this.searchTerms = this.protectedArea?.searchTerms.split(',')
+    }
+    
     this.form = new UntypedFormGroup({
       protectedAreaName: new UntypedFormControl(this.protectedArea?.displayName),
       protectedAreaOrcs: new UntypedFormControl(this.protectedArea?.orcs),
