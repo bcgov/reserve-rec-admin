@@ -12,7 +12,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   @Input() _markers = signal([]); // Signal to hold markers data
   @Input() _polygons = signal([]); // Signal to hold polygons data
-  @Input() hideObjectsOutsideZoom = false; // Whether to hide objects outside the current zoom level
+  @Input() hideObjectsOutsideZoom = false; // Whether to hide objects outside the current zoom
+  //level
+  @Input() showGrips = true; // Whether to show grips for polygons
 
   @Output() markersChange = new EventEmitter<any[]>();
   @Output() gripsChange = new EventEmitter<any[]>();
@@ -101,8 +103,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return {};
     }
     const grips = [];
-    grips.push(this.createPolyGrip(coordinates[0], options?.gripAOptions));
-    grips.push(this.createPolyGrip(coordinates[2], options?.gripBOptions));
+    if (this.showGrips) {
+      grips.push(this.createPolyGrip(coordinates[0], options?.gripAOptions));
+      grips.push(this.createPolyGrip(coordinates[2], options?.gripBOptions));
+    }
     const polygonId = `polygon-${Date.now()}`;
     this.map.addSource(polygonId, {
       'type': 'geojson',

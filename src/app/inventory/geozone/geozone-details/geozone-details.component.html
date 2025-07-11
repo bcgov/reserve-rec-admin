@@ -150,6 +150,9 @@
     </div>
     <div class="col-md-6">
       <h4 class="mb-3">Map</h4>
+      <div class="border rounded-5 overflow-hidden">
+        <app-map #mapComponent [_markers]="_markers" [_polygons]="_envelope" [showGrips]="false"></app-map>
+      </div>
     </div>
   </div>
 </section>
