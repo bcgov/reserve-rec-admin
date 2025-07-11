@@ -132,7 +132,7 @@ export class ApiService implements OnDestroy {
           .pipe(catchError(this.errorHandler));
       } else {
         this.headers = this.headers.append('Authorization', `guest`);
-        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj)
+        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
           .pipe(catchError(this.errorHandler));
       }
     } else {

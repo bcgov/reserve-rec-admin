@@ -5,7 +5,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h4 class="text-muted mb-4">{{ protectedArea?.displayName }}</h4>
-          
+
           <p><strong>ORCS:</strong> {{ protectedArea?.orcs }}</p>
           <p>
             <strong>Status:</strong>
@@ -13,7 +13,8 @@
               {{ protectedArea?.isVisible ? 'Open' : 'Closed' }}
             </span>
           </p>
-          <p><strong>Admin Notes:</strong><br>{{ protectedArea?.adminNotes }}</p>
+          <p><strong>Admin Notes:</strong><br>{{ protectedArea?.adminNotes || '(No admin notes added)' }}</p>
+          <p><strong>Search Terms:</strong><br>{{ getSearchTermsDisplay() }}</p>
           <p class="text-muted mb-4">
             <strong>Last updated:</strong><br>
             {{ protectedArea?.lastUpdated | date:'yyyy-MM-dd - hh:mm a' }}

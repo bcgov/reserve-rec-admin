@@ -1,6 +1,6 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { LoadingService } from '../../../services/loading.service';
 import { ProtectedAreaService } from '../../../services/protected-area.service';
@@ -12,7 +12,7 @@ import { ConfirmationModalComponent } from '../../../shared/components/confirmat
 import { ModalRowSpec } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 @Component({
   selector: 'app-protected-area-edit-component',
-  imports: [CommonModule, NgdsFormsModule, ModalComponent, DatePipe],
+  imports: [CommonModule, NgdsFormsModule, ModalComponent, DatePipe, FormsModule],
   templateUrl: './protected-area-edit.component.html',
   styleUrls: ['./protected-area-edit.component.scss'],
   providers: [BsModalService]
@@ -25,7 +25,10 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
   public protectedAreaEditModal: modalSchema;
   public protectedAreaEditModalRef: BsModalRef;
   private utils = new Utils();
-
+  public searchTermSet!: string;
+  public searchTerms: string[] = [];
+  public searchTermExists = false;
+  
   @ViewChild('protectedAreaEditConfirmationTemplate')
   protectedAreaEditConfirmationTemplate: TemplateRef<any>;
 
@@ -45,11 +48,17 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
   }
 
   initForm() {
+    // Split the search terms string into an array if it exists.
+    if (this.protectedArea?.searchTerms.length > 0) {
+      this.searchTerms = this.protectedArea?.searchTerms.split(',')
+    }
+    
     this.form = new UntypedFormGroup({
       protectedAreaName: new UntypedFormControl(this.protectedArea?.displayName),
       protectedAreaOrcs: new UntypedFormControl(this.protectedArea?.orcs),
       protectedAreaIsVisible: new UntypedFormControl(false),
       protectedAreaAdminNotes: new UntypedFormControl(this.protectedArea?.adminNotes),
+      protectedAreaSearchTerms: new UntypedFormControl(this.searchTerms),
     });
   }
 
@@ -61,6 +70,7 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
       orcs: this.protectedArea?.orcs,
       isVisible: formData.protectedAreaIsVisible,
       adminNotes: formData.protectedAreaAdminNotes,
+      searchTerms: formData.protectedAreaSearchTerms,
     };
     this.displayConfirmationModal(protectedAreaObj);
   }
@@ -77,7 +87,8 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
       { label: 'Name', value: this.protectedArea?.displayName },
       { label: 'Status', value: protectedAreaObj?.isVisible, eitherOr: v => v ? 'Open' : 'Closed' },
       { label: 'Visibility', value: protectedAreaObj?.isVisible, eitherOr: v => v ? 'Visible to public' : 'Not visible to public' },
-      { label: 'Admin Notes', value: protectedAreaObj?.adminNotes }
+      { label: 'Admin Notes', value: protectedAreaObj?.adminNotes || '(No admin notes added)' },
+      { label: 'Search Terms', value: protectedAreaObj?.searchTerms.join(', ') || '(No search terms added)'},
     ];
 
     // Show the modal with the confirmation details.
@@ -103,6 +114,42 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
     });
   }
 
+  // Add search terms
+  onSearchTermAdd() {
+    this.searchTermExists = false;
+    this.searchTermSet = this.searchTermSet?.trim();
+    this.searchTermSet = this.searchTermSet?.replace(/\n/g, "");
+
+    if (this.searchTermSet == '' || this.searchTermSet == null) return;
+    const strings = this.searchTermSet?.split(',');
+
+    if (strings.length > 1) {
+      let duplicate = false;
+      strings.forEach((string) => {
+        string = string.trim();
+        if (string && !this.searchTerms.includes(string)) {
+          this.searchTerms.push(string);
+        } else if (string) {
+          duplicate = true;
+        }
+      });
+      this.searchTermExists = duplicate;
+      this.searchTermSet = '';
+      return;
+    } else {
+      if (!this.searchTerms.includes(this.searchTermSet)) {
+        this.searchTerms.push(this.searchTermSet);
+        this.searchTermSet = '';
+      } else {
+        this.searchTermExists = true;
+      }
+    }
+  }
+
+  removeSearchTerm(index: any) {
+    this.searchTerms.splice(index, 1);
+  }
+
   navigateBack() {
     window.history.back();
   }
@@ -113,6 +160,7 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
       protectedAreaOrcs: this.protectedArea?.orcs,
       protectedAreaIsVisible: this.protectedArea?.isVisible,
       protectedAreaAdminNotes: this.protectedArea?.adminNotes,
+      protectedAreaSearchTerms: this.protectedArea?.searchTerms,
     });
   }
 

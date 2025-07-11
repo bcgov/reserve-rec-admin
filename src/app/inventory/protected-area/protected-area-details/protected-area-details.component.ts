@@ -26,6 +26,20 @@ export class ProtectedAreaDetailsComponent  {
     })
   }
 
+  getSearchTermsDisplay(): string {
+    const terms = this.protectedArea?.searchTerms;
+    if (!terms || (Array.isArray(terms) && terms.length === 0)) {
+      return '(No search terms added)';
+    }
+    if (Array.isArray(terms)) {
+      return terms.join(', ');
+    }
+    if (typeof terms === 'string') {
+      return terms.replaceAll(',', ', ');
+    }
+    return '(No search terms added)';
+  }
+
   editPark() {
     this.router.navigate(['./edit'], { relativeTo: this.route });
   }
