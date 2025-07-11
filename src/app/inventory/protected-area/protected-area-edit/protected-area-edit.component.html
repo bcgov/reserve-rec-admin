@@ -1,0 +1,79 @@
+<div class="container mt-5" *ngIf="protectedArea">
+  <h1 class="card-title mb-3">Edit a protected area</h1>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="text-muted mb-4">{{ protectedArea?.displayName }}</h4>
+      <hr>
+
+      <form>
+        <div class="mb-4">
+          <ngds-toggle-input
+            [control]="form.get('protectedAreaIsVisible')"
+            [id]="'protectedAreaStatus'"
+            [label]="'Park Status'"
+            [switch]="true"
+            [ariaLabel]="'Park Status'"></ngds-toggle-input>
+            <span>
+              {{ form.get('protectedAreaIsVisible').value ? 'This park is open' : 'This park is closed' }}
+            </span>
+        </div>
+
+        <div class="mb-3">
+          <ngds-text-input
+            [control]="form.get('protectedAreaName')"
+            [label]="'Park Name'"
+            [disabled]="true"
+            [ariaLabel]="'Park Name'"
+            [id]="'protectedAreaName'"></ngds-text-input>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <ngds-text-input
+              [control]="form.get('protectedAreaOrcs')"
+              [label]="'Park ORCS'"
+              [disabled]="true"
+              [ariaLabel]="'Park ORCS'"
+              [id]="'protectedAreaOrcs'"></ngds-text-input>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <ngds-text-input
+            [control]="form.get('protectedAreaAdminNotes')"
+            [label]="'Admin Notes'"
+            [ariaLabel]="'Admin Notes'"
+            [id]="'protectedAreaAdminNotes'"
+            [placeholder]="'Enter admin notes here...'"
+            [multiline]="true"></ngds-text-input>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-danger"
+            (click)="navigateBack()">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-secondary"
+            (click)="onFormReset()"
+            [disabled]="form?.pristine">
+            Reset
+          </button>
+          <button type="button" class="btn btn-primary"
+            (click)="onSubmit()"
+            [disabled]="form?.invalid">
+            Submit
+          </button>
+        </div>
+      </form>
+
+      <p class="text-muted mt-3 mb-0">
+        Last updated: {{ protectedArea?.lastUpdated | date:'yyyy-MM-dd - hh:mm a' }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal template -->
+<ng-template #protectedAreaEditConfirmationTemplate>
+  <app-modal [modal]="protectedAreaEditModal"></app-modal>
+</ng-template>
