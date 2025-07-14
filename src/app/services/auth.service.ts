@@ -13,7 +13,7 @@ export class AuthService {
   constructor(private configService: ConfigService, private loggerService: LoggerService, private router: Router) {
   }
 
-  public user = signal<any>(null); // Make sure observable for user updates
+ public user = signal<any>(null); // Make sure observable for user updates
   public session = signal(null);
   jwtToken: any;
 
@@ -28,8 +28,8 @@ export class AuthService {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
               scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-              redirectSignIn: ['http://localhost:4300'],
-              redirectSignOut: ['http://localhost:4300'],
+              redirectSignIn: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
+              redirectSignOut: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
               responseType: 'code',
             }
           },
