@@ -35,8 +35,8 @@ export class AuthService {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
               scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-              redirectSignIn: this.reDirectValues,
-              redirectSignOut: this.reDirectValues,
+              redirectSignIn: [this.reDirectValues],
+              redirectSignOut: [this.reDirectValues],
               responseType: 'code',
             }
           },
