@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AmplifyService } from '../services/amplify.service';
+import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut, fetchUserAttributes } from 'aws-amplify/auth';
@@ -19,13 +19,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 isAuthenticed = false;
 isAdmin = false;
 
-constructor(public amplifyService: AmplifyService, private router: Router, protected cdr: ChangeDetectorRef) {}
+constructor(public authService: AuthService, private router: Router, protected cdr: ChangeDetectorRef) {}
 async ngOnInit() {
     try {
       // Check if user is already signed in, throws if not
       await getCurrentUser();
       this.isAuthenticed = true;
-      this.isAdmin = await this.amplifyService.userIsAdmin();
+      this.isAdmin = await this.authService.userIsAdmin();
       console.log("are you the admin??:", this.isAdmin)
       console.log('User is authenticated', getCurrentUser());
       const session = await fetchAuthSession();
