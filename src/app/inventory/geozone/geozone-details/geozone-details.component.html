@@ -158,7 +158,8 @@
         </div>
         <div class="col-auto">
           <div class="badge bg-light text-dark border d-flex align-items-center rounded-pill px-2">
-            <div class="mb-0">{{geozone?.orcs}}</div>
+            <div *ngIf="geozone?.orcs" class="mb-0">{{geozone?.orcs}}</div>
+            <div *ngIf="!geozone?.orcs" class="mb-0">&lt;No ORCS&gt;</div>
           </div>
         </div>
       </div>

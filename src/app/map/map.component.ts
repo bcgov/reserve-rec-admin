@@ -36,7 +36,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.createMap();
-
   }
 
   createMarker(coordinates: [number, number], options: any = {}) {
@@ -181,6 +180,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   test() {
     this.updateMap();
+  }
+
+  flyToFitBounds() {
+    const bounds = new maplibregl.LngLatBounds();
+    if (this._markers().length > 0) {
+      this._markers().forEach(marker => {
+        bounds.extend(marker.coordinates);
+      });
+    };
+    if (this._polygons().length > 0) {
+      this._polygons().forEach(polygon => {
+        polygon.coordinates.forEach(coord => {
+          bounds.extend(coord);
+        });
+      });
+    }
+    this.map?.fitBounds(bounds, { padding: 75 });
   }
 
   ngOnDestroy() {

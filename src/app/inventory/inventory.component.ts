@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ContentChildren, effect, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -6,15 +6,39 @@ import { SearchService } from '../services/search.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchResultsTableComponent } from './search-results-table/search-results-table.component';
 import { RouterLink } from '@angular/router';
+import { MapComponent } from '../map/map.component';
+import { Constants } from '../app.constants';
+import { DataService } from '../services/data.service';
+import { SearchResultComponent } from './search-results-table/search-result/search-result.component';
 
 @Component({
   selector: 'app-inventory-component',
-  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, RouterLink],
+  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, RouterLink, MapComponent],
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.scss']
 })
 export class InventoryComponent implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('mapComponent') mapComponent!: MapComponent;
+  @ContentChildren(SearchResultComponent) searchResultEls!: SearchResultComponent[];
   public form;
+  public results = [];
+  public _markers: WritableSignal<any[]> = signal([]);
+  public _resultsSignal: WritableSignal<any[]> = signal([]);
+
+  public markerOptions = {
+    geozone: {
+      color: 'goldenrod',
+    },
+    protectedArea: {
+      color: 'green',
+    },
+    facility: {
+      color: 'blue',
+    },
+    default: {
+      color: 'gray',
+    }
+  };
 
   public schemaOptions = [
     { display: 'Protected Area', value: 'protectedArea' },
@@ -83,9 +107,19 @@ export class InventoryComponent implements OnInit, OnDestroy, AfterViewChecked {
   constructor(
     protected searchService: SearchService,
     protected loadingService: LoadingService,
-    protected cdr: ChangeDetectorRef
+    protected cdr: ChangeDetectorRef,
+    protected dataService: DataService
   ) {
-
+    this._resultsSignal = this.dataService.watchItem(Constants.dataIds.SEARCH_RESULTS);
+    effect(() => {
+      this.results = this._resultsSignal()?.map(result => {
+        if (result?._source) {
+          return result._source;
+        }
+        return result;
+      });
+      this.updateMapMarkers();
+    });
   }
 
   ngOnInit() {
@@ -111,6 +145,29 @@ export class InventoryComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.resetFilters(true);
     });
 
+  }
+
+  updateMapMarkers() {
+    if (this.results?.length) {
+      const markers = [];
+      for (const result of this.results) {
+        if (result?.location?.coordinates) {
+          markers.push({
+            coordinates: [result.location.coordinates[0], result.location.coordinates[1]],
+            options: {
+              displayName: result?.displayName,
+              element: this.searchResultEls[0],
+              ...this.markerOptions[result?.schema || 'default']
+            }
+          });
+        }
+      }
+      this._markers.set(markers);
+    } else {
+      this._markers.set([]);
+    }
+    this.mapComponent?.updateMap();
+    this.mapComponent?.flyToFitBounds();
   }
 
   ngAfterViewChecked(): void {

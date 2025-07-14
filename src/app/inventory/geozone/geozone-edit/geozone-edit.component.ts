@@ -42,11 +42,8 @@ export class GeozoneEditComponent {
     // Get all dirty controls by recursion
     const rootProps = Object.entries(this.geozoneForm.controls).filter(([key, control]) => control.dirty);
     const mandatoryProps = Object.entries(this.geozoneForm.get('mandatoryFields')['controls']).filter(([key, control]) => control['dirty']);
-    const props = [...rootProps, ...mandatoryProps].reduce((acc, [key, control]) => ({...acc, [key]: control}), {});
+    const props = [...rootProps, ...mandatoryProps].reduce((acc, [key, control]) => ({...acc, [key]: control?.['value'] || control}), {});
     const mandatoryFields = this.geozoneForm.get('mandatoryFields').value;
-    this.getDirtyProps(props, this.geozoneForm.controls);
-    this.getDirtyProps(mandatoryProps, this.geozoneForm.get('mandatoryFields')['controls']);
-
     if (props?.['location']) {
       props['location'] = {
         type: 'point',

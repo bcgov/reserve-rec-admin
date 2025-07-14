@@ -5,7 +5,7 @@ import { CommonModule, UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-geozone',
-  imports: [GeozoneDetailsComponent, RouterOutlet, UpperCasePipe, CommonModule],
+  imports: [RouterOutlet, UpperCasePipe, CommonModule],
   templateUrl: './geozone.component.html',
   styleUrl: './geozone.component.scss'
 })

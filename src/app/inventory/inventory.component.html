@@ -1,144 +1,156 @@
 <section class="container my-5">
-  <h3>Inventory Management</h3>
-  <div class="row">
+  <div class="row d-flex justify-content-between">
     <div class="col">
-      <ngds-text-input
-        [control]="form.get('search')"
-        [label]="'BC Parks Reservation Service Data Lookup'"
-        [placeholder]="'Search for protected areas, facilities, activities, or other data'"
-        [resetButton]="true"
-        [loadWhile]="loadingService?.loading()"
-        aria-label="Search for protected areas, facilities, activities, or other data"
-        (keyup.enter)="search()"
-      >
-        <button
-          ngdsInputAppend
-          class="btn btn-primary"
-          type="submit"
-          (click)="search()"
-          [disabled]="form.get('search')?.disabled"
-        >
-          <i class="me-1 fa-regular fa-magnifying-glass"></i>
-          Search
-        </button>
-      </ngds-text-input>
-
-    </div>
-    <div class="col-auto d-flex align-items-bottom">
-      <button
-        class="btn btn-success float-end"
-        [routerLink]="['/inventory/create']"
-      >
-        <i class="fa-solid fa-plus me-1"></i>
-        Create New Inventory Item
-      </button>
-    </div>
-  </div>
-  <ngds-toggle-input
-    [control]="form.get('showFilters')"
-    [label]="'Search filters'"
-    [switch]="true"
-  >
-  </ngds-toggle-input>
-  <!-- Filters -->
-  <div
-    *ngIf="form.get('showFilters')?.value === true"
-    class="container my-3"
-  >
-    <div class="card p-3">
-      <h5>Filters</h5>
+      <h3>Inventory Management</h3>
       <div class="row">
-        <!-- Schema -->
-        <div class="col-md-4">
-          <ngds-typeahead-input
-            [control]="form.get('filters.schema')"
-            [selectionListItems]="schemaOptions"
-            [label]="'Schema'"
-            [placeholder]="'Select schema(s)'"
-            [resetButton]="true"
-          ></ngds-typeahead-input>
-        </div>
-        <!-- Collection ID -->
-        <div class="col-md-4">
+        <div class="col">
           <ngds-text-input
-            [control]="form.get('filters.collectionId')"
-            [label]="'Collection ID'"
-            [placeholder]="'Enter Collection ID'"
+            [control]="form.get('search')"
+            [label]="'BC Parks Reservation Service Data Lookup'"
+            [placeholder]="'Search for protected areas, facilities, activities, or other data'"
             [resetButton]="true"
-          ></ngds-text-input>
+            [loadWhile]="loadingService?.loading()"
+            aria-label="Search for protected areas, facilities, activities, or other data"
+            (keyup.enter)="search()"
+          >
+            <button
+              ngdsInputAppend
+              class="btn btn-primary"
+              type="submit"
+              (click)="search()"
+              [disabled]="form.get('search')?.disabled"
+            >
+              <i class="me-1 fa-regular fa-magnifying-glass"></i>
+              Search
+            </button>
+          </ngds-text-input>
+
+        </div>
+        <div class="col-auto d-flex align-items-bottom">
+          <button
+            class="btn btn-success float-end"
+            [routerLink]="['/inventory/create']"
+          >
+            <i class="fa-solid fa-plus me-1"></i>
+            Create New Inventory Item
+          </button>
         </div>
       </div>
-      <hr>
-      <div class="row">
-        <!-- ORCS -->
-        <div
-          *ngIf="form.get('filters.schema')?.value === 'protectedArea'"
-          class="col-md-4"
-        >
-          <ngds-number-input
-            [control]="form.get('filters.orcs')"
-            [label]="'ORCS'"
-            [placeholder]="'Enter ORCS number'"
-            [resetButton]="true"
-          ></ngds-number-input>
+      <ngds-toggle-input
+        [control]="form.get('showFilters')"
+        [label]="'Search filters'"
+        [switch]="true"
+      >
+      </ngds-toggle-input>
+      <!-- Filters -->
+      <div
+        *ngIf="form.get('showFilters')?.value === true"
+        class="container my-3"
+      >
+        <div class="card p-3">
+          <h5>Filters</h5>
+          <div class="row">
+            <!-- Schema -->
+            <div class="col-md-4">
+              <ngds-typeahead-input
+                [control]="form.get('filters.schema')"
+                [selectionListItems]="schemaOptions"
+                [label]="'Schema'"
+                [placeholder]="'Select schema(s)'"
+                [resetButton]="true"
+              ></ngds-typeahead-input>
+            </div>
+            <!-- Collection ID -->
+            <div class="col-md-4">
+              <ngds-text-input
+                [control]="form.get('filters.collectionId')"
+                [label]="'Collection ID'"
+                [placeholder]="'Enter Collection ID'"
+                [resetButton]="true"
+              ></ngds-text-input>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <!-- ORCS -->
+            <div
+              *ngIf="form.get('filters.schema')?.value === 'protectedArea'"
+              class="col-md-4"
+            >
+              <ngds-number-input
+                [control]="form.get('filters.orcs')"
+                [label]="'ORCS'"
+                [placeholder]="'Enter ORCS number'"
+                [resetButton]="true"
+              ></ngds-number-input>
+            </div>
+            <!-- FacilityType -->
+            <div
+              *ngIf="form.get('filters.schema')?.value === 'facility'"
+              class="col-md-4"
+            >
+              <ngds-typeahead-input
+                [control]="form.get('filters.facilityType')"
+                [selectionListItems]="facilityTypeOptions"
+                [label]="'Facility Type'"
+                [placeholder]="'Select Facility Type'"
+                [resetButton]="true"
+              ></ngds-typeahead-input>
+            </div>
+            <!-- FacilitySubType -->
+            <div
+              *ngIf="form.get('filters.facilityType')?.value"
+              class="col-md-4"
+            >
+              <ngds-typeahead-input
+                [control]="form.get('filters.facilitySubType')"
+                [label]="'Facility Subtype'"
+                [selectionListItems]="getFacilitySubTypeOptions()"
+                [placeholder]="'Select Facility Subtype'"
+                [resetButton]="true"
+              ></ngds-typeahead-input>
+            </div>
+            <!-- ActivityType -->
+            <div
+              *ngIf="form.get('filters.schema')?.value === 'activity'"
+              class="col-md-4"
+            >
+              <ngds-typeahead-input
+                [control]="form.get('filters.activityType')"
+                [selectionListItems]="activityTypeOptions"
+                [label]="'Activity Type'"
+                [placeholder]="'Select Activity Type'"
+                [resetButton]="true"
+              ></ngds-typeahead-input>
+            </div>
+            <!-- ActivitySubType for Activity -->
+            <div
+              *ngIf="form.get('filters.activityType')?.value"
+              class="col-md-4"
+            >
+              <ngds-typeahead-input
+                [control]="form.get('filters.activitySubType')"
+                [label]="'Activity Subtype'"
+                [selectionListItems]="getActivitySubTypeOptions()"
+                [placeholder]="'Select Activity Subtype'"
+                [resetButton]="true"
+              ></ngds-typeahead-input>
+            </div>
+          </div>
         </div>
-        <!-- FacilityType -->
-        <div
-          *ngIf="form.get('filters.schema')?.value === 'facility'"
-          class="col-md-4"
+      </div>
+      <section>
+        <app-search-results-table></app-search-results-table>
+      </section>
+    </div>
+    <div class="col">
+      <div class="position-sticky position-top rounded-5 border overflow-hidden">
+        <app-map
+          #mapComponent
+          [_markers]="_markers"
         >
-          <ngds-typeahead-input
-            [control]="form.get('filters.facilityType')"
-            [selectionListItems]="facilityTypeOptions"
-            [label]="'Facility Type'"
-            [placeholder]="'Select Facility Type'"
-            [resetButton]="true"
-          ></ngds-typeahead-input>
-        </div>
-        <!-- FacilitySubType -->
-        <div
-          *ngIf="form.get('filters.facilityType')?.value"
-          class="col-md-4"
-        >
-          <ngds-typeahead-input
-            [control]="form.get('filters.facilitySubType')"
-            [label]="'Facility Subtype'"
-            [selectionListItems]="getFacilitySubTypeOptions()"
-            [placeholder]="'Select Facility Subtype'"
-            [resetButton]="true"
-          ></ngds-typeahead-input>
-        </div>
-        <!-- ActivityType -->
-        <div
-          *ngIf="form.get('filters.schema')?.value === 'activity'"
-          class="col-md-4"
-        >
-          <ngds-typeahead-input
-            [control]="form.get('filters.activityType')"
-            [selectionListItems]="activityTypeOptions"
-            [label]="'Activity Type'"
-            [placeholder]="'Select Activity Type'"
-            [resetButton]="true"
-          ></ngds-typeahead-input>
-        </div>
-        <!-- ActivitySubType for Activity -->
-        <div
-          *ngIf="form.get('filters.activityType')?.value"
-          class="col-md-4"
-        >
-          <ngds-typeahead-input
-            [control]="form.get('filters.activitySubType')"
-            [label]="'Activity Subtype'"
-            [selectionListItems]="getActivitySubTypeOptions()"
-            [placeholder]="'Select Activity Subtype'"
-            [resetButton]="true"
-          ></ngds-typeahead-input>
-        </div>
+        </app-map>
       </div>
     </div>
   </div>
-
-</section>
-<section>
-  <app-search-results-table></app-search-results-table>
 </section>

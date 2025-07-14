@@ -28,7 +28,7 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
   public searchTermSet!: string;
   public searchTerms: string[] = [];
   public searchTermExists = false;
-  
+
   @ViewChild('protectedAreaEditConfirmationTemplate')
   protectedAreaEditConfirmationTemplate: TemplateRef<any>;
 
@@ -49,15 +49,15 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
 
   initForm() {
     // Split the search terms string into an array if it exists.
-    if (this.protectedArea?.searchTerms.length > 0) {
+    if (this.protectedArea?.searchTerms?.length > 0) {
       this.searchTerms = this.protectedArea?.searchTerms.split(',')
     }
-    
+
     this.form = new UntypedFormGroup({
       protectedAreaName: new UntypedFormControl(this.protectedArea?.displayName),
       protectedAreaOrcs: new UntypedFormControl(this.protectedArea?.orcs),
       protectedAreaIsVisible: new UntypedFormControl(false),
-      protectedAreaAdminNotes: new UntypedFormControl(this.protectedArea?.adminNotes),
+      protectedAreaAdminNotes: new UntypedFormControl(this.protectedArea?.adminNotes || ''),
       protectedAreaSearchTerms: new UntypedFormControl(this.searchTerms),
     });
   }
