@@ -14,10 +14,17 @@ export class AuthService {
   }
 
  public user = signal<any>(null); // Make sure observable for user updates
-  public session = signal(null);
-  jwtToken: any;
+ public session = signal(null);
+ jwtToken: any;
+ public reDirectValues; 
 
   async init() {
+    
+    if(this.configService.config.ENVIRONMENT === 'local') {
+      this.reDirectValues = 'http://localhost:4300';
+    } else {
+      this.reDirectValues = this.configService.config['COGNITO_REDIRECT_URI'];
+    }
     Amplify.configure({
       Auth: {
         Cognito: {
@@ -28,8 +35,8 @@ export class AuthService {
             oauth: {
               domain: this.configService.config['OAUTH_DOMAIN'],
               scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-              redirectSignIn: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
-              redirectSignOut: ['http://localhost:4300', this.configService.config['COGNITO_REDIRECT_URI']],
+              redirectSignIn: this.reDirectValues,
+              redirectSignOut: this.reDirectValues,
               responseType: 'code',
             }
           },
@@ -172,4 +179,7 @@ export class AuthService {
     }
   }
 
+  configEnv() {
+    return this.configService.config;
+  }
 }
