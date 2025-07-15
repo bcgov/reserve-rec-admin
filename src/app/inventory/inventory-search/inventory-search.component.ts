@@ -25,6 +25,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   public _resultsSignal: WritableSignal<any[]> = signal([]);
   public _passiveResultsSignal: WritableSignal<any[]> = signal([]);
   public searchChangeFlag = false; // Flag to indicate if search results have changed
+  public searchFiltersOpen = false; // Flag to indicate if search filters are open
 
   public markerSchemaOptions = {
     geozone: {
@@ -130,18 +131,17 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
         result['resultType'] = 'search';
         return result;
       });
-      console.log('searchResults:', this.searchResults);
       const passiveResults = this._passiveResultsSignal()?.map((result) => {
         if (result?._source) {
           return result._source;
         }
         return result;
       }) || [];
-      this.mapResults = new Set([ ...passiveResults, ...this.searchResults]);
+      this.mapResults = new Set([...passiveResults, ...this.searchResults]);
       this.updateMapMarkers();
     });
     effect(() => {
-      if (this._resultsSignal() && this.searchResults?.length > 0 ) {
+      if (this._resultsSignal() && this.searchResults?.length > 0) {
         this.mapComponent?.flyToFitBounds(this.searchResults?.map(result => result?.location), null);
       }
     });
@@ -293,6 +293,10 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     }
   }
 
+  toggleSearchFilters() {
+    this.searchFiltersOpen = !this.searchFiltersOpen;
+  }
+
   generatePassiveResultEl(options, data = null) {
     const el = document.createElement('div');
     el.style.backgroundColor = data?.resultType != 'search' ? 'gray' : options?.color;
@@ -319,9 +323,9 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
       pk: event?.pk,
       sk: event?.sk,
     },
-    {
-      size: 1
-    })
+      {
+        size: 1
+      });
   }
 
   goToPark() {

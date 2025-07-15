@@ -31,8 +31,103 @@
               >
                 <i class="fa fa-search"></i>
               </button>
+              <button
+                class="btn btn-light"
+                [disabled]="loadingService?.loading()"
+                (click)="toggleSearchFilters()"
+                type="button"
+              >
+                <i class="fa fa-sliders"></i>
+              </button>
             </div>
           </ngds-text-input>
+
+          <div *ngIf="searchFiltersOpen">
+            <div class="border rounded-3 my-1 p-2 text-center">
+              <h6>Filters</h6>
+              <div class="row">
+                <div class="col-xl-12">
+                  <ngds-typeahead-input
+                    [control]="form.get('filters.schema')"
+                    [selectionListItems]="schemaOptions"
+                    [label]="'Schema'"
+                    [placeholder]="'Select schema(s)'"
+                    [resetButton]="true"
+                  ></ngds-typeahead-input>
+                </div>
+                <div class="col-xl-12">
+                  <ngds-text-input
+                    [control]="form.get('filters.collectionId')"
+                    [label]="'Collection ID'"
+                    [placeholder]="'Enter Collection ID'"
+                    [resetButton]="true"
+                  ></ngds-text-input>
+                </div>
+              </div>
+              <hr *ngIf="form.get('filters.schema')?.value">
+              <div class="row">
+                <div
+                  *ngIf="form.get('filters.schema')?.value === 'protectedArea'"
+                  class="col-xl-12"
+                >
+                  <ngds-number-input
+                    [control]="form.get('filters.orcs')"
+                    [label]="'ORCS'"
+                    [placeholder]="'Enter ORCS number'"
+                    [resetButton]="true"
+                  ></ngds-number-input>
+                </div>
+                <div
+                  *ngIf="form.get('filters.schema')?.value === 'facility'"
+                  class="col-xl-12"
+                >
+                  <ngds-typeahead-input
+                    [control]="form.get('filters.facilityType')"
+                    [selectionListItems]="facilityTypeOptions"
+                    [label]="'Facility Type'"
+                    [placeholder]="'Select Facility Type'"
+                    [resetButton]="true"
+                  ></ngds-typeahead-input>
+                </div>
+                <div
+                  *ngIf="form.get('filters.facilityType')?.value"
+                  class="col-xl-12"
+                >
+                  <ngds-typeahead-input
+                    [control]="form.get('filters.facilitySubType')"
+                    [label]="'Facility Subtype'"
+                    [selectionListItems]="getFacilitySubTypeOptions()"
+                    [placeholder]="'Select Facility Subtype'"
+                    [resetButton]="true"
+                  ></ngds-typeahead-input>
+                </div>
+                <div
+                  *ngIf="form.get('filters.schema')?.value === 'activity'"
+                  class="col-xl-12"
+                >
+                  <ngds-typeahead-input
+                    [control]="form.get('filters.activityType')"
+                    [selectionListItems]="activityTypeOptions"
+                    [label]="'Activity Type'"
+                    [placeholder]="'Select Activity Type'"
+                    [resetButton]="true"
+                  ></ngds-typeahead-input>
+                </div>
+                <div
+                  *ngIf="form.get('filters.activityType')?.value"
+                  class="col-xl-12"
+                >
+                  <ngds-typeahead-input
+                    [control]="form.get('filters.activitySubType')"
+                    [label]="'Activity Subtype'"
+                    [selectionListItems]="getActivitySubTypeOptions()"
+                    [placeholder]="'Select Activity Subtype'"
+                    [resetButton]="true"
+                  ></ngds-typeahead-input>
+                </div>
+              </div>
+            </div>
+          </div>
           <div *ngIf="searchResults?.length">
             <h6 class="text-center mt-2">Search Results</h6>
           </div>
@@ -42,6 +137,7 @@
           >
             <app-search-results-table></app-search-results-table>
           </div>
+
         </div>
       </div>
     </app-map>
