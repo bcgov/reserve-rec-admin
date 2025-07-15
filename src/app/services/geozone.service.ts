@@ -5,6 +5,7 @@ import { DataService } from './data.service';
 import { LoadingService } from './loading.service';
 import { ApiService } from './api.service';
 import { LoggerService } from './logger.service';
+import { ToastService, ToastTypes } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class GeozoneService {
     protected dataService: DataService,
     protected loadingService: LoadingService,
     protected apiService: ApiService,
-    protected loggerService: LoggerService
+    protected loggerService: LoggerService,
+    protected toastService: ToastService
   ) { }
 
   async getGeozone(gzCollectionId, geozoneId) {
@@ -37,9 +39,19 @@ export class GeozoneService {
       const res = (await lastValueFrom(this.apiService.post(`geozones/${gzCollectionId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.toastService.addMessage(
+        `Geozone: ${res.name} created.`,
+        '',
+        ToastTypes.SUCCESS
+      );
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.toastService.addMessage(
+        `${error}`,
+        `Geozone failed to create`,
+        ToastTypes.ERROR
+      );
       this.loggerService.error(error);
     }
   }
@@ -50,8 +62,18 @@ export class GeozoneService {
       const res = (await lastValueFrom(this.apiService.put(`geozones/${gzCollectionId}/${geozoneId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.toastService.addMessage(
+        `Geozone: ${res.name} updated.`,
+        '',
+        ToastTypes.SUCCESS
+      );
       return res;
     } catch (error) {
+      this.toastService.addMessage(
+        `${error}`,
+        `Geozone failed to update`,
+        ToastTypes.ERROR
+      );
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.loggerService.error(error);
     }

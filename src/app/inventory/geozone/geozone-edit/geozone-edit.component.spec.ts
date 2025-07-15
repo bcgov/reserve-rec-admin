@@ -5,6 +5,7 @@ import { ConfigService } from '../../../services/config.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { provideToastr } from 'ngx-toastr';
 
 describe('GeozoneEditComponent', () => {
   let component: GeozoneEditComponent;
@@ -13,7 +14,7 @@ describe('GeozoneEditComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GeozoneEditComponent],
-      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([]), provideToastr(),]
     })
     .compileComponents();
 

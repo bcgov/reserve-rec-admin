@@ -1,6 +1,7 @@
 export class Constants {
   public static readonly dataIds = {
     SEARCH_RESULTS: 'searchResults',
+    PASSIVE_SEARCH_RESULTS: 'passiveSearchResults',
     GEOZONE_RESULT: 'geozoneResult',
     CURRENT_PROTECTED_AREA: 'currentProtectedArea',
     PROTECTED_AREAS_RESULTS: 'protectedAreasResults',

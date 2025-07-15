@@ -1,0 +1,49 @@
+<section class="h-100">
+  <div class="rounded-5 border h-100 overflow-hidden">
+    <app-map
+      #mapComponent
+      [_markers]="_markers"
+      (boundsChange)="updateSearchBounds($event)"
+      (markerClicked)="onMarkerClick($event)"
+    >
+      <div
+        #searchOverlay
+        class="overlay-element"
+      >
+        <div
+          class="bg-light border rounded-4 m-3 p-2 d-flex flex-column"
+          [style.max-height]="'600px !important'"
+        >
+          <ngds-text-input
+            [control]="form.get('search')"
+            [placeholder]="'Search...'"
+            [resetButton]="true"
+            [loadWhile]="loadingService?.loading()"
+            aria-label="Search for protected areas, facilities, activities, or other data"
+            (keyup.enter)="search()"
+          >
+            <div ngdsInputAppend>
+              <button
+                class="btn btn-light"
+                [disabled]="loadingService?.loading()"
+                (click)="search()"
+                type="button"
+              >
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </ngds-text-input>
+          <div *ngIf="searchResults?.length">
+            <h6 class="text-center mt-2">Search Results</h6>
+          </div>
+          <div
+            *ngIf="searchResults?.length"
+            class="flex-grow-1 results-table border rounded-3 p-2"
+          >
+            <app-search-results-table></app-search-results-table>
+          </div>
+        </div>
+      </div>
+    </app-map>
+  </div>
+</section>

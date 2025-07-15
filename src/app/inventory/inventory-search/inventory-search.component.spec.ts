@@ -1,30 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GeozoneCreateComponent } from './geozone-create.component';
-import { ConfigService } from '../../../services/config.service';
+import { InventorySearchComponent } from './inventory-search.component';
+import { ConfigService } from '../../services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 
-describe('GeozoneCreateComponent', () => {
-  let component: GeozoneCreateComponent;
-  let fixture: ComponentFixture<GeozoneCreateComponent>;
+describe('InventorySearchComponent', () => {
+  let component: InventorySearchComponent;
+  let fixture: ComponentFixture<InventorySearchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GeozoneCreateComponent],
+      imports: [InventorySearchComponent],
       providers: [
         ConfigService,
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([]),
         provideToastr()
       ]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(GeozoneCreateComponent);
+    fixture = TestBed.createComponent(InventorySearchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

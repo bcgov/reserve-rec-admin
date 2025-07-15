@@ -4,13 +4,14 @@ import { SearchService } from './search.service';
 import { ConfigService } from './config.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideToastr } from 'ngx-toastr';
 
 describe('SearchService', () => {
   let service: SearchService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideToastr()]
     });
     service = TestBed.inject(SearchService);
   });

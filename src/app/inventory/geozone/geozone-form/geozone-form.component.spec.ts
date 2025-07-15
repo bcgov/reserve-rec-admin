@@ -5,6 +5,7 @@ import { ConfigService } from '../../../services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { provideToastr } from 'ngx-toastr';
 
 describe('GeozoneFormComponent', () => {
   let component: GeozoneFormComponent;
@@ -13,7 +14,7 @@ describe('GeozoneFormComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GeozoneFormComponent],
-      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [ConfigService, provideHttpClient(), provideHttpClientTesting(), provideRouter([]), provideToastr()]
     })
     .compileComponents();
 

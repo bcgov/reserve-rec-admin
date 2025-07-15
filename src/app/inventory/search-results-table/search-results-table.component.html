@@ -1,6 +1,14 @@
-<div class="mx-3" *ngIf="results?.length">
-  <h3>Search Results</h3>
-  <div *ngFor="let result of results" class="row">
+<div
+  #resultsContainer
+  class="h-100 d-flex flex-column"
+>
+  <div
+    *ngFor="let result of results"
+    class="row"
+  >
     <app-search-result [data]="result"></app-search-result>
+  </div>
+  <div class="text-muted text-center">
+    End of results
   </div>
 </div>

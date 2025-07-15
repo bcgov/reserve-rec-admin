@@ -15,15 +15,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   @Input() hideObjectsOutsideZoom = false; // Whether to hide objects outside the current zoom
   //level
   @Input() showGrips = true; // Whether to show grips for polygons
+  @Input() mapOverlayPadding = 300; // Padding for the overlay
 
   @Output() markersChange = new EventEmitter<any[]>();
   @Output() gripsChange = new EventEmitter<any[]>();
+  @Output() boundsChange = new EventEmitter<any[]>();
+  @Output() mapResize = new EventEmitter<any>();
+  @Output() markerClicked = new EventEmitter<any>();
 
   public map: Map | undefined;
   public markerArray: maplibregl.Marker[] = [];
   public polygonArray: any[] = []; // Array to hold polygon data
   public layerArray: any[] = []; // Array to hold layer data
   public isMapLoaded = false;
+  public mapStdPadding = 75; // Standard padding for the map
 
   constructor() {
     // Effect to watch for changes in markers signal
@@ -43,10 +48,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return {};
     }
     const marker = new maplibregl.Marker(options)
-      .setLngLat(coordinates)
-      .setPopup(new maplibregl.Popup().setHTML(`<strong>${options?.displayName}</strong>`)); // Optional popup
-    this.markerArray.push(marker);
+      .setLngLat(coordinates);
+    const popup = new maplibregl.Popup().setHTML(`<strong>${options?.data?.displayName}</strong>`);
+    // popup.on('open', () => {
+    //   this.markerClicked.emit(options?.data);
+    // });
+    marker.setPopup(popup); // Attach popup to the marker
     marker.addTo(this.map!); // Add marker to the map
+    this.markerArray.push(marker); // Store the marker in the array
     marker.on('dragend', () => {
       const newCoordinates = marker.getLngLat();
       // Update the marker data in the signal
@@ -133,7 +142,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   updateMap() {
     this.markerArray.forEach(marker => marker.remove());
-    this.polygonArray.forEach(polygon => {
+    this.polygonArray?.forEach(polygon => {
       this.map.removeLayer(polygon?.id);
       if (polygon?.grips) {
         for (const grip of polygon.grips) {
@@ -143,7 +152,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
     this.polygonArray = [];
     this.markerArray = [];
-
     // Add markers from the signal
     this._markers().forEach(markerData => {
       if (markerData?.coordinates) {
@@ -168,35 +176,49 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           [-141.06, 46.30], // Southwest coordinates of BC (approximate)
           [-112.03, 62.00]  // Northeast coordinates of BC (approximate)
         ],
-        attributionControl: false
+        attributionControl: false,
+        trackResize: true, // Automatically resize the map when the window is resized
       });
       this.map.addControl(new maplibregl.NavigationControl());
     }
     this.map.on('load', () => {
       this.isMapLoaded = true;
       this.updateMap();
+      this.map.resize();
+    });
+    this.map.on('moveend', () => {
+      if (this.map) {
+        const bounds = this.map.getBounds();
+        this.boundsChange.emit([bounds.getNorthWest().toArray(), bounds.getSouthEast().toArray()]);
+      }
     });
   }
 
-  test() {
-    this.updateMap();
-  }
-
-  flyToFitBounds() {
+  flyToFitBounds(markerList, polygonList = null) {
     const bounds = new maplibregl.LngLatBounds();
-    if (this._markers().length > 0) {
-      this._markers().forEach(marker => {
-        bounds.extend(marker.coordinates);
+    if (!bounds) {
+      return;
+    }
+    if (markerList?.length > 0) {
+      markerList?.forEach(marker => {
+        bounds.extend(marker?.coordinates);
       });
     };
-    if (this._polygons().length > 0) {
-      this._polygons().forEach(polygon => {
-        polygon.coordinates.forEach(coord => {
+    if (polygonList?.length > 0) {
+      polygonList?.forEach(polygon => {
+        polygon?.coordinates.forEach(coord => {
           bounds.extend(coord);
         });
       });
     }
-    this.map?.fitBounds(bounds, { padding: 75 });
+    this.map?.fitBounds(bounds, {
+      padding: {
+        top: this.mapStdPadding,
+        bottom: this.mapStdPadding,
+        left: this.mapOverlayPadding,
+        right: this.mapStdPadding
+      }
+    });
   }
 
   ngOnDestroy() {

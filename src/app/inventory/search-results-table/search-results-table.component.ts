@@ -1,4 +1,4 @@
-import { Component, WritableSignal, effect, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { Subscription } from 'rxjs';
 import { Constants } from '../../app.constants';
@@ -11,13 +11,17 @@ import { CommonModule } from '@angular/common';
   templateUrl: './search-results-table.component.html',
   styleUrl: './search-results-table.component.scss'
 })
-export class SearchResultsTableComponent {
+export class SearchResultsTableComponent implements AfterViewInit {
+  @ViewChild('resultsContainer') resultsContainer: ElementRef;
+  @Input() height: string = '500px'; // Default height for the results container
   public _resultsSignal: WritableSignal<any[]> = signal([]);
   public subscriptions = new Subscription();
   public results: any[] = [];
+  public maxHeight: string = '';
 
   constructor(
-    protected dataService: DataService
+    protected dataService: DataService,
+    protected cdr: ChangeDetectorRef
   ) {
     this._resultsSignal = this.dataService.watchItem(Constants.dataIds.SEARCH_RESULTS);
     effect(() => {
@@ -32,5 +36,23 @@ export class SearchResultsTableComponent {
       }
       return result;
     });
+    this.getMaxHeight();
+  }
+
+  resizeResultsContainer() {
+    // if (this.resultsContainer) {
+    //   console.log('this.resultsContainer.nativeElement.parentElement:', this.resultsContainer.nativeElement.parentElement.parentElement);
+    //   const parentHeight = this.resultsContainer.nativeElement.parentElement?.parentElement?.clientHeight;
+    //   this.resultsContainer.nativeElement.style.maxHeight = parentHeight;
+    // }
+  }
+
+  getMaxHeight() {
+    const parentHeight = this.resultsContainer?.nativeElement?.parentElement?.parentElement?.clientHeight;
+    this.maxHeight =  parentHeight ? `${parentHeight}px !important` : '500px !important';
+  }
+
+  ngAfterViewInit(): void {
+    this.resizeResultsContainer();
   }
 }
