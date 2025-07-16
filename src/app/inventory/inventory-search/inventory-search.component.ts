@@ -127,6 +127,8 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
         return result;
       }) || [];
       // Flag search results with resultType
+      // Unfortunately this duplicates the searched results - TODO, find a better
+      // way to differentiate search results from passive results
       this.searchResults = this.searchResults.map((result) => {
         result['resultType'] = 'search';
         return result;
@@ -319,13 +321,10 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   }
 
   onMarkerClick(event: any) {
+    console.log('event:', event);
     this.searchService.searchByQuery(``, {
-      pk: event?.pk,
-      sk: event?.sk,
-    },
-      {
-        size: 1
-      });
+      _id: `${event?.pk}#${event?.sk}`,
+    })
   }
 
   goToPark() {

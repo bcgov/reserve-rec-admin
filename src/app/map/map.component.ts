@@ -50,9 +50,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const marker = new maplibregl.Marker(options)
       .setLngLat(coordinates);
     const popup = new maplibregl.Popup().setHTML(`<strong>${options?.data?.displayName}</strong>`);
-    // popup.on('open', () => {
-    //   this.markerClicked.emit(options?.data);
-    // });
+    popup.on('open', () => {
+      this.markerClicked.emit(options?.data);
+    });
     marker.setPopup(popup); // Attach popup to the marker
     marker.addTo(this.map!); // Add marker to the map
     this.markerArray.push(marker); // Store the marker in the array
@@ -213,6 +213,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       });
     }
     this.map?.fitBounds(bounds, {
+      maxZoom: 13,
       padding: {
         top: this.mapStdPadding,
         bottom: this.mapStdPadding,
