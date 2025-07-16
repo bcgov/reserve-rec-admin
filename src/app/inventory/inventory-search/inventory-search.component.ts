@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, WritableSignal } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, ViewContainerRef, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -8,15 +8,17 @@ import { SearchResultsTableComponent } from '../search-results-table/search-resu
 import { MapComponent } from '../../map/map.component';
 import { Constants } from '../../app.constants';
 import { DataService } from '../../services/data.service';
+import { MapMarkerComponent } from './map-marker/map-marker.component';
 
 @Component({
   selector: 'app-inventory-search',
-  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, MapComponent],
+  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, MapComponent, MapMarkerComponent],
   templateUrl: './inventory-search.component.html',
   styleUrl: './inventory-search.component.scss'
 })
 export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('mapComponent') mapComponent!: MapComponent;
+  @ViewChild('markerRenderZone', { read: ViewContainerRef }) vcr!: ViewContainerRef;
   @ViewChild('searchOverlay') searchOverlay!: ElementRef; // Adjust type as necessary
   public form;
   public searchResults = [];
@@ -114,7 +116,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     protected searchService: SearchService,
     protected loadingService: LoadingService,
     protected cdr: ChangeDetectorRef,
-    protected dataService: DataService
+    protected dataService: DataService,
   ) {
     this._resultsSignal = this.dataService.watchItem(Constants.dataIds.SEARCH_RESULTS);
     this._passiveResultsSignal = this.dataService.watchItem(Constants.dataIds.PASSIVE_SEARCH_RESULTS);
@@ -171,15 +173,19 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     this.form.get('filters.schema').valueChanges.subscribe(() => {
       this.resetFilters(true);
     });
-
   }
 
-  updateMapMarkers() {
+  onSearchReset() {
+    this.form.reset();
+    this.searchService.clearSearchResults();
+  }
+
+  async updateMapMarkers() {
     if (this.mapResults?.size > 0) {
       const markers = [];
       for (const result of this.mapResults) {
         if (result?.location?.coordinates) {
-          const options = this.generateMarkerOptions(result);
+          const options = await this.generateMarkerOptions(result);
           markers.push({
             coordinates: [result.location.coordinates[0], result.location.coordinates[1]],
             options: {
@@ -196,15 +202,17 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     this.mapComponent?.updateMap();
   }
 
-  generateMarkerOptions(data) {
+  async generateMarkerOptions(data) {
     const schema = data?.schema || 'default';
-    const options = this.markerSchemaOptions[schema] || this.markerSchemaOptions.default;
+    let options = { ...this.markerSchemaOptions.default };
+    if (data?.resultType === 'search') {
+      options = this.markerSchemaOptions[schema] || this.markerSchemaOptions.default;
+    }
+    options['icon'] = this.getMarkerIcon(data);
     const markerOptions = {
-      color: options?.color,
-      icon: options?.icon,
       z_index: data?.resultType === 'search' ? 900 : 500,
       draggable: false,
-      element: this.generatePassiveResultEl(options, data)
+      element: await this.generateMapMarkerHTML(options, data)
     };
     return markerOptions;
   }
@@ -287,7 +295,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     if (bounds && bounds.length === 2) {
       this.searchService.searchByQuery('', {
         bbox: bounds,
-        size: 1000
+        size: 100
       },
         null,
         true
@@ -299,32 +307,99 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     this.searchFiltersOpen = !this.searchFiltersOpen;
   }
 
-  generatePassiveResultEl(options, data = null) {
+  getMarkerIcon(data) {
+    if (data?.schema !== 'facility') {
+      return this.markerSchemaOptions[data?.schema]?.icon || this.markerSchemaOptions.default.icon;
+    }
+    if (data?.facilityType) {
+      if (data?.facilitySubType) {
+        const subType = this.facilitySubTypeOptions[data.facilityType].find(f => f.value === data.facilitySubType);
+        if (subType?.icon) {
+          return subType.icon;
+        }
+      }
+      // If no subType icon found, return the main facility type icon
+      return this.facilityTypeOptions.find(f => f.value === data.facilityType)?.icon || this.markerSchemaOptions.default.icon;
+    }
+    return this.markerSchemaOptions.default.icon;
+  }
+
+  async generateMapMarkerHTML(options, data = null) {
+    const el2 = this.vcr.createComponent(MapMarkerComponent);
+    el2.setInput('markerData', data);
+    el2.setInput('markerOptions', options);
+    return await el2.instance.getTemplate();
+  }
+
+  async oldMapMarkerHTML(options, data = null) {
     const el = document.createElement('div');
     el.style.backgroundColor = data?.resultType != 'search' ? 'gray' : options?.color;
     el.style.width = '30px';
     el.style.height = '30px';
+    el.style.borderRadius = '50%';
+    el.style.fontSize = '1rem';
     el.style.setProperty("-webkit-filter", "drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5))");
-    el.className = 'badge rounded-circle text-white p-2 d-flex align-items-center justify-content-center';
-    const icon = el.appendChild(document.createElement('i'));
-    icon.className = options?.icon + ' fa-2xl';
-    if ((data?.schema) === 'facility' && data?.facilityType) {
-      icon.className = this.facilityTypeOptions.find(f => f.value === data.facilityType)?.icon + ' fa-2xl' || options?.icon + ' fa-2xl';
-      if (data?.facilitySubType) {
-        const subType = this.facilitySubTypeOptions[data?.facilityType].find(f => f.value === data.facilitySubType);
-        if (subType?.icon) {
-          icon.className = subType.icon + ' fa-2xl';
+    if (data?.resultType === 'search') {
+      el.style.width = '50px';
+      el.style.height = '50px';
+      el.style.fontSize = '2rem';
+
+    }
+    if (data?.imageUrl && data?.resultType === 'search') {
+      const img = el.appendChild(document.createElement('img'));
+      el.style.border = `2px solid ${options?.color}`;
+      img.src = data.imageUrl;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '50%';
+    } else {
+      const icon = el.appendChild(document.createElement('i'));
+      el.className = 'badge rounded-circle text-white p-2 d-flex align-items-center justify-content-center';
+      icon.className = options?.icon;
+      if ((data?.schema) === 'facility' && data?.facilityType) {
+        icon.className = this.facilityTypeOptions.find(f => f.value === data.facilityType)?.icon || options?.icon;
+        if (data?.facilitySubType) {
+          const subType = this.facilitySubTypeOptions[data?.facilityType].find(f => f.value === data.facilitySubType);
+          if (subType?.icon) {
+            icon.className = subType.icon;
+          }
         }
       }
     }
+    const tempElVals = {
+      width: el.style.width,
+      height: el.style.height,
+      fontSize: el.style.fontSize,
+      filter: el.style.getPropertyValue("-webkit-filter"),
+      z_index: options?.z_index || 500
+    };
+    el.addEventListener('mouseenter', () => {
+      el.style.setProperty("-webkit-filter", "drop-shadow(0px 0px 4px rgba(0, 153, 255, 0.5))");
+      el.style.width = '45px';
+      el.style.height = '45px';
+      el.style.fontSize = '1.5rem';
+      el.style.zIndex = '900';
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.setProperty("-webkit-filter", tempElVals.filter);
+      el.style.width = tempElVals.width;
+      el.style.height = tempElVals.height;
+      el.style.fontSize = tempElVals.fontSize;
+      el.style.zIndex = String(tempElVals.z_index);
+    });
     return el;
   }
 
+  loadMore(event: any) {
+    console.log('Load more:', event);
+
+  }
+
   onMarkerClick(event: any) {
-    console.log('event:', event);
     this.searchService.searchByQuery(``, {
       _id: `${event?.pk}#${event?.sk}`,
-    })
+    });
   }
 
   goToPark() {

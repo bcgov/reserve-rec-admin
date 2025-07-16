@@ -17,12 +17,19 @@
           <ngds-text-input
             [control]="form.get('search')"
             [placeholder]="'Search...'"
-            [resetButton]="true"
             [loadWhile]="loadingService?.loading()"
             aria-label="Search for protected areas, facilities, activities, or other data"
             (keyup.enter)="search()"
           >
             <div ngdsInputAppend>
+              <button
+                class="btn btn-light"
+                [disabled]="loadingService?.loading()"
+                (click)="onSearchReset()"
+                type="button"
+              >
+                <i class="fa fa-xmark"></i>
+              </button>
               <button
                 class="btn btn-light"
                 [disabled]="loadingService?.loading()"
@@ -135,7 +142,7 @@
             *ngIf="searchResults?.length"
             class="flex-grow-1 results-table border rounded-3 p-2"
           >
-            <app-search-results-table></app-search-results-table>
+            <app-search-results-table (loadMore)="loadMore($event)"></app-search-results-table>
           </div>
 
         </div>
@@ -143,3 +150,5 @@
     </app-map>
   </div>
 </section>
+
+<div #markerRenderZone></div>

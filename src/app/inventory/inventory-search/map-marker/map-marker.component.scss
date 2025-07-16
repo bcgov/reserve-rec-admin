@@ -1,0 +1,18 @@
+.circle-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid;
+  background-color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+  z-index: -500;
+  &:hover {
+    cursor: pointer;
+    filter: drop-shadow(0 0 5px rgba(0, 174, 255, 0.5));
+    z-index: 900;
+    transform: scale(1.2);
+  }
+}

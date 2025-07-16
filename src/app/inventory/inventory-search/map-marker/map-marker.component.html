@@ -1,0 +1,23 @@
+<div #markerTemplate>
+  <div
+    class="circle-marker"
+    [style.backgroundColor]="markerOptions?.color"
+    [style.borderColor]="markerOptions?.color"
+    [ngStyle]="{'scale': markerData?.resultType === 'search' ? 1.5 : 1}"
+  >
+    <img
+      *ngIf="markerData?.imageUrl"
+      [src]="markerData.imageUrl"
+      [style.width]="'100%'"
+      [style.height]="'100%'"
+      alt="Marker Image"
+      class="object-fit-cover rounded-circle border-2"
+    >
+    <div
+      *ngIf="!markerData?.imageUrl"
+      class="text-white"
+    >
+      <i [ngClass]="markerOptions.icon + ' fa-xl'"></i>
+    </div>
+  </div>
+</div>

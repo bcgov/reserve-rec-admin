@@ -141,17 +141,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   updateMap() {
-    this.markerArray.forEach(marker => marker.remove());
-    this.polygonArray?.forEach(polygon => {
-      this.map.removeLayer(polygon?.id);
-      if (polygon?.grips) {
-        for (const grip of polygon.grips) {
-          grip.remove();
-        }
-      }
-    });
-    this.polygonArray = [];
-    this.markerArray = [];
+    this.clearMap();
     // Add markers from the signal
     this._markers().forEach(markerData => {
       if (markerData?.coordinates) {
@@ -179,7 +169,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         attributionControl: false,
         trackResize: true, // Automatically resize the map when the window is resized
       });
-      this.map.addControl(new maplibregl.NavigationControl());
+      this.map.addControl(new maplibregl.NavigationControl({
+        visualizePitch: true,
+      }));
+      this.map.addControl(new maplibregl.GeolocateControl({}));
+      this.map.addControl(new maplibregl.FullscreenControl({}));
     }
     this.map.on('load', () => {
       this.isMapLoaded = true;
@@ -193,6 +187,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.boundsChange.emit([bounds.getNorthWest().toArray(), bounds.getSouthEast().toArray()]);
       }
     });
+  }
+
+  clearMap() {
+    console.log('Clearing map markers and polygons');
+    this.markerArray.forEach(marker => marker.remove());
+    this.polygonArray?.forEach(polygon => {
+      this.map.removeLayer(polygon?.id);
+      if (polygon?.grips) {
+        for (const grip of polygon.grips) {
+          grip.remove();
+        }
+      }
+    });
+    this.polygonArray = [];
+    this.markerArray = [];
   }
 
   flyToFitBounds(markerList, polygonList = null) {
