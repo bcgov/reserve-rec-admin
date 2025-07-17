@@ -1,0 +1,80 @@
+<section class="container pt-5 pb-4">
+  <div class="row d-flex justify-content-between align-items-center">
+    <div class="col-auto">
+      <div class="row">
+        <div class="col-auto">
+          <h2>{{data?.displayName || "&lt;Facility not found&gt; "}}</h2>
+        </div>
+        <div class="col-auto">
+          <div
+            *ngIf="data"
+            class="badge bg-primary d-flex justify-content-between align-items-center rounded-pill px-3"
+          >
+            <i class="fa-solid fa-location-dot me-1 fa-xl"></i>
+            <h4 class="mb-0">{{data?.schema | uppercase}}</h4>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-auto">
+          <div
+            *ngTemplateOutlet="typeBadge; context: { type: getFacilityTypeOption(), subtype: getFacilitySubTypeOption() }"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="btn-group border me-3">
+        <button
+          class="btn btn-light"
+          (click)="navToEdit()"
+        >
+          <div class="col-auto">
+            <i class="fa-solid fa-pen-to-square me-1"></i>
+            Edit
+          </div>
+        </button>
+        <button
+          class="btn btn-light"
+          disabled
+        >
+          <div
+            class="badge bg-light text-dark border d-flex justify-content-between align-items-center rounded-pill px-3"
+          >
+            <h5 class="mb-0">v{{data?.version || '?'}}</h5>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<router-outlet></router-outlet>
+
+<ng-template
+  #typeBadge
+  let-type="type"
+  let-subtype="subtype"
+>
+  <div class="badge bg-secondary d-flex align-items-center rounded-pill px-2">
+    <i
+      [ngClass]="type?.iconClass"
+      class="me-1 fa-xl"
+    ></i>
+    <h6 class="mb-0">{{type?.display}}</h6>
+    <div
+      *ngIf="subtype?.value"
+      class="badge bg-info text-dark rounded-pill d-flex align-items-center px-2 ms-2"
+    >
+      <i
+        [ngClass]="subtype?.iconClass"
+        class="me-1 fa-xl"
+      ></i>
+      <h6
+        *ngIf="subtype"
+        class="ms-2 mb-0"
+      >{{subtype?.display}}</h6>
+    </div>
+  </div>
+</ng-template>

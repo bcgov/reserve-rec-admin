@@ -1,0 +1,258 @@
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Summary</h4>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Display Name: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{facility?.displayName}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Facility Type: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getFacilityTypeOption(), isSubtype: false }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Facility SubType: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getFacilitySubTypeOption(), isSubtype: true }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Latest version: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{facility?.version || 'No version available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Collection ID: </strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-secondary">{{facility?.fcCollectionId || 'No ID available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Created at: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{facility?.creationDate | date:'medium'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Last Updated: </strong>
+        </div>
+        <div class="col-auto">
+
+          <span>{{facility?.lastUpdated | date:'medium'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Timezone: </strong>
+        </div>
+        <div class="col-auto">
+          <i class="fa-solid fa-clock mx-1"></i>
+          <span>{{facility?.timezone || 'No timezone available.'}}</span>
+        </div>
+      </div>
+      <h5 class="mt-3">Description</h5>
+      <p>{{facility?.description || 'No description available.'}}</p>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Images</h4>
+      <img
+        *ngIf="facility?.imageUrl"
+        [src]="facility?.imageUrl"
+        alt="{{facility?.displayName}} image"
+        class="img-fluid rounded"
+      />
+    </div>
+  </div>
+</section>
+<hr />
+<section class="container">
+  <div class="row px-0">
+    <div class="row d-flex justify-content-between align-items-center mb-3">
+      <div class="col-auto ">
+        <h4 class="mb-3">Activities</h4>
+      </div>
+      <div class="col-auto px-0">
+        <button
+          class="btn btn-success"
+        >
+          <i class="fa-solid fa-plus me-1"></i>
+          Add Another Activity to {{facility?.displayName}}
+        </button>
+      </div>
+    </div>
+    <div
+      *ngFor="let activity of facility?.activities"
+    >
+      <app-search-result [data]="activity"></app-search-result>
+    </div>
+  </div>
+</section>
+<hr />
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Geospatial Details</h4>
+      <div class="mb-2">
+        <div class="row">
+          <div class="col-auto">
+            <strong class="me-1">Location: </strong>
+          </div>
+          <div class="col">
+            <span>{{facility?.location?.coordinates[1] || 'Invalid latitude.'}}, {{facility?.location?.coordinates[0] ||
+              'Invalid
+              longitude'}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="row">
+          <div class="col-auto">
+            <strong class="me-1">Envelope: </strong>
+          </div>
+          <div class="col">
+            <div *ngFor="let coord of facility?.envelope?.coordinates">{{coord[1] || 'Invalid latitude.'}}, {{coord[0]
+              ||
+              'Invalid longitude'}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <strong class="me-1">Minimum Map Zoom Level: </strong>
+          </div>
+          <div class="col-auto">
+            <div class="mb-0">{{facility?.minMapZoom}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <strong class="me-1">Maximum Map Zoom Level: </strong>
+          </div>
+          <div class="col-auto">
+            <div class="mb-0">{{facility?.maxMapZoom}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <strong class="me-1">Visible on Map: </strong>
+          </div>
+          <div class="col-auto">
+            <div
+              class="mb-0"
+              [ngClass]="{'text-primary': facility?.isVisible, 'text-secondary': !facility?.isVisible}"
+            >{{facility?.isVisible}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Map</h4>
+      <div
+        class="border rounded-5 overflow-hidden"
+        [style.height]="'400px'"
+      >
+        <app-map
+          #mapComponent
+          [_markers]="_markers"
+        ></app-map>
+      </div>
+    </div>
+  </div>
+</section>
+<hr />
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Metadata</h4>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Schema: </strong>
+        </div>
+        <div class="col-auto">
+          <div class="badge bg-primary d-flex align-items-center rounded-pill px-2">
+            <i class="fa-solid fa-map-location-dot me-1"></i>
+            <div class="mb-0">{{facility?.schema | uppercase}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">ORCS: </strong>
+        </div>
+        <div class="col-auto">
+          <div class="badge bg-light text-dark border d-flex align-items-center rounded-pill px-2">
+            <div
+              *ngIf="facility?.orcs"
+              class="mb-0"
+            >{{facility?.orcs}}</div>
+            <div
+              *ngIf="!facility?.orcs"
+              class="mb-0"
+            >&lt;No ORCS&gt;</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Facility ID: </strong>
+        </div>
+        <div class="col-auto">
+          <div class="badge bg-primary d-flex align-items-center rounded-pill px-2">
+            <div class="mb-0">{{facility?.facilityId}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Show on Map?: </strong>
+        </div>
+        <div class="col-auto">
+          <div class="text-primary">
+            <div class="mb-0">{{facility?.showOnMap}}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Raw Data</h4>
+      <pre>{{stringifyData(facility)}}</pre>
+    </div>
+  </div>
+</section>
+
+<ng-template
+  #typeBadge
+  let-type="type"
+  let-isSubtype="isSubtype"
+>
+  <div
+    class="badge d-flex align-items-center rounded-pill px-2"
+    [class.bg-secondary]="!isSubtype"
+    [class.bg-info]="isSubtype"
+    [class.text-dark]="isSubtype"
+  >
+    <i
+      [ngClass]="type?.iconClass"
+      class="me-1"
+    ></i>
+    <span>{{type?.display}}</span>
+  </div>
+</ng-template>
