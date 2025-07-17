@@ -243,7 +243,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
 
   getFacilitySubTypeOptions() {
     const facilityType = this.form.get('filters.facilityType').value;
-    return this.facilitySubTypeOptions[facilityType] || [];
+    return Object.entries(Constants.facilityTypes[facilityType].subtypes);
   }
 
   getActivitySubTypeOptions() {
@@ -313,13 +313,13 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     }
     if (data?.facilityType) {
       if (data?.facilitySubType) {
-        const subType = this.facilitySubTypeOptions[data.facilityType].find(f => f.value === data.facilitySubType);
-        if (subType?.icon) {
-          return subType.icon;
+        const subType = Constants.facilityTypes[data?.facilityType]?.subTypes?.[data.facilitySubType]
+        if (subType?.iconClass) {
+          return subType.iconClass;
         }
       }
       // If no subType icon found, return the main facility type icon
-      return this.facilityTypeOptions.find(f => f.value === data.facilityType)?.icon || this.markerSchemaOptions.default.icon;
+      return Constants.facilityTypes[data?.facilityType]?.iconClass || this.markerSchemaOptions.default.icon;
     }
     return this.markerSchemaOptions.default.icon;
   }

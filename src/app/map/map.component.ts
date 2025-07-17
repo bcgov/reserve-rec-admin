@@ -15,6 +15,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   @Input() hideObjectsOutsideZoom = false; // Whether to hide objects outside the current zoom
   //level
   @Input() showGrips = true; // Whether to show grips for polygons
+  @Input() offsetPadding = false; // eccentric Padding for the map overlay
 
   @Output() markersChange = new EventEmitter<any[]>();
   @Output() gripsChange = new EventEmitter<any[]>();
@@ -28,7 +29,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   public layerArray: any[] = []; // Array to hold layer data
   public isMapLoaded = false;
   public mapStdPadding = 75; // Standard padding for the map
-  public mapOverlayPadding = 300; // Padding for the overlay
+  public mapOverlayPadding = this.mapStdPadding; // Padding for the map overlay
 
   constructor() {
     // Effect to watch for changes in markers signal
@@ -234,9 +235,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   setOverlayPadding() {
     const width = this.mapContainer?.nativeElement?.clientWidth;
-    if (width) {
+    if (width && this.offsetPadding) {
       const padding = (width / 3) + this.mapStdPadding;
-      this.mapOverlayPadding = padding;
+      this.mapOverlayPadding = padding; // Update the overlay padding
+    } else {
+      this.mapOverlayPadding = this.mapStdPadding; // Reset to standard padding if no width or offsetPadding is false
     }
   }
 

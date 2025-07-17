@@ -1,6 +1,11 @@
 <section class="mx-5 py-5 h-100">
   <div class="col h-100 d-flex flex-column ">
-    <h3>Inventory Management</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>Inventory Management</h3>
+      <button class="btn btn-success" (click)="createNewInventory()">
+        <i class="fa fa-plus"></i> Create New Inventory
+      </button>
+    </div>
     <div class="flex-grow-1">
       <app-inventory-search></app-inventory-search>
     </div>

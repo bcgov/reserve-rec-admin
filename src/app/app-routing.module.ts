@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { ProtectedAreasResolver } from './resolvers/protected-areas.resolver';
+import { FacilityResolver } from './resolvers/facility.resolver';
 
 export const routes: Routes = [
   {
@@ -69,6 +70,24 @@ export const routes: Routes = [
       {
         path: 'edit',
         loadComponent: () => import('./inventory/geozone/geozone-edit/geozone-edit.component').then(mod => mod.GeozoneEditComponent),
+        canActivate: [UserGuard],
+      }
+    ]
+  },
+  {
+    path: 'inventory/facility/:fcCollectionId/:facilityType/:facilityId',
+    loadComponent: () => import('./inventory/facility/facility.component').then(mod => mod.FacilityComponent),
+    canActivate: [UserGuard],
+    resolve: { facility: FacilityResolver },
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./inventory/facility/facility-details/facility-details.component').then(mod => mod.FacilityDetailsComponent),
+        canActivate: [UserGuard],
+      },
+      {
+        path: 'edit',
+        loadComponent: () => import('./inventory/facility/facility-edit/facility-edit.component').then(mod => mod.FacilityEditComponent),
         canActivate: [UserGuard],
       }
     ]
