@@ -1,14 +1,13 @@
 <div *ngIf="loadingService?.loading()">
   <app-loadal #loadal></app-loadal>
 </div>
-
 <section #collectionIdSection>
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <div class="d-flex align-items-center mb-5">
-      <h5 class="text-center me-2 my-0">Step 1: Select Collection ID</h5>
+      <h5 class="text-center me-2 my-0">Step 1: Select Partition Information</h5>
       <a
         class="p-0"
-        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-collections"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#facility-collections"
         target="_blank"
         noreferrer
         noopener
@@ -19,21 +18,52 @@
       </a>
     </div>
     <div class="text-center mb-2">
-      Enter the <strong>Collection ID</strong> for the geozone. A <strong>Collection ID</strong> is an
+      Enter the <strong>Collection ID</strong> and <strong>Facility Type</strong> of the facility.
+    </div>
+    <div class="mb-2">
+      A <strong>Collection ID</strong> is an
       identifier that differentiates groups of geozones, activities, and facilities within the system based on their
       purpose, ownership, or intended audience.
     </div>
     <div class="mb-2">
-      Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.
+      A <strong>Facility Type</strong> is a classification that describes the nature of the facility, such as whether it
+      is a natural feature or man-made structure.
     </div>
-    <ngds-text-input
-      [control]="form.get('gzCollectionId')"
-      [label]="'Collection ID'"
-      [placeholder]="'Enter Collection ID'"
-      [resetButton]="true"
-      [disabled]="geozone?.gzCollectionId"
-    >
-    </ngds-text-input>
+
+    <div class="mb-2">
+      Make sure the <strong>Collection ID</strong> and <strong>Facility Type</strong> are correct, as they cannot be
+      changed later.
+    </div>
+    <div class="row">
+      <div class="col">
+        <ngds-text-input
+          [control]="form.get('fcCollectionId')"
+          [label]="'Collection ID'"
+          [placeholder]="'Enter Collection ID'"
+          [resetButton]="true"
+          [disabled]="facility?.fcCollectionId"
+        >
+        </ngds-text-input>
+      </div>
+      <div class="col">
+        <ngds-typeahead-input
+          [control]="form.get('facilityType')"
+          [label]="'Facility Type'"
+          [selectionListItems]="facilityTypes"
+          [placeholder]="'Enter Facility Type'"
+          [disabled]="facility?.facilityType"
+        >
+          <button
+            ngdsInputAppend
+            class="btn btn-light"
+            [disabled]="loadingService?.loading() || !form.get('facilityType').enabled"
+            (click)="form.reset()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </ngds-typeahead-input>
+      </div>
+    </div>
   </div>
 </section>
 <hr>
@@ -43,7 +73,7 @@
       <h5 class="text-center me-2 my-0">Step 2: Complete Mandatory Fields</h5>
       <a
         class="p-0"
-        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-properties"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#facility-properties"
         target="_blank"
         noreferrer
         noopener
@@ -54,29 +84,28 @@
       </a>
     </div>
     <div class="text-center mb-2">
-      Complete the mandatory fields for the geozone. These fields are required to ensure that the
-      geozone is properly defined and can be used within the system.
+      Complete the mandatory fields for the facility. These fields are required to ensure that the
+      facility is properly defined and can be used within the system.
     </div>
     <div class="row w-100">
       <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
         <ngds-text-input
           class="mb-4"
-          [control]="form.get('mandatoryFields.displayName')"
+          [control]="form.get('displayName')"
           [label]="'Display name'"
-          [placeholder]="'Type a display name for the geozone'"
+          [placeholder]="'Type a display name for the facility'"
           [resetButton]="true"
         >
         </ngds-text-input>
         <div class="mb-4">
           <strong>Location</strong>:
           Use the <i class="fa-solid fa-location-dot"></i> pin on the map to select the geospatial location of the
-          geozone. The location could be the approximate centroid
-          of the geozone or a specific point within it. You can also manually enter the latitude and longitude
+          facility. You can also manually enter the latitude and longitude
           coordinates.
           <div class="row mb-2">
             <div class="col">
               <ngds-number-input
-                [control]="form.get('mandatoryFields.location.latitude')"
+                [control]="form.get('location.latitude')"
                 [label]="'Latitude'"
                 [placeholder]="'Enter latitude'"
                 [resetButton]="true"
@@ -85,7 +114,7 @@
             </div>
             <div class="col">
               <ngds-number-input
-                [control]="form.get('mandatoryFields.location.longitude')"
+                [control]="form.get('location.longitude')"
                 [label]="'Longitude'"
                 [placeholder]="'Enter longitude'"
                 [resetButton]="true"
@@ -100,66 +129,15 @@
             Center Map on Location
           </button>
         </div>
-        <div class="mb-4">
-          <strong>Envelope</strong>:
-          Use the <strong>A</strong>, <strong>B</strong> grips on the map to select the geospatial envelope of the
-          geozone. The envelope is the rectangular bounding box
-          that completely contains the geozone. You can also manually enter the latitude and longitude coordinates.
-          <div class="row">
-            <div class="col">
-              <ngds-number-input
-                [control]="form.get('mandatoryFields.envelope.northwest.latitude')"
-                [label]="'Point A Latitude'"
-                [placeholder]="'Enter latitude'"
-                [resetButton]="true"
-              >
-              </ngds-number-input>
-            </div>
-            <div class="col">
-              <ngds-number-input
-                [control]="form.get('mandatoryFields.envelope.northwest.longitude')"
-                [label]="'Point A Longitude'"
-                [placeholder]="'Enter longitude'"
-                [resetButton]="true"
-              >
-              </ngds-number-input>
-            </div>
-          </div>
-          <div class="row mb-2">
-            <div class="col">
-              <ngds-number-input
-                [control]="form.get('mandatoryFields.envelope.southeast.latitude')"
-                [label]="'Point B Latitude'"
-                [placeholder]="'Enter latitude'"
-                [resetButton]="true"
-              >
-              </ngds-number-input>
-            </div>
-            <div class="col">
-              <ngds-number-input
-                [control]="form.get('mandatoryFields.envelope.southeast.longitude')"
-                [label]="'Point B Longitude'"
-                [placeholder]="'Enter longitude'"
-                [resetButton]="true"
-              >
-              </ngds-number-input>
-            </div>
-          </div>
-          <button
-            class="btn btn-secondary mt-2 w-100"
-            (click)="zoomToEnvelopeLimits()"
-          >
-            Zoom to Envelope Limits
-          </button>
-        </div>
         <div class="mb-3">
           <strong>Zoom levels:</strong>
-          Set the maximum and minimum zoom levels for the geozone. The geozone will be visible within these zoom levels
-          on the map.
+          Set the maximum and minimum zoom levels for the facility. The facility will be visible within these zoom
+          levels
+          on maps.
           <div class="row">
             <div class="col">
               <ngds-number-input
-                [control]="form.get('mandatoryFields.minMapZoom')"
+                [control]="form.get('minMapZoom')"
                 [label]="'Minimum Map Zoom Level (furthest out)'"
                 [placeholder]="'Enter zoom level'"
                 [resetButton]="true"
@@ -167,7 +145,7 @@
                 <button
                   ngdsInputAppend
                   class="btn btn-light border-start"
-                  (click)="centerMapOnLocation(form.get('mandatoryFields.minMapZoom').value)"
+                  (click)="centerMapOnLocation(form.get('minMapZoom').value)"
                 >
                   <i class="fa-solid fa-magnifying-glass-minus"></i>
                   <span class="visually-hidden">Zoom to level</span>
@@ -176,7 +154,7 @@
             </div>
             <div class="col">
               <ngds-number-input
-                [control]="form.get('mandatoryFields.maxMapZoom')"
+                [control]="form.get('maxMapZoom')"
                 [label]="'Maximum Map Zoom Level (furthest in)'"
                 [placeholder]="'Enter zoom level'"
                 [resetButton]="true"
@@ -184,7 +162,7 @@
                 <button
                   ngdsInputAppend
                   class="btn btn-light border-start"
-                  (click)="centerMapOnLocation(form.get('mandatoryFields.maxMapZoom').value)"
+                  (click)="centerMapOnLocation(form.get('maxMapZoom').value)"
                 >
                   <i class="fa-solid fa-magnifying-glass-plus"></i>
                   <span class="visually-hidden">Zoom to level</span>
@@ -194,8 +172,8 @@
           </div>
           <div>
             <ngds-toggle-input
-              [control]="form.get('enforceZoomVisibility')"
-              [label]="'Hide geozone outside of zoom levels'"
+              [control]="form.get('meta.enforceZoomVisibility')"
+              [label]="'Hide facility outside of zoom levels'"
               [switch]="true"
             >
             </ngds-toggle-input>
@@ -203,7 +181,7 @@
         </div>
         <div class="mb-3">
           <ngds-picklist-input
-            [control]="form.get('mandatoryFields.timezone')"
+            [control]="form.get('timezone')"
             [label]="'Timezone'"
             [selectionListItems]="timezones"
             [autoSelectFirstItem]="true"
@@ -220,11 +198,9 @@
             <div class="w-100 border rounded-5 h-100 overflow-hidden">
               <app-map
                 #mapComponent
-                [_markers]="_locationMarkers"
-                [_polygons]="_envelopeMarkers"
+                [_markers]="_locationMarker"
                 (markersChange)="updateLocationGeospatial($event)"
-                (gripsChange)="updateEnvelopeGeospatial($event)"
-                [hideObjectsOutsideZoom]="form.get('enforceZoomVisibility').value"
+                [hideObjectsOutsideZoom]="form.get('meta.enforceZoomVisibility').value"
               ></app-map>
             </div>
           </div>
@@ -234,13 +210,53 @@
   </div>
 </section>
 <hr>
+<section #attachActivitiesSection>
+  <div class="d-flex flex-column text-center align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 3: Link Activities</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activities"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <p>
+      Facilities serve as the geospatial context for <strong>activities</strong>. If your facility is intended to host
+      activities, you can
+      search for and link preexisting activities here. You can also choose to complete this step later.
+    </p>
+  </div>
+  <div class="row text-center">
+    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+      <h6>Activities Search</h6>
+      <div class="alert alert-secondary mb-2">
+        <i class="fa-solid fa-info-circle me-1"></i>
+        Coming soon: Search for activities to link to this facility.
+      </div>
+    </div>
+    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+      <h6>Linked Activities</h6>
+      <div class="alert alert-secondary mb-2">
+        <i class="fa-solid fa-info-circle me-1"></i>
+        Coming soon: A list of activities linked to this facility will appear here.
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
 <section #optionalFieldsSection>
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <div class="d-flex align-items-center mb-5">
-      <h5 class="text-center me-2 my-0">Step 3: Complete Optional Fields</h5>
+      <h5 class="text-center me-2 my-0">Step 4: Complete Optional Fields</h5>
       <a
         class="p-0"
-        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#geozone-properties"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#facility-properties"
         target="_blank"
         noreferrer
         noopener
@@ -251,7 +267,7 @@
       </a>
     </div>
     <div class="text-center mb-2">
-      Complete the optional fields for the geozone.
+      Complete the optional fields for the facility.
     </div>
   </div>
   <div class="row">
@@ -259,16 +275,25 @@
       <ngds-toggle-input
         [control]="form.get('isVisible')"
         [switch]="true"
-        [label]="'Toggle public visibility of the geozone. If unchecked, the geozone will not be visible to public users.'"
+        [label]="'Toggle public visibility of the facility. If unchecked, the facility will not be visible to public users.'"
       ></ngds-toggle-input>
       <ngds-text-input
         [control]="form.get('description')"
         [label]="'Description'"
         [multiline]="true"
-        [placeholder]="'Enter a description for the geozone'"
+        [placeholder]="'Enter a description for the facility'"
         [resetButton]="true"
       >
       </ngds-text-input>
+      <ngds-typeahead-input
+        [control]="form.get('facilitySubType')"
+        [label]="'Facility Sub-Type'"
+        [selectionListItems]="facilitySubtypes"
+        [subLabel]="'Facility sub-types options are based on the selected Facility Type.'"
+        [placeholder]="'Enter a sub-type for the facility'"
+        [resetButton]="true"
+      >
+      </ngds-typeahead-input>
       <ngds-number-input
         [control]="form.get('orcs')"
         [label]="'ORCS'"
@@ -311,7 +336,7 @@
           [class.border]="form.get('imageUrl').value"
           width="100%"
           height="auto"
-          alt="No image of {{form.get('mandatoryFields.displayName').value}}"
+          alt="No image of {{form.get('displayName').value}}"
         >
       </div>
     </div>

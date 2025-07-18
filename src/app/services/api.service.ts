@@ -128,13 +128,14 @@ export class ApiService implements OnDestroy {
       // If logged in, append the JWT token to the headers.
       if (this.authService.jwtToken) {
         this.headers = this.headers.append('Authorization', `Bearer ${this.authService.jwtToken}`);
-        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj)
-          .pipe(catchError(this.errorHandler));
       } else {
         this.headers = this.headers.append('Authorization', `guest`);
-        return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
-          .pipe(catchError(this.errorHandler));
+        console.log('calling as guest');
       }
+      return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
+        .pipe(
+          map(response => response?.body),
+          catchError(this.errorHandler));
     } else {
       throw 'Network Offline';
     }

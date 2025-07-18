@@ -12,7 +12,13 @@ export class Constants {
 
   public static readonly timeZoneIANA = 'America/Vancouver';
 
-  public static facilityTypes = {
+  public static readonly facilityTypes = {
+    noType: {
+      display: 'No Type',
+      value: 'noType',
+      iconClass: 'fa-solid fa-location-dot',
+      subTypes: {}
+    },
     campground: {
       display: 'Campground',
       value: 'campground',
@@ -47,8 +53,8 @@ export class Constants {
         parkingLot: { display: 'Parking Lot', value: 'parkingLot', iconClass: 'fa-solid fa-square-parking' },
         boatLaunch: { display: 'Boat Launch', value: 'boatLaunch', iconClass: 'fa-solid fa-sailboat' },
         yurt: { display: 'Yurt', value: 'yurt', iconClass: 'fa-solid fa-tent' },
-    }
-  },
+      }
+    },
     trail: {
       display: 'Trail',
       value: 'trail',
@@ -56,4 +62,10 @@ export class Constants {
       subTypes: {}
     }
   };
+
+  public static readonly timezones = [
+    { value: 'America/Vancouver', display: 'America/Vancouver (Pacific Time, PST/PDT)' },
+    { value: 'America/Edmonton', display: 'America/Edmonton (Mountain Time, MST/MDT)' },
+    { value: 'America/Fort_Nelson', display: 'America/Fort_Nelson (Mountain Time, MST)' }
+  ];
 }

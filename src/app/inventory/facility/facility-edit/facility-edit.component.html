@@ -1,1 +1,20 @@
-<p>facility-edit works!</p>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center">Update {{ facility?.displayName }}</h4>
+  </div>
+</section>
+<hr>
+<app-facility-form
+  (formValue)="updateFacilityForm($event)"
+  >
+</app-facility-form>
+<hr>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Update Facility</h4>
+<button class="btn btn-secondary btn-lg" (click)="submit()" [disabled]="!facilityForm?.valid || !facilityForm?.dirty">
+  <i class="fa-solid fa-pen-to-square me-2"></i>
+  <span>Update {{facility?.displayName}}</span>
+</button>
+  </div>
+</section>

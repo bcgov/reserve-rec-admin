@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FacilityEditComponent } from './facility-edit.component';
+import { FacilityFormComponent } from './facility-form.component';
 import { ConfigService } from '../../../services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideToastr } from 'ngx-toastr';
 import { provideRouter } from '@angular/router';
 
-describe('FacilityEditComponent', () => {
-  let component: FacilityEditComponent;
-  let fixture: ComponentFixture<FacilityEditComponent>;
+describe('FacilityFormComponent', () => {
+  let component: FacilityFormComponent;
+  let fixture: ComponentFixture<FacilityFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FacilityEditComponent],
+      imports: [FacilityFormComponent],
       providers: [
         ConfigService,
         provideHttpClient(),
@@ -22,9 +22,9 @@ describe('FacilityEditComponent', () => {
         provideRouter([])
       ]
     })
-      .compileComponents();
+    .compileComponents();
 
-    fixture = TestBed.createComponent(FacilityEditComponent);
+    fixture = TestBed.createComponent(FacilityFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,1 +1,23 @@
-<p>facility-create works!</p>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Facility</h4>
+    <div class="text-center mb-3">
+      Facilities are specific geospatial locations defined by a latitude and longitude and can represent the location of campgrounds, trails, structures, natural features, and other amenities.
+    </div>
+  </div>
+</section>
+<hr>
+<app-facility-form
+  (formValue)="updateFacilityForm($event)"
+  >
+</app-facility-form>
+<hr>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Facility</h4>
+<button class="btn btn-success btn-lg" (click)="submit()">
+  <i class="fa-solid fa-plus me-2"></i>
+  <span>Create Facility</span>
+</button>
+  </div>
+</section>

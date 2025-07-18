@@ -7,6 +7,7 @@ import { MapComponent } from '../../../map/map.component';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
+import { Constants } from '../../../app.constants';
 
 @Component({
   selector: 'app-geozone-form',
@@ -64,11 +65,7 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
     }
   };
 
-  public timezones = [
-    { value: 'America/Vancouver', display: 'America/Vancouver (Pacific Time, PST/PDT)' },
-    { value: 'America/Edmonton', display: 'America/Edmonton (Mountain Time, MST/MDT)' },
-    { value: 'America/Fort_Nelson', display: 'America/Fort_Nelson (Mountain Time, MST)' }
-  ];
+  public timezones = Constants.timezones;
 
   constructor(
     protected cdr: ChangeDetectorRef,

@@ -191,7 +191,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   clearMap() {
-    console.log('Clearing map markers and polygons');
     this.markerArray.forEach(marker => marker.remove());
     this.polygonArray?.forEach(polygon => {
       this.map.removeLayer(polygon?.id);
@@ -229,7 +228,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         bottom: this.mapStdPadding,
         left: this.mapOverlayPadding,
         right: this.mapStdPadding
-      }
+      },
+      essential: true
     });
   }
 

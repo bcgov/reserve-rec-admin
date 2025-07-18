@@ -12,7 +12,7 @@ import { MapMarkerComponent } from './map-marker/map-marker.component';
 
 @Component({
   selector: 'app-inventory-search',
-  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, MapComponent, MapMarkerComponent],
+  imports: [CommonModule, NgdsFormsModule, SearchResultsTableComponent, MapComponent],
   templateUrl: './inventory-search.component.html',
   styleUrl: './inventory-search.component.scss'
 })
