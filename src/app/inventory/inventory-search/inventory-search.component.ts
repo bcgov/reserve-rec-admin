@@ -85,32 +85,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     trail: []
   };
 
-  public activityTypeOptions = [
-    { display: 'Backcountry Camping', value: 'backcountryCamp' },
-    { display: 'Frontcountry Camping', value: 'frontcountryCamp' },
-    { display: 'Day Use', value: 'dayUse' },
-    { display: 'Boating', value: 'boating' },
-    { display: 'Canoe Circuit', value: 'canoeCircuit' },
-  ];
-
-  public activitySubTypeOptions = {
-    backcountryCamping: [
-      { display: 'Passport', value: 'passport' },
-      { display: 'Reservation', value: 'reservation' },
-      { display: 'Group', value: 'group' },
-    ],
-    frontcountryCamping: [],
-    dayUse: [
-      { display: 'Parking', value: 'parking' },
-      { display: 'Trail Access', value: 'trailAccess' },
-      { display: 'Picnic Shelter', value: 'picnicShelter' },
-    ],
-    boating: [],
-    canoeCircuit: [
-      { display: 'Full Circuit', value: 'fullCircuit' },
-      { display: 'Partial Circuit', value: 'partialCircuit' },
-    ]
-  };
+  public activityTypeOptions = Object.values(Constants.activityTypes);
 
   constructor(
     protected searchService: SearchService,
@@ -248,7 +223,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
 
   getActivitySubTypeOptions() {
     const activityType = this.form.get('filters.activityType').value;
-    return this.activitySubTypeOptions[activityType] || [];
+    return Object.entries(Constants.activityTypes[activityType]?.subTypes || {}).map(([key, value]) => value);
   }
 
   async search() {

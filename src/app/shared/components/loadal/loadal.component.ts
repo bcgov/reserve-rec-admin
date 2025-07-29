@@ -18,9 +18,12 @@ export class LoadalComponent implements AfterViewInit, OnDestroy{
   }
 
   ngAfterViewInit(): void {
-    this.loadal = new bootstrap.Modal('#loadal');
-    this.show();
+  if (this.loadalElement?.nativeElement) {
+    this.loadal = new bootstrap.Modal(this.loadalElement.nativeElement);
+  } else {
+    console.error('Loadal element not found');
   }
+}
 
   show() {
     this.loadal?.show();

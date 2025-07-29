@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
+import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
 import { ProtectedAreasResolver } from './resolvers/protected-areas.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
+import { ActivityResolver } from './resolvers/activity.resolver';
 
 export const routes: Routes = [
   {
@@ -52,7 +54,8 @@ export const routes: Routes = [
       },
       {
         path: 'activity',
-        loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent),
+        resolve: { protectedAreas: ProtectedAreasResolver }
       },
     ],
   },
@@ -93,6 +96,25 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'inventory/activity/:acCollectionId/:activityType/:activityId',
+    loadComponent: () => import('./inventory/activity/activity.component').then(mod => mod.ActivityComponent),
+    canActivate: [UserGuard],
+    resolve: { activity: ActivityResolver },
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./inventory/activity/activity-details/activity-details.component').then(mod => mod.ActivityDetailsComponent),
+        canActivate: [UserGuard],
+      },
+      {
+        path: 'edit',
+        loadComponent: () => import('./inventory/activity/activity-edit/activity-edit.component').then(mod => mod.ActivityEditComponent),
+        canActivate: [UserGuard],
+      }
+    ]
+  },
+  {
     path: 'reports',
     loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent),
     canActivate: [UserGuard]
@@ -103,20 +125,15 @@ export const routes: Routes = [
     canActivate: [UserGuard]
   },
   {
-    path: 'inventory/protected-area',
-    loadComponent: () => import('./inventory/protected-area/protected-area.component').then(mod => mod.ProtectedAreaComponent),
-    canActivate: [UserGuard]
-  },
-  {
     path: 'inventory/protected-area/:orcs',
     loadComponent: () => import('./inventory/protected-area/protected-area-details/protected-area-details.component').then(mod => mod.ProtectedAreaDetailsComponent),
     canActivate: [UserGuard],
-    resolve: { protectedArea: ProtectedAreasResolver }
+    resolve: { protectedArea: ProtectedAreaResolver }
   },
   {
     path: 'inventory/protected-area/:orcs/edit',
     loadComponent: () => import('./inventory/protected-area/protected-area-edit/protected-area-edit.component').then(mod => mod.ProtectedAreaEditComponent),
     canActivate: [UserGuard],
-    resolve: { protectedArea: ProtectedAreasResolver }
+    resolve: { protectedArea: ProtectedAreaResolver }
   },
 ];

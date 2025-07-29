@@ -1,0 +1,32 @@
+// Activity Form Component Styles
+// Inherits styles from parent components and global styles
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.sticky-map {
+  position: sticky;
+  top: 2rem;
+}
+
+.map-container {
+  height: 400px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.alert {
+  margin-top: 1rem;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .sticky-map {
+    position: static;
+  }
+  
+  .map-container {
+    height: 300px;
+  }
+}

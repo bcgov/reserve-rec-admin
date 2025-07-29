@@ -1,0 +1,202 @@
+<section class="container pt-5 pb-4">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Summary</h4>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Display Name: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{activity?.displayName}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Activity Type: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getActivityTypeOption(), isSubtype: false }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">SubType: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getActivitySubTypeOption(), isSubtype: true }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Latest version: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{activity?.version || 'No version available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Collection ID: </strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-secondary">{{activity?.acCollectionId || 'No ID available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Visible: </strong>
+        </div>
+        <div class="col-auto">
+          <div
+            class="mb-0"
+            [ngClass]="{'text-primary': activity?.isVisible, 'text-secondary': !activity?.isVisible}"
+          >
+            <span *ngIf="activity?.isVisible; else notVisible"><i class="fa-solid fa-eye me-1"></i> {{activity?.isVisible }}</span>
+            <ng-template #notVisible><i class="fa-solid fa-eye-slash me-1"></i> {{activity?.isVisible || false}}</ng-template>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Created at: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{activity?.creationDate | date:'medium'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Last Updated: </strong>
+        </div>
+        <div class="col-auto">
+
+          <span>{{activity?.lastUpdated | date:'medium'}}</span>
+        </div>
+      </div>
+      <h6 class="mt-3">Description</h6>
+      <p>{{activity?.description || 'No description available.'}}</p>
+      <h6 class="mt-3">Search Terms</h6>
+      <p>{{activity?.searchTerms || 'No search terms available.'}}</p>
+      <h6 class="mt-3">Admin Notes</h6>
+      <p>{{activity?.adminNotes || 'No adminNotes available.'}}</p>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Images</h4>
+      <img
+        *ngIf="activity?.imageUrl"
+        [src]="activity?.imageUrl"
+        alt="{{activity?.displayName}} image"
+        class="img-fluid rounded"
+      />
+    </div>
+  </div>
+</section>
+
+<hr>
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Facilities Details</h4>
+      <div class="mb-2">
+        <div class="row">
+          <div class="col-auto">
+            <strong class="me-1">Facility Name: </strong>
+          </div>
+          <div class="col">
+            <span>{{facility || 'No facility name available.'}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Geospatial Details</h4>
+      <div *ngIf="activity?.protectedArea; else noGeozone">
+        <div class="mb-2">
+          <div class="row">
+            <div class="col-auto">
+              <strong class="me-1">Location: </strong>
+            </div>
+            <div class="col">
+              <span>{{location?.coordinates[1] || 'Invalid latitude.'}}, {{location?.coordinates[0] || 'Invalid longitude'}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="mb-2">
+          <div class="row">
+            <div class="col-auto">
+              <strong class="me-1">Envelope: </strong>
+            </div>
+            <div class="col">
+              <div *ngFor="let coord of envelope?.coordinates">{{coord[1] || 'Invalid latitude.'}}, {{coord[0] ||
+                'Invalid longitude'}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noGeozone>
+        <div class="alert alert-warning" role="alert">
+          No geozone assigned to this activity.
+        </div>
+      </ng-template>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Map</h4>
+      <div class="border rounded-5 overflow-hidden">
+        <app-map #mapComponent [_markers]="_markers" [_polygons]="_envelope" [showGrips]="false"></app-map>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Meta activity</h4>
+      <div class="row">
+        <div class="col-3"><strong>Schema:</strong></div>
+        <div class="col-auto">
+          <div class="badge bg-primary d-flex align-items-center rounded-pill px-2">
+            <i class="fa-solid fa-map-location-dot me-1"></i>
+            <div class="mb-0">{{activity?.schema | uppercase}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3"><strong>Activity ID:</strong></div>
+        <div class="col">
+          <div class="badge bg-info text-dark rounded-pill px-2">{{ activity?.activityId }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Raw Data</h4>
+      <pre>{{ stringifyData(activity) }}</pre>
+    </div>
+  </div>
+</section>
+
+<ng-template
+  #typeBadge
+  let-type="type"
+  let-isSubtype="isSubtype"
+>
+  <div
+    class="badge d-flex align-items-center rounded-pill px-2"
+    [class.bg-secondary]="!isSubtype"
+    [class.bg-info]="isSubtype"
+    [class.text-dark]="isSubtype"
+  >
+    <i
+      [ngClass]="type?.iconClass"
+      class="me-1"
+    ></i>
+    <span>{{type?.display}}</span>
+  </div>
+</ng-template>

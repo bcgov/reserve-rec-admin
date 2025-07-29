@@ -4,19 +4,19 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { provideRouter } from '@angular/router';
-import { ConfigService } from '../../../services/config.service';
 import { ActivatedRoute } from '@angular/router';
+import { ConfigService } from '../../../services/config.service';
 import { of } from 'rxjs';
 
-import { ActivityCreateComponent } from './activity-create.component';
+import { ActivityEditComponent } from './activity-edit.component';
 
-describe('ActivityCreateComponent', () => {
-  let component: ActivityCreateComponent;
-  let fixture: ComponentFixture<ActivityCreateComponent>;
+describe('ActivityEditComponent', () => {
+  let component: ActivityEditComponent;
+  let fixture: ComponentFixture<ActivityEditComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityCreateComponent],
+      imports: [ActivityEditComponent],
       providers: [
         ConfigService,
         provideAnimations(),
@@ -28,6 +28,11 @@ describe('ActivityCreateComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             data: of({}),
+            parent: {
+              snapshot: {
+                data: {}
+              }
+            },
             snapshot: {
               data: {}
             }
@@ -37,7 +42,7 @@ describe('ActivityCreateComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityCreateComponent);
+    fixture = TestBed.createComponent(ActivityEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

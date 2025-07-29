@@ -1,1 +1,24 @@
-<p>activity-create works!</p>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Activity</h4>
+    <div class="text-center mb-3">
+      Activities are a specific experience or offering provided by BC Parks at one or many facilities (physical
+      locations).
+    </div>
+  </div>
+</section>
+<hr>
+<app-activity-form
+  (formValue)="updateActivityForm($event)"
+  >
+</app-activity-form>
+<hr>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Activity</h4>
+    <button class="btn btn-success btn-lg" (click)="submit()">
+      <i class="fa-solid fa-plus me-2"></i>
+      <span>Create Activity</span>
+    </button>
+  </div>
+</section>

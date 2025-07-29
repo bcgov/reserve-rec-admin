@@ -21,14 +21,31 @@ export class GeozoneService {
   ) { }
 
   async getGeozone(gzCollectionId, geozoneId) {
+    const queryParams = {};
+    if (geozoneId) {
+      queryParams['geozoneId'] = geozoneId;
+    }
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`geozones/${gzCollectionId}/${geozoneId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`geozones/${gzCollectionId}`, queryParams)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.loggerService.error(error);
+    }
+  }
+  
+  async getGeozoneByCollectionId(gzCollectionId) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.GEOZONES_RESULT);
+      const res = (await lastValueFrom(this.apiService.get(`geozones/${gzCollectionId}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.GEOZONES_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONES_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONES_RESULT);
       this.loggerService.error(error);
     }
   }

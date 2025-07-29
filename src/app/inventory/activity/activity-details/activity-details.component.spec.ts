@@ -4,19 +4,19 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { provideRouter } from '@angular/router';
-import { ConfigService } from '../../../services/config.service';
 import { ActivatedRoute } from '@angular/router';
+import { ConfigService } from '../../../services/config.service';
 import { of } from 'rxjs';
 
-import { ActivityCreateComponent } from './activity-create.component';
+import { ActivityDetailsComponent } from './activity-details.component';
 
-describe('ActivityCreateComponent', () => {
-  let component: ActivityCreateComponent;
-  let fixture: ComponentFixture<ActivityCreateComponent>;
+describe('ActivityDetailsComponent', () => {
+  let component: ActivityDetailsComponent;
+  let fixture: ComponentFixture<ActivityDetailsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityCreateComponent],
+      imports: [ActivityDetailsComponent],
       providers: [
         ConfigService,
         provideAnimations(),
@@ -37,7 +37,7 @@ describe('ActivityCreateComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityCreateComponent);
+    fixture = TestBed.createComponent(ActivityDetailsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

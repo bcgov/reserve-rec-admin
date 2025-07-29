@@ -1,0 +1,7 @@
+.search-terms-input {
+  // Remove white border that appears
+  &.ng-untouched {
+    border-color: #ced4da;
+    box-shadow: none;
+  }
+}

@@ -36,6 +36,19 @@ export class FacilityService {
     }
   }
 
+  async getFacilitiesByCollectionId(fcCollectionId) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.FACILITIES_RESULT);
+      const res = (await lastValueFrom(this.apiService.get(`facilities/${fcCollectionId}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.FACILITIES_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITIES_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITIES_RESULT);
+      this.loggerService.error(error);
+    }
+  }
+
   async createFacility(fcCollectionId, facilityType, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);

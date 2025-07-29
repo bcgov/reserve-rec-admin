@@ -17,8 +17,8 @@ export class ProtectedAreaDetailsComponent  {
     protected router: Router
   ) {
     this.route.data.subscribe((data) => {
-      if (data?.['protectedArea']?.data) {
-        this._protectedAreaDataSignal.set(data['protectedArea'].data);
+      if (data?.['protectedArea']) {
+        this._protectedAreaDataSignal.set(data['protectedArea']);
       }
     })
     effect(() => {

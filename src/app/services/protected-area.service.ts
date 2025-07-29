@@ -25,17 +25,30 @@ export class ProtectedAreaService {
     searchTerms: { type: 'string', required: false }
   };
 
-  async getProtectedAreaByOrcs(orcs: string) {
+  async getProtectedAreas() {
     try {
-      this.dataService.clearItemValue(Constants.dataIds.PROTECTED_AREAS_RESULTS);
-      this.loadingService.addToFetchList(Constants.dataIds.PROTECTED_AREAS_RESULTS);
-      const res = await lastValueFrom(this.apiService.get(`protected-areas/${orcs}`));
-      this.dataService.setItemValue(Constants.dataIds.PROTECTED_AREAS_RESULTS, res);
-      this.dataService.setItemValue(Constants.dataIds.CURRENT_PROTECTED_AREA, res);
-      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREAS_RESULTS);
+      this.loadingService.addToFetchList(Constants.dataIds.PROTECTED_AREAS_RESULT);
+      const res = await lastValueFrom(this.apiService.get('protected-areas'));
+      this.dataService.setItemValue(Constants.dataIds.PROTECTED_AREAS_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREAS_RESULT);
       return res;
     } catch (error) {
-      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREAS_RESULTS);
+      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREAS_RESULT);
+      this.loggerService.error(error);
+      throw error; // Re-throw the error for further handling if needed
+    }
+  }
+
+  async getProtectedAreaByOrcs(orcs: string) {
+    try {
+      this.dataService.clearItemValue(Constants.dataIds.PROTECTED_AREA_RESULT);
+      this.loadingService.addToFetchList(Constants.dataIds.PROTECTED_AREA_RESULT);
+      const res = (await lastValueFrom(this.apiService.get(`protected-areas/${orcs}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.PROTECTED_AREA_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREA_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PROTECTED_AREA_RESULT);
       this.loggerService.error(error);
       throw error; // Re-throw the error for further handling if needed
     }
@@ -114,21 +127,6 @@ export class ProtectedAreaService {
     delete obj?.orcs;
 
     return obj;
-  }
-    
-
-  // Get current park, key is stored in DataService
-  getCurrentProtectedArea() {
-    const key = this.dataService.getItemValue(Constants.dataIds.CURRENT_PROTECTED_AREA);
-    if (key && key.sk) {
-      return this.getCachedProtectedArea(key)
-    }
-    return null;
-  }
-
-  // Get park from cache using provided key
-  getCachedProtectedArea(key) {
-    return this.dataService.getItemValue(Constants.dataIds.PROTECTED_AREAS_LIST)[key?.sk] || null;
   }
 }
 
