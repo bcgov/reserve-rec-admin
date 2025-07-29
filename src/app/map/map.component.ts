@@ -34,6 +34,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   constructor() {
     // Effect to watch for changes in markers signal
     effect(() => {
+      const markers = this._markers();
+      const polygons = this._polygons();
       if (this.isMapLoaded) {
         this.updateMap();
       }

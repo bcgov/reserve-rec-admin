@@ -1,0 +1,350 @@
+<!-- Loading indicator while data is being fetched -->
+<div *ngIf="loadingService?.loading()">
+  <app-loadal #loadal></app-loadal>
+</div>
+
+<!-- Main form container - only shown when form is initialized -->
+<div *ngIf="form">
+  <!-- STEP 1: Collection ID Selection -->
+  <section #collectionIdSection>
+    <div class="d-flex flex-column align-items-center justify-content-center my-5">
+      <!-- Step 1 header with help link -->
+      <div class="d-flex align-items-center mb-5">
+        <h5 class="text-center me-2 my-0">Step 1: Select Collection ID</h5>
+        <a
+          class="p-0"
+          href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activity-collections"
+          target="_blank"
+          noreferrer
+          noopener
+        >
+          <button class="btn btn-outline-secondary py-0 px-2">
+            <i class="fa-solid fa-question fa-xs"></i>
+          </button>
+        </a>
+      </div>
+      <!-- Collection ID instructions and warnings -->
+      <div class="text-center mb-2">
+        Enter the <strong>Collection ID</strong> for the activity you are creating. A <strong>Collection ID</strong> is an
+        identifier that differentiates groups of activities within the system based on their
+        purpose, ownership, or intended audience.
+      </div>
+      <div class="mb-2">
+        Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.
+      </div>
+      
+      <!-- Collection ID input field -->
+      <ngds-text-input
+        [control]="form.get('acCollectionId')"
+        [label]="'Collection ID'"
+        [placeholder]="'Enter Collection ID'"
+        [resetButton]="true"
+        [disabled]="activity?.acCollectionId"
+      >
+      </ngds-text-input>
+    </div>
+  </section>
+  
+  <hr>
+  
+  <!-- STEP 2: Mandatory Fields -->
+  <section #mandatoryFieldsSection>
+    <div class="d-flex flex-column align-items-center justify-content-center my-5">
+      <!-- Step 2 header with help link -->
+      <div class="d-flex align-items-center mb-5">
+        <h5 class="text-center me-2 my-0">Step 2: Complete Mandatory Fields</h5>
+        <a
+          class="p-0"
+          href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activity-properties"
+          target="_blank"
+          noreferrer
+          noopener
+        >
+          <button class="btn btn-outline-secondary py-0 px-2">
+            <i class="fa-solid fa-question fa-xs"></i>
+          </button>
+        </a>
+      </div>
+      
+      <!-- Step 2 instructions -->
+      <div class="text-center mb-2">
+        Complete the mandatory fields for the activity you are creating. These fields are required to ensure that the
+        activity is properly defined and can be used within the system.
+      </div>
+      
+      <!-- Protected Area field -->
+      <div class="row w-100">
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <!-- Existing activity - show as picklist -->
+          <div *ngIf="activity?.protectedArea; else createProtectedArea">
+            <ngds-text-input
+              [control]="form.get('protectedArea')"
+              [label]="'Protected Area'"
+              [selectionListItems]="protectedAreas"
+              [placeholder]="'Select a protected area'"
+              [resetButton]="true"
+              [disabled]="true"
+            >
+            </ngds-text-input>
+          </div>
+          <!-- New activity - show typeahead for selection -->
+          <ng-template #createProtectedArea>
+            <ngds-typeahead-input
+              [control]="form.get('protectedArea')"
+              [label]="'Protected Area'"
+              [selectionListItems]="protectedAreas"
+              [placeholder]="'Select a protected area'"
+              [resetButton]="true"
+              [disabled]="!form.get('acCollectionId').value"
+            >
+            </ngds-typeahead-input>
+          </ng-template>
+        </div>
+      </div>
+      
+      <!-- ORCS field (auto-populated from Protected Area) -->
+      <div class="row w-100">
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <ngds-number-input
+            [control]="form.get('orcs')"
+            [label]="'ORCS'"
+            [placeholder]="'Enter ORCS for the activity'"
+            [resetButton]="true"
+            [disabled]="true"
+          >
+          </ngds-number-input>
+        </div>
+      </div>
+      
+      <!-- Facility field -->
+      <div class="row w-100">
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <!-- Existing activity with facilities -->
+          <div *ngIf="activity?.facilities">
+            <ngds-picklist-input
+              [control]="form.get('facility')"
+              [label]="'Facility'"
+              [selectionListItems]="facilities"
+              [placeholder]="'Select a facility'"
+              [resetButton]="true"
+            >
+            </ngds-picklist-input>
+          </div>
+          
+          <!-- New activity with available facilities -->
+          <div *ngIf="!activity?.facilities && protectedAreas && facilities[0]?.label !== null">
+            <ngds-typeahead-input
+              [control]="form.get('facility')"
+              [label]="'Facility'"
+              [selectionListItems]="facilities"
+              [placeholder]="'Select a facility'"
+              (valueChange)="updateFacility()"
+              [resetButton]="true"
+              [disabled]="!form.get('orcs').value"
+            >
+            </ngds-typeahead-input>
+          </div>
+          
+          <!-- No facilities available - show create facility prompt -->
+          <div *ngIf="!activity?.facilities && (!protectedAreas || facilities[0]?.label === null)" class="alert alert-warning mt-3">
+            No facilities found for the selected Protected Area. Please create a facility first.
+            <br>
+            <button
+              class="btn btn-primary btn-sm mt-2"
+              (click)="navigateCreateFacility()">Create facility</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Display Name field -->
+      <div class="row w-100">
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <ngds-text-input
+            [control]="form.get('displayName')"
+            [label]="'Display name'"
+            [placeholder]="'Type a display name for the activity'"
+            [resetButton]="true"
+          >
+          </ngds-text-input>
+        </div>
+      </div>
+      
+      <!-- Activity Type field -->
+      <div class="row w-100">
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <ngds-picklist-input
+              [control]="form.get('activityType')"
+              [label]="'Activity'"
+              [selectionListItems]="activityTypes"
+              (valueChange)="updateFilteredActivitySubTypes()"
+              [placeholder]="'Select an activity'"
+              [resetButton]="true"
+              [disabled]="this.activity?.activityType"
+            >
+            </ngds-picklist-input>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <hr>
+  
+  <!-- STEP 3: Optional Fields -->
+  <section #optionalFieldsSection>
+    <div class="d-flex flex-column align-items-center justify-content-center my-5">
+      <!-- Step 3 header with help link -->
+      <div class="d-flex align-items-center mb-5">
+        <h5 class="text-center me-2 my-0">Step 3: Complete Optional Fields</h5>
+        <a
+          class="p-0"
+          href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activity-properties"
+          target="_blank"
+          noreferrer
+          noopener
+        >
+          <button class="btn btn-outline-secondary py-0 px-2">
+            <i class="fa-solid fa-question fa-xs"></i>
+          </button>
+        </a>
+      </div>
+      
+      <!-- Step 3 instructions -->
+      <div class="text-center mb-2">
+        Complete the optional fields for the activity you are creating.
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- Left column - Form fields -->
+      <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+        <!-- Activity Sub Type (hidden for group camps) -->
+        <div *ngIf="form.get('activityType')?.value !== 'groupCamp'">
+          <ngds-picklist-input
+            [control]="form.get('activitySubType')"
+            [label]="'Activity Sub Type'"
+            [selectionListItems]="activitySubTypes"
+            [placeholder]="'Select an activity sub type'"
+            [resetButton]="true"
+          >
+        </ngds-picklist-input>
+        </div>
+      
+        <!-- Existing activity with geozones -->
+        <div *ngIf="activity?.geozones">
+          <ngds-picklist-input
+            [control]="form.get('geozone')"
+            [label]="'Geozone'"
+            [selectionListItems]="geozones"
+            [placeholder]="'Select a geozone'"
+            (valueChange)="updateCurrentMapMarker()"
+            [resetButton]="true"
+          >
+          </ngds-picklist-input>
+        </div>
+        
+        <!-- New activity with available geozones -->
+        <div *ngIf="!activity?.geozones && protectedAreas && geozones[0]?.label !== null">
+          <ngds-typeahead-input
+            [control]="form.get('geozone')"
+            [label]="'Geozone'"
+            [selectionListItems]="geozones"
+            [placeholder]="'Select a geozone'"
+            (valueChange)="updateCurrentMapMarker()"
+            [resetButton]="true"
+            [disabled]="!form.get('orcs').value"
+          >
+          </ngds-typeahead-input>
+        </div>
+        
+        <!-- No geozones available - show create geozone prompt -->
+        <div *ngIf="!activity?.geozones && (!protectedAreas || geozones[0]?.label === null)" class="alert alert-warning mt-3">
+          No geozones found for this area. Create a geozone for this protected area.
+          <br>
+          <button
+            class="btn btn-primary btn-sm mt-2"
+            (click)="navigateCreateGeozone()">Create geozone</button>
+        </div>
+        
+        <!-- Public visibility toggle -->
+        <ngds-toggle-input
+          [control]="form.get('isVisible')"
+          [switch]="true"
+          [label]="'Toggle public visibility of the activity. If unchecked, the activity will not be visible to public users.'"
+        ></ngds-toggle-input>
+        
+        <!-- Activity description -->
+        <ngds-text-input
+          [control]="form.get('description')"
+          [label]="'Description'"
+          [multiline]="true"
+          [placeholder]="'Enter a description for the activity'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+        
+        <!-- Search terms component -->
+        <app-search-terms
+          #searchTerms
+          [searchTerms]="form.get('searchTerms')?.value || []"
+          (searchTermsChange)="onSearchTermsChange($event)"
+          (searchTermDirty)="onSearchTermDirty()"
+        ></app-search-terms>
+        
+        <!-- Administrative notes -->
+        <ngds-text-input
+          [control]="form.get('adminNotes')"
+          [label]="'Administrative Notes'"
+          [multiline]="true"
+          [placeholder]="'Enter administrative notes'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+      </div>
+      
+      <!-- Center column - Map component -->
+      <div class="col-lg-6 d-flex flex-column text-center justify-content-center align-items-center">
+        <div class="my-2 h-100 w-100">
+          <div class="position-sticky sticky-top mt-2">
+            <h5>Geospatial information</h5>
+            <div class="w-100 border rounded-5 h-100 overflow-hidden">
+              <app-map
+                #mapComponent
+                [_markers]="_locationMarkers"
+                [_polygons]="_envelopeMarkers"
+              ></app-map>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right column - Image preview -->
+      <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+        <!-- Image URL input -->
+        <ngds-text-input
+          [control]="form.get('imageUrl')"
+          [label]="'Image URL'"
+          [placeholder]="'Paste Image URL here'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+        
+        <!-- Image preview container -->
+        <div
+          class="w-100 rounded-5 mt-2 border text-center text-muted d-flex align-items-center justify-content-center"
+          [ngStyle]="{'min-height': form.get('imageUrl').value ? 'auto' : '500px'}"
+        >
+          <img
+            [src]="form.get('imageUrl').value"
+            class="img-fluid rounded-5 p-1"
+            [class.border]="form.get('imageUrl').value"
+            width="100%"
+            height="auto"
+            alt="No image of {{form.get('displayName').value}}"
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <hr>
+</div>

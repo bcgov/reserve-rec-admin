@@ -1,22 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
-import { provideRouter } from '@angular/router';
-import { ConfigService } from '../../../services/config.service';
 import { ActivatedRoute } from '@angular/router';
+import { ConfigService } from '../../services/config.service';
 import { of } from 'rxjs';
 
-import { ActivityCreateComponent } from './activity-create.component';
+import { ActivityComponent } from './activity.component';
 
-describe('ActivityCreateComponent', () => {
-  let component: ActivityCreateComponent;
-  let fixture: ComponentFixture<ActivityCreateComponent>;
+describe('ActivityComponent', () => {
+  let component: ActivityComponent;
+  let fixture: ComponentFixture<ActivityComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityCreateComponent],
+      imports: [ActivityComponent],
       providers: [
         ConfigService,
         provideAnimations(),
@@ -37,7 +37,7 @@ describe('ActivityCreateComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityCreateComponent);
+    fixture = TestBed.createComponent(ActivityComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

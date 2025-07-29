@@ -1,31 +1,30 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { ActivityFormComponent } from '../activity-form/activity-form.component';
 import { ActivityService } from '../../../services/activity.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActivityFormComponent } from '../../activity/activity-form/activity-form.component';
 
 @Component({
-  selector: 'app-activity-create',
+  selector: 'app-activity-edit',
   imports: [ActivityFormComponent],
-  templateUrl: './activity-create.component.html',
-  styleUrl: './activity-create.component.scss'
+  templateUrl: './activity-edit.component.html',
+  styleUrl: './activity-edit.component.scss'
 })
-export class ActivityCreateComponent {
-  public activityForm: UntypedFormGroup;
+export class ActivityEditComponent {
+  public activityForm;
   public activity;
 
   constructor(
     protected activityService: ActivityService,
     protected router: Router,
-    protected cdr: ChangeDetectorRef,
-    protected route: ActivatedRoute
+    protected route: ActivatedRoute,
+    protected cdr: ChangeDetectorRef
   ) {
     if (this.route.parent?.snapshot.data['activity']) {
       this.activity = this.route.parent?.snapshot.data['activity'];
     }
   }
 
-  updateActivityForm(event) {
+    updateActivityForm(event) {
     this.activityForm = event;
   }
 
@@ -33,21 +32,20 @@ export class ActivityCreateComponent {
   async submit(): Promise<void> {
     // For creating new activities, get the values from the form instead of route data
     const acCollectionId = this.activity?.acCollectionId || this.activityForm?.get('acCollectionId')?.value;
-    const orcs = this.activity?.orcs || this.activityForm?.get('orcs')?.value;
+    const activityType = this.activity?.activityType || this.activityForm?.get('activityType')?.value;
+    const activityId = this.activity?.activityId || this.activityForm?.get('activityId')?.value;
 
-    if (!acCollectionId || !orcs) {
+    if (!acCollectionId || !activityType || !activityId) {
       console.error('Missing required collection ID or ORCS values');
       return;
     }
 
     const payload = this.formatFormForSubmission();
 
-    const res = await this.activityService.createActivity(acCollectionId, orcs, payload);
+    const res = await this.activityService.updateActivity(acCollectionId, activityType, activityId, payload);
     // get newly created activityId from response
-    const activityType = res[0]?.data?.activityType;
-    const activityId = res[0]?.data?.activityId;
     if (activityId) {
-      this.navigateToActivity(acCollectionId, orcs, activityType, activityId);
+      this.navigateToActivity(acCollectionId, activityType, activityId);
     }
   }
 
@@ -82,14 +80,16 @@ export class ActivityCreateComponent {
     delete props['facilityPkSk'];
     delete props['protectedArea'];
     delete props['acCollectionId'];
-
+    
     return props;
   }
 
   // Navigate to newly created activity
-  navigateToActivity(collectionId: string, orcs: string, activityType: string, activityId: string): void {
-    this.router.navigate([`/inventory/activity/${collectionId}_${orcs}/${activityType}/${activityId}`]);
-    window.scrollTo(0, 0);
+  navigateToActivity(collectionId, activityType, activityId) {
+    this.router.navigate([`/inventory/activity/${collectionId}/${activityType}/${activityId}`]).then(() => {
+      window.scrollTo(0, 0);
+      this.cdr.detectChanges();
+      // window.location.reload();
+    });
   }
-
 }

@@ -66,6 +66,4 @@ export class FacilityEditComponent {
       window.location.reload();
     });
   }
-
-
 }

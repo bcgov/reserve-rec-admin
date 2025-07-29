@@ -10,9 +10,10 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Utils } from '../../../utils/utils';
 import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ModalRowSpec } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { SearchTermsComponent } from "../../../shared/components/search-terms/search-terms.component";
 @Component({
   selector: 'app-protected-area-edit-component',
-  imports: [CommonModule, NgdsFormsModule, ModalComponent, DatePipe, FormsModule],
+  imports: [CommonModule, NgdsFormsModule, ModalComponent, DatePipe, FormsModule, SearchTermsComponent],
   templateUrl: './protected-area-edit.component.html',
   styleUrls: ['./protected-area-edit.component.scss'],
   providers: [BsModalService]
@@ -31,6 +32,7 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
 
   @ViewChild('protectedAreaEditConfirmationTemplate')
   protectedAreaEditConfirmationTemplate: TemplateRef<any>;
+  @ViewChild('searchTerms', { static: true }) searchTermsComponent!: any;
 
   constructor(
     protected protectedAreaService: ProtectedAreaService,
@@ -40,8 +42,8 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
     private modalService: BsModalService
   ) {
     this.route.data.subscribe((data) => {
-      if (data?.['protectedArea']['data']) {
-        this.protectedArea = data['protectedArea']['data'];
+      if (data?.['protectedArea']) {
+        this.protectedArea = data['protectedArea'];
       }
     });
     this.initForm();
@@ -114,40 +116,9 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
     });
   }
 
-  // Add search terms
-  onSearchTermAdd() {
-    this.searchTermExists = false;
-    this.searchTermSet = this.searchTermSet?.trim();
-    this.searchTermSet = this.searchTermSet?.replace(/\n/g, "");
-
-    if (this.searchTermSet == '' || this.searchTermSet == null) return;
-    const strings = this.searchTermSet?.split(',');
-
-    if (strings.length > 1) {
-      let duplicate = false;
-      strings.forEach((string) => {
-        string = string.trim();
-        if (string && !this.searchTerms.includes(string)) {
-          this.searchTerms.push(string);
-        } else if (string) {
-          duplicate = true;
-        }
-      });
-      this.searchTermExists = duplicate;
-      this.searchTermSet = '';
-      return;
-    } else {
-      if (!this.searchTerms.includes(this.searchTermSet)) {
-        this.searchTerms.push(this.searchTermSet);
-        this.searchTermSet = '';
-      } else {
-        this.searchTermExists = true;
-      }
-    }
-  }
-
-  removeSearchTerm(index: any) {
-    this.searchTerms.splice(index, 1);
+  onSearchTermsChange(searchTerms: string[]): void {
+    this.form.get('protectedAreaSearchTerms')?.setValue(searchTerms);
+    this.cdr.detectChanges();
   }
 
   navigateBack() {

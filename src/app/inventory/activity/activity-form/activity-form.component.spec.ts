@@ -8,15 +8,15 @@ import { ConfigService } from '../../../services/config.service';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
-import { ActivityCreateComponent } from './activity-create.component';
+import { ActivityFormComponent } from './activity-form.component';
 
-describe('ActivityCreateComponent', () => {
-  let component: ActivityCreateComponent;
-  let fixture: ComponentFixture<ActivityCreateComponent>;
+describe('ActivityFormComponent', () => {
+  let component: ActivityFormComponent;
+  let fixture: ComponentFixture<ActivityFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityCreateComponent],
+      imports: [ActivityFormComponent],
       providers: [
         ConfigService,
         provideAnimations(),
@@ -28,6 +28,11 @@ describe('ActivityCreateComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             data: of({}),
+            parent: {
+              snapshot: {
+                data: {}
+              }
+            },
             snapshot: {
               data: {}
             }
@@ -37,7 +42,7 @@ describe('ActivityCreateComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityCreateComponent);
+    fixture = TestBed.createComponent(ActivityFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
