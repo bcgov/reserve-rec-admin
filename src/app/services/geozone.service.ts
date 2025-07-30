@@ -57,7 +57,7 @@ export class GeozoneService {
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
-        `Geozone: ${res[0]?.data?.displayName} created.`,
+        `Geozone: ${res[0]?.data?.displayName} created`,
         '',
         ToastTypes.SUCCESS
       );
@@ -80,7 +80,7 @@ export class GeozoneService {
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
-        `Geozone: ${res.name} updated.`,
+        `Geozone successfully updated`,
         '',
         ToastTypes.SUCCESS
       );
@@ -103,7 +103,7 @@ export class GeozoneService {
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
-        `Geozone successfully deleted.`,
+        `Geozone successfully deleted`,
         '',
         ToastTypes.SUCCESS
       );

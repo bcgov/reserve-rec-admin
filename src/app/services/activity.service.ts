@@ -48,7 +48,7 @@ export class ActivityService {
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(
-        `Activity: ${res[0]?.data?.displayName} created.`,
+        `Activity: ${res[0]?.data?.displayName} created`,
         '',
         ToastTypes.SUCCESS
       );
@@ -71,7 +71,7 @@ export class ActivityService {
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(
-        `Activity edited.`,
+        `Activity successfully updated`,
         '',
         ToastTypes.SUCCESS
       );
@@ -94,7 +94,7 @@ export class ActivityService {
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(
-        `Activity successfully deleted.`,
+        `Activity successfully deleted`,
         '',
         ToastTypes.SUCCESS
       );
