@@ -56,7 +56,7 @@ export class FacilityService {
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
-        `Facility: ${res[0]?.data?.displayName} created.`,
+        `Facility: ${res[0]?.data?.displayName} created`,
         '',
         ToastTypes.SUCCESS
       );
@@ -79,7 +79,7 @@ export class FacilityService {
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
-        `Facility: ${res.name} updated.`,
+        `Facility successfully updated`,
         '',
         ToastTypes.SUCCESS
       );
@@ -102,7 +102,7 @@ export class FacilityService {
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
-        `Facility successfully deleted.`,
+        `Facility successfully deleted`,
         '',
         ToastTypes.SUCCESS
       );
