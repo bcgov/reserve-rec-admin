@@ -28,15 +28,24 @@
           </div>
         </button>
         <button
-          class="btn btn-light"
-          disabled
+        class="btn btn-danger"
+        (click)="onDelete()"
         >
-          <div
-            class="badge bg-light text-dark border d-flex justify-content-between align-items-center rounded-pill px-3"
-          >
-            <h5 class="mb-0">v{{data?.version || '?'}}</h5>
-          </div>
-        </button>
+        <div class="col-auto">
+          <i class="fa-solid fa-trash-can me-1"></i>
+          Delete
+        </div>
+      </button>
+      <button
+        class="btn btn-light"
+        disabled
+      >
+        <div
+          class="badge bg-light text-dark border d-flex justify-content-between align-items-center rounded-pill px-3"
+        >
+          <h5 class="mb-0">v{{data?.version || '?'}}</h5>
+        </div>
+      </button>
       </div>
     </div>
   </div>

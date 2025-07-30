@@ -56,7 +56,7 @@ export class FacilityService {
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
-        `Facility: ${res.name} created.`,
+        `Facility: ${res[0]?.data?.displayName} created.`,
         '',
         ToastTypes.SUCCESS
       );
@@ -95,4 +95,26 @@ export class FacilityService {
     }
   }
 
+  async deleteFacility(fcCollectionId, facilityType, facilityId) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);
+      const res = (await lastValueFrom(this.apiService.delete(`facilities/${fcCollectionId}/${facilityType}/${facilityId}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
+      this.toastService.addMessage(
+        `Facility successfully deleted.`,
+        '',
+        ToastTypes.SUCCESS
+      );
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
+      this.loggerService.error(error);
+      this.toastService.addMessage(
+        `${error}`,
+        `Facility failed to delete`,
+        ToastTypes.ERROR
+      );
+    }
+  }
 }

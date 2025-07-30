@@ -193,6 +193,12 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
       coordinates: [location.longitude, location.latitude],
       options: this.markerOptions
     }]);
+
+    // This items might get skipped but are required in form submission,
+    // mark as dirty to ensure they are included.
+    this.form.get('timezone').markAsDirty();
+    this.form.get('minMapZoom').markAsDirty();
+    this.form.get('maxMapZoom').markAsDirty();
     this.cdr.detectChanges();
   }
 
@@ -214,7 +220,7 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  updateFacilitySubTypeOptions() {
+  updateFacilitySubTypeOptions() {    
     const type = this.form.get('facilityType')?.value;
     this.facilitySubtypes = Object.entries(Constants.facilityTypes?.[type]?.subTypes || {}).map(([key, value]) => value);
   }
