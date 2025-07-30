@@ -30,12 +30,22 @@ export class FacilityCreateComponent {
   }
 
   async submit() {
-    const collectionId = this.facility?.fcCollectionId;
-    const facilityType = this.facility?.facilityType;
-    const facilityId = this.facility?.facilityId;
+    const collectionId = this.facilityForm.get('fcCollectionId').value || this.facility?.fcCollectionId;
+    const facilityType = this.facilityForm.get('facilityType').value || this.facility?.facilityType;
+
+    if (!collectionId || !facilityType) {
+      console.error('Missing required collection ID or facility type');
+      return;
+    }
+
     const props = this.formatFormForSubmission();
-    const res = await this.facilityService.updateFacility(collectionId, facilityType, facilityId, props);
-    this.navigateToFacility(collectionId, facilityType, facilityId);
+    
+    const res = await this.facilityService.createFacility(collectionId, facilityType, props);
+
+    const facilityId = res[0]?.data?.facilityId;
+    if (facilityId) {
+      this.navigateToFacility(collectionId, facilityType, facilityId);
+    }
   }
 
   formatFormForSubmission() {
@@ -55,7 +65,7 @@ export class FacilityCreateComponent {
         coordinates: [location.longitude, location.latitude]
       };
     };
-    delete props['fcCollectionId']; // Remove gzCollectionId from the props
+    delete props['fcCollectionId']; // Remove fcCollectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;
   }

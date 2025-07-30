@@ -129,44 +129,4 @@ export class ActivityDetailsComponent {
       ], { padding: 75 });
     }
   }
-
-  async initiateDelete() {
-    console.log('Delete action initiated for activity:', this.activity);
-    await this.displayConfirmationModal()
-  }
-
-  async displayConfirmationModal() {
-    const details: ModalRowSpec[] = [
-      { label: 'Activity to delete', value: this.activity?.displayName },
-    ];
-
-    // Show the modal with the confirmation details.
-    const modalRef = this.modalService.show(ConfirmationModalComponent, {
-      initialState: {
-        title: 'Confirm Delete Activity',
-        details,
-        confirmText: 'Confirm',
-        cancelText: 'Cancel',
-        confirmClass: 'btn btn-primary',
-        cancelClass: 'btn btn-outline-secondary'
-      }
-    });
-
-    // Listen for confirmation and cancellation events from the modal.
-    const modalContent = modalRef.content as ConfirmationModalComponent;
-    modalContent.confirmButton.subscribe(async () => {
-      const collectionId = this.activity?.pk.split('::')[1];
-      const activityType = this.activity?.sk.split('::')[0];
-      const activityId = this.activity?.sk.split('::')[1];
-      const res = await this.activityService.deleteActivity(collectionId, activityType, activityId)
-      modalRef.hide();
-      if (res) {
-        console.log('Activity deleted successfully:', res);
-        this.router.navigate(['/']);
-      }
-    });
-    modalContent.cancelButton.subscribe(() => {
-      modalRef.hide();
-    });
-  }
 }

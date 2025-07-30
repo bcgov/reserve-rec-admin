@@ -57,7 +57,7 @@ export class GeozoneService {
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
-        `Geozone: ${res.name} created.`,
+        `Geozone: ${res[0]?.data?.displayName} created.`,
         '',
         ToastTypes.SUCCESS
       );
@@ -93,6 +93,29 @@ export class GeozoneService {
       );
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.loggerService.error(error);
+    }
+  }
+
+  async deleteGeozone(gzCollectionId, geozoneId) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
+      const res = (await lastValueFrom(this.apiService.delete(`geozones/${gzCollectionId}/${geozoneId}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.toastService.addMessage(
+        `Geozone successfully deleted.`,
+        '',
+        ToastTypes.SUCCESS
+      );
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
+      this.loggerService.error(error);
+      this.toastService.addMessage(
+        `${error}`,
+        `Geozone failed to delete`,
+        ToastTypes.ERROR
+      );
     }
   }
 }
