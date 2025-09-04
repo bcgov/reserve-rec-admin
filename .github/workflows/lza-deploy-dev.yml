@@ -1,0 +1,92 @@
+name: LZA Deploy Reserve Rec Admin Dev
+
+run-name: Deploying ${{ github.ref_name }} to lzadev
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: lza-deploy-reserve-rec-admin
+  cancel-in-progress: false
+
+env:
+  STACK_NAME: ${{ vars.STACK_NAME }}
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: lzadev
+    strategy:
+      max-parallel: 1
+      matrix:
+        node-version: [20.x]
+    steps:
+      ### Checkout GitHub Repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install AWS CDK
+        run: |
+          yarn
+          yarn global add aws-cdk
+
+      ### Assume AWS IAM Role
+      - name: Get AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      ### CDK Synth
+      - name: CDK Synth
+        run: cdk synth
+
+      ## CDK Deploy
+      - name: CDK Deploy
+        run: |
+          echo "Deploying $STACK_NAME"
+          cdk deploy $STACK_NAME --require-approval never --rollback
+
+      ### Install if no cache exists ###
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          cache-dependency-path: "yarn.lock"
+      - run: yarn install --silent --frozen-lockfile
+
+      ### Build if no cache exists ###
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            **dist
+          key: ${{ github.sha }}-dist
+      - name: Run yarn build
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        env:
+          GH_HASH: ${{ github.sha }}
+        run: |
+          sed 's@localConfigEndpoint@'true'@g' src/env.js.template | sed 's@localGHHash@'"$GH_HASH"'@g' > src/env.js
+          yarn build
+
+      ### Upload dist to S3 ###
+      - name: Deploy to S3
+        env:
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          DIR_NAME: ${{ github.sha }}
+        run: |
+          echo "Deploying to $S3_BUCKET/$DIR_NAME"
+          aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
+          aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
+          aws s3 sync dist s3://$S3_BUCKET/latest
