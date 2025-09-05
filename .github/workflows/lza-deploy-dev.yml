@@ -18,6 +18,7 @@ concurrency:
 env:
   STACK_NAME: ${{ vars.STACK_NAME }}
   S3_BUCKET: ${{ vars.S3_BUCKET }}
+  ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
 jobs:
   deploy:

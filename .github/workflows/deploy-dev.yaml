@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
+  STACK_NAME: ${{ vars.STACK_NAME }}
   S3_BUCKET: ${{ vars.S3_BUCKET }}
   ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
@@ -53,8 +53,8 @@ jobs:
       ## CDK Deploy
       - name: CDK Deploy
         run: |
-          echo "Deploying $ADMIN_STACK_NAME"
-          cdk deploy $ADMIN_STACK_NAME --require-approval never --rollback
+          echo "Deploying $STACK_NAME"
+          cdk deploy $STACK_NAME --require-approval never --rollback
 
       ### Install if no cache exists ###
       - name: Setup node
