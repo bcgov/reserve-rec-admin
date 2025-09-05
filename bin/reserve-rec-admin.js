@@ -11,8 +11,8 @@ new ReserveRecAdminStack(app, 'ReserveRecAdminStack', {
     region: process.env.CDK_DEFAULT_REGION,
 
     // Custom environment variables
-    ENVIRONMENT: process.env.ENVIRONMENT || 'dev',
-    S3_BUCKET_ADMIN: process.env.S3_BUCKET_ADMIN || 'reserve-rec-admin-cdk',
-    API_STAGE: process.env.API_STAGE || 'api',
+    ENVIRONMENT: process.env.ENVIRONMENT,
+    S3_BUCKET: process.env.S3_BUCKET,
+    API_STAGE: process.env.API_STAGE,
   }
 });

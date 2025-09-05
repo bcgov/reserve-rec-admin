@@ -22,7 +22,7 @@ concurrency:
 
 env:
   ADMIN_STACK_NAME: ${{ vars.ADMIN_STACK_NAME }}
-  S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
   ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
 jobs:
@@ -89,13 +89,13 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET_ADMIN: ${{ vars.S3_BUCKET_ADMIN }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
           DIR_NAME: ${{ github.sha }}
         run: |
-          echo "Deploying to $S3_BUCKET_ADMIN/$DIR_NAME"
-          aws s3 sync dist s3://$S3_BUCKET_ADMIN/$DIR_NAME
-          aws s3 rm s3://$S3_BUCKET_ADMIN/ --recursive --exclude "*" --include "latest/*"
-          aws s3 sync dist s3://$S3_BUCKET_ADMIN/latest
+          echo "Deploying to $S3_BUCKET/$DIR_NAME"
+          aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
+          aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
+          aws s3 sync dist s3://$S3_BUCKET/latest
 
       # - name: Invalidate CloudFront
       #   uses: chetan/invalidate-cloudfront-action@v2
