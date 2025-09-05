@@ -4,7 +4,7 @@ const cdk = require('aws-cdk-lib');
 const { ReserveRecAdminStack } = require('../lib/reserve-rec-admin-stack');
 
 const app = new cdk.App();
-new ReserveRecAdminStack(app, 'ReserveRecAdminStack', {
+new ReserveRecAdminStack(app, process.env.STACK_NAME, {
   env: {
     //AWS account variables
     account: process.env.CDK_DEFAULT_ACCOUNT,
