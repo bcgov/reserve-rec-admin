@@ -33,11 +33,11 @@
           <strong>Last Updated:</strong> {{data?.lastUpdated | date:'short'}}
         </div>
         <div
-          *ngIf="data?.gzCollectionId || data?.fcCollectionId || data?.acCollectionId"
+          *ngIf="data?.collectionId || data?.collectionId || data?.collectionId"
           class="mb-2"
         >
           <strong>Collection ID: </strong>
-          <div class="badge bg-secondary">{{data?.gzCollectionId || data?.fcCollectionId || data?.acCollectionId || 'No
+          <div class="badge bg-secondary">{{data?.collectionId || data?.collectionId || data?.collectionId || 'No
             ID available.'}}</div>
         </div>
         <div *ngIf="data?.facilityType">

@@ -49,30 +49,30 @@ export class ActivityComponent implements OnDestroy {
   }
 
   navToEdit() {
-    if (this.data?.acCollectionId && this.data?.activityType && this.data?.activityId) {
-      this.router.navigate([`/inventory/activity/${this.data.acCollectionId}/${this.data.activityType}/${this.data.activityId}/edit`]);
+    if (this.data?.collectionId && this.data?.activityType && this.data?.activityId) {
+      this.router.navigate([`/inventory/activity/${this.data.collectionId}/${this.data.activityType}/${this.data.activityId}/edit`]);
     }
     this.cdr.detectChanges();
   }
 
   navToDelete() {
-    if (this.data?.acCollectionId && this.data?.activityType && this.data?.activityId) {
-      this.router.navigate([`/inventory/activity/${this.data.acCollectionId}/${this.data.activityType}/${this.data.activityId}/delete`]);
+    if (this.data?.collectionId && this.data?.activityType && this.data?.activityId) {
+      this.router.navigate([`/inventory/activity/${this.data.collectionId}/${this.data.activityType}/${this.data.activityId}/delete`]);
     }
     this.cdr.detectChanges();
   }
 
   onDelete() {
-    const acCollectionId = this.data?.acCollectionId;
+    const collectionId = this.data?.collectionId;
     const activityType = this.data?.activityType;
     const activityId = this.data?.activityId;
 
-    this.displayConfirmationModal(acCollectionId, activityType, activityId);
+    this.displayConfirmationModal(collectionId, activityType, activityId);
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with the details of the protected area and its status.
-  displayConfirmationModal(acCollectionId, activityType, activityId) {
+  displayConfirmationModal(collectionId, activityType, activityId) {
     const details: ModalRowSpec[] = [
       { label: 'Activity Name', value: this.data?.displayName },
       { label: 'Activity Type', value: this.getActivityTypeOption()?.display },
@@ -95,7 +95,7 @@ export class ActivityComponent implements OnDestroy {
     // Listen for confirmation and cancellation events from the modal.
     const modalContent = modalRef.content as ConfirmationModalComponent;
     modalContent.confirmButton.subscribe(() => {
-      this.activityService.deleteActivity(acCollectionId, activityType, activityId)
+      this.activityService.deleteActivity(collectionId, activityType, activityId)
       modalRef.hide();
       this.router.navigate(['/inventory']);
     });

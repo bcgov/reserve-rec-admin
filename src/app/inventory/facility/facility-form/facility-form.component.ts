@@ -61,8 +61,8 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
   ngOnInit(): void {
     this.facilityTypes = this.facilityTypes.filter(type => type.value !== 'noType'); // Exclude 'general' type from the list
     this.form = new UntypedFormGroup({
-      fcCollectionId: new UntypedFormControl(
-        this.facility?.fcCollectionId || '',
+      collectionId: new UntypedFormControl(
+        this.facility?.collectionId || '',
         {
           nonNullable: true,
           validators: [Validators.required]

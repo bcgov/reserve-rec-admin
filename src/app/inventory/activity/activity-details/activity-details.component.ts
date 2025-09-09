@@ -53,11 +53,11 @@ export class ActivityDetailsComponent {
   }
 
   async getGeozoneData() {
-    const gzCollectionId = this.activity?.geozone?.pk.split('::')[1];
+    const collectionId = this.activity?.geozone?.pk.split('::')[1];
     const geozoneId = this.activity?.geozone?.sk;
-    if (gzCollectionId && geozoneId) {
+    if (collectionId && geozoneId) {
       try {
-        const geozoneData = await this.geozoneService.getGeozone(gzCollectionId, geozoneId);
+        const geozoneData = await this.geozoneService.getGeozone(collectionId, geozoneId);
         this.location = geozoneData?.items?.[0]?.location || null;
         this.envelope = geozoneData?.items?.[0]?.envelope || null;
         this.updateMarkers();
@@ -69,10 +69,10 @@ export class ActivityDetailsComponent {
   }
 
   async getFacility() {
-    const fcCollectionId = this.activity?.facilities?.pk.split('::')[1];
+    const collectionId = this.activity?.facilities?.pk.split('::')[1];
     const facilityType = this.activity?.facilities?.sk.split('::')[0];
     const facilityId = this.activity?.facilities?.sk.split('::')[1];
-    const facility = await this.facilityService.getFacility(fcCollectionId, facilityType, facilityId);
+    const facility = await this.facilityService.getFacility(collectionId, facilityType, facilityId);
     this.facility = facility.displayName || null;
   }
 

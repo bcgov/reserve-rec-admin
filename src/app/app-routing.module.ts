@@ -60,7 +60,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'inventory/geozone/:gzCollectionId/:geozoneId',
+    path: 'inventory/geozone/:collectionId/:geozoneId',
     loadComponent: () => import('./inventory/geozone/geozone.component').then(mod => mod.GeozoneComponent),
     canActivate: [UserGuard],
     resolve: { geozone: GeozoneResolver },
@@ -78,7 +78,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'inventory/facility/:fcCollectionId/:facilityType/:facilityId',
+    path: 'inventory/facility/:collectionId/:facilityType/:facilityId',
     loadComponent: () => import('./inventory/facility/facility.component').then(mod => mod.FacilityComponent),
     canActivate: [UserGuard],
     resolve: { facility: FacilityResolver },
@@ -96,7 +96,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'inventory/activity/:acCollectionId/:activityType/:activityId',
+    path: 'inventory/activity/:collectionId/:activityType/:activityId',
     loadComponent: () => import('./inventory/activity/activity.component').then(mod => mod.ActivityComponent),
     canActivate: [UserGuard],
     resolve: { activity: ActivityResolver },

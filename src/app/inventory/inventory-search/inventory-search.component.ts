@@ -247,15 +247,15 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
           delete filters.collectionId;
           break;
         case 'geozone':
-          filters['gzCollectionId'] = filters.collectionId;
+          filters['collectionId'] = filters.collectionId;
           delete filters.collectionId;
           break;
         case 'facility':
-          filters['fcCollectionId'] = filters.collectionId;
+          filters['collectionId'] = filters.collectionId;
           delete filters.collectionId;
           break;
         case 'activity':
-          filters['acCollectionId'] = filters.collectionId;
+          filters['collectionId'] = filters.collectionId;
           delete filters.collectionId;
           break;
         default:

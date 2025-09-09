@@ -20,14 +20,14 @@ export class GeozoneService {
     protected toastService: ToastService
   ) { }
 
-  async getGeozone(gzCollectionId, geozoneId) {
+  async getGeozone(collectionId, geozoneId) {
     const queryParams = {};
     if (geozoneId) {
       queryParams['geozoneId'] = geozoneId;
     }
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`geozones/${gzCollectionId}`, queryParams)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`geozones/${collectionId}`, queryParams)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       return res;
@@ -37,10 +37,10 @@ export class GeozoneService {
     }
   }
   
-  async getGeozoneByCollectionId(gzCollectionId) {
+  async getGeozoneByCollectionId(collectionId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONES_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`geozones/${gzCollectionId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`geozones/${collectionId}`)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONES_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONES_RESULT);
       return res;
@@ -50,10 +50,10 @@ export class GeozoneService {
     }
   }
 
-  async createGeozone(gzCollectionId, props) {
+  async createGeozone(collectionId, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
-      const res = (await lastValueFrom(this.apiService.post(`geozones/${gzCollectionId}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.post(`geozones/${collectionId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
@@ -73,10 +73,10 @@ export class GeozoneService {
     }
   }
 
-  async updateGeozone(gzCollectionId, geozoneId, props) {
+  async updateGeozone(collectionId, geozoneId, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
-      const res = (await lastValueFrom(this.apiService.put(`geozones/${gzCollectionId}/${geozoneId}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.put(`geozones/${collectionId}/${geozoneId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
@@ -96,10 +96,10 @@ export class GeozoneService {
     }
   }
 
-  async deleteGeozone(gzCollectionId, geozoneId) {
+  async deleteGeozone(collectionId, geozoneId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONE_RESULT);
-      const res = (await lastValueFrom(this.apiService.delete(`geozones/${gzCollectionId}/${geozoneId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.delete(`geozones/${collectionId}/${geozoneId}`)))['data'];
       this.dataService.setItemValue(Constants.dataIds.GEOZONE_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(

@@ -31,21 +31,21 @@ export class ActivityEditComponent {
   // Submit new activity
   async submit(): Promise<void> {
     // For creating new activities, get the values from the form instead of route data
-    const acCollectionId = this.activity?.acCollectionId || this.activityForm?.get('acCollectionId')?.value;
+    const collectionId = this.activity?.collectionId || this.activityForm?.get('collectionId')?.value;
     const activityType = this.activity?.activityType || this.activityForm?.get('activityType')?.value;
     const activityId = this.activity?.activityId || this.activityForm?.get('activityId')?.value;
 
-    if (!acCollectionId || !activityType || !activityId) {
+    if (!collectionId || !activityType || !activityId) {
       console.error('Missing required collection ID or ORCS values');
       return;
     }
 
     const payload = this.formatFormForSubmission();
 
-    const res = await this.activityService.updateActivity(acCollectionId, activityType, activityId, payload);
+    const res = await this.activityService.updateActivity(collectionId, activityType, activityId, payload);
     // get newly created activityId from response
     if (activityId) {
-      this.navigateToActivity(acCollectionId, activityType, activityId);
+      this.navigateToActivity(collectionId, activityType, activityId);
     }
   }
 
@@ -79,7 +79,7 @@ export class ActivityEditComponent {
     delete props['geozonePkSk'];
     delete props['facilityPkSk'];
     delete props['protectedArea'];
-    delete props['acCollectionId'];
+    delete props['collectionId'];
     
     return props;
   }

@@ -31,25 +31,25 @@ export class GeozoneComponent {
   }
 
   navToEdit() {
-    if (this.data?.gzCollectionId && this.data?.geozoneId) {
-      this.router.navigate([`/inventory/geozone/${this.data.gzCollectionId}/${this.data.geozoneId}/edit`]);
+    if (this.data?.collectionId && this.data?.geozoneId) {
+      this.router.navigate([`/inventory/geozone/${this.data.collectionId}/${this.data.geozoneId}/edit`]);
     }
     this.cdr.detectChanges();
   }
 
   onDelete() {
-    const gzCollectionId = this.data?.gzCollectionId;
+    const collectionId = this.data?.collectionId;
     const geozoneId = this.data?.geozoneId;
 
-    this.displayConfirmationModal(gzCollectionId, geozoneId);
+    this.displayConfirmationModal(collectionId, geozoneId);
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with the details of the protected area and its status.
-  displayConfirmationModal(gzCollectionId, geozoneId) {
+  displayConfirmationModal(collectionId, geozoneId) {
     const details: ModalRowSpec[] = [
       { label: 'Geozone Name', value: this.data?.displayName },
-      { label: 'Geozone Collection ID', value: gzCollectionId },
+      { label: 'Geozone Collection ID', value: collectionId },
       { label: 'Geozone ID', value: geozoneId }
     ];
 
@@ -68,7 +68,7 @@ export class GeozoneComponent {
     // Listen for confirmation and cancellation events from the modal.
     const modalContent = modalRef.content as ConfirmationModalComponent;
     modalContent.confirmButton.subscribe(() => {
-      this.geozoneService.deleteGeozone(gzCollectionId, geozoneId)
+      this.geozoneService.deleteGeozone(collectionId, geozoneId)
       modalRef.hide();
       this.router.navigate(['/inventory']);
     });

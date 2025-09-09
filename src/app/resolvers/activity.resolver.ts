@@ -8,10 +8,10 @@ export class ActivityResolver implements Resolve<any> {
 
   resolve(route: ActivatedRouteSnapshot) {
     // Check current route first, then parent route for parameters
-    const acCollectionId = route.paramMap.get('acCollectionId') || route.parent?.paramMap.get('acCollectionId');
+    const collectionId = route.paramMap.get('collectionId') || route.parent?.paramMap.get('collectionId');
     const activityType = route.paramMap.get('activityType') || route.parent?.paramMap.get('activityType');
     const activityId = route.paramMap.get('activityId') || route.parent?.paramMap.get('activityId');
-    const activity = this.ActivityService.getActivity(acCollectionId, activityType, activityId);
+    const activity = this.ActivityService.getActivity(collectionId, activityType, activityId);
     return activity;
   }
 }
