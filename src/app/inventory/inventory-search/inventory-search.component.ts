@@ -241,27 +241,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
         delete filters[key];
       }
     }
-    if (filters?.collectionId) {
-      switch (filters.schema) {
-        case 'protectedArea':
-          delete filters.collectionId;
-          break;
-        case 'geozone':
-          filters['collectionId'] = filters.collectionId;
-          delete filters.collectionId;
-          break;
-        case 'facility':
-          filters['collectionId'] = filters.collectionId;
-          delete filters.collectionId;
-          break;
-        case 'activity':
-          filters['collectionId'] = filters.collectionId;
-          delete filters.collectionId;
-          break;
-        default:
-          delete filters.collectionId;
-      }
-    }
+    
     // Remove empty filters
     return filters;
   }
