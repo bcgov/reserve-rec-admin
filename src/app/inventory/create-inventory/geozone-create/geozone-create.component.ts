@@ -23,7 +23,7 @@ export class GeozoneCreateComponent {
   }
 
   async submit() {
-    const collectionId = this.geozoneForm.get('gzCollectionId').value;
+    const collectionId = this.geozoneForm.get('collectionId').value;
     const props = this.formatFormForSubmission();
     const res = await this.geozoneService.createGeozone(collectionId, props);
     // get newly created geozoneId from response
@@ -47,14 +47,14 @@ export class GeozoneCreateComponent {
         [mandatoryFields.envelope.northwest.longitude, mandatoryFields.envelope.northwest.latitude],
         [mandatoryFields.envelope.southeast.longitude, mandatoryFields.envelope.southeast.latitude]]
     };
-    delete props.gzCollectionId; // Remove gzCollectionId from the props
+    delete props.collectionId; // Remove collectionId from the props
     delete props.enforceZoomVisibility; // Remove enforceZoomVisibility from the props
     delete props.mandatoryFields; // Remove mandatoryFields from the props
     return props;
   }
 
-  navigateToGeozone(gzCollectionId, geozoneId) {
-    this.router.navigate([`/inventory/geozone/${gzCollectionId}/${geozoneId}`]).then(() => {
+  navigateToGeozone(collectionId, geozoneId) {
+    this.router.navigate([`/inventory/geozone/${collectionId}/${geozoneId}`]).then(() => {
       window.scrollTo(0, 0);
       window.location.reload();
     });

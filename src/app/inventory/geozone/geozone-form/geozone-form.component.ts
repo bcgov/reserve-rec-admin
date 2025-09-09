@@ -86,8 +86,8 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.form = new UntypedFormGroup({
-      gzCollectionId: new UntypedFormControl(
-        this.geozone?.gzCollectionId || '',
+      collectionId: new UntypedFormControl(
+        this.geozone?.collectionId || '',
         {
           nonNullable: true,
           validators: [Validators.required]

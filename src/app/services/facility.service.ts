@@ -20,13 +20,13 @@ export class FacilityService {
     protected toastService: ToastService
   ) { }
 
-  async getFacility(fcCollectionId, facilityType, facilityId, fetchActivities = false) {
+  async getFacility(collectionId, facilityType, facilityId, fetchActivities = false) {
     try {
       const params = {
         fetchActivities: fetchActivities
       };
       this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`facilities/${fcCollectionId}/${facilityType}/${facilityId}`, params)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`facilities/${collectionId}/${facilityType}/${facilityId}`, params)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       return res;
@@ -36,10 +36,10 @@ export class FacilityService {
     }
   }
 
-  async getFacilitiesByCollectionId(fcCollectionId) {
+  async getFacilitiesByCollectionId(collectionId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITIES_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`facilities/${fcCollectionId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`facilities/${collectionId}`)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITIES_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITIES_RESULT);
       return res;
@@ -49,10 +49,10 @@ export class FacilityService {
     }
   }
 
-  async createFacility(fcCollectionId, facilityType, props) {
+  async createFacility(collectionId, facilityType, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.post(`facilities/${fcCollectionId}/${facilityType}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.post(`facilities/${collectionId}/${facilityType}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
@@ -72,10 +72,10 @@ export class FacilityService {
     }
   }
 
-  async updateFacility(fcCollectionId, facilityType, facilityId, props) {
+  async updateFacility(collectionId, facilityType, facilityId, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.put(`facilities/${fcCollectionId}/${facilityType}/${facilityId}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.put(`facilities/${collectionId}/${facilityType}/${facilityId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(
@@ -95,10 +95,10 @@ export class FacilityService {
     }
   }
 
-  async deleteFacility(fcCollectionId, facilityType, facilityId) {
+  async deleteFacility(collectionId, facilityType, facilityId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.delete(`facilities/${fcCollectionId}/${facilityType}/${facilityId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.delete(`facilities/${collectionId}/${facilityType}/${facilityId}`)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.toastService.addMessage(

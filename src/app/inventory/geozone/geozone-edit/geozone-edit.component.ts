@@ -30,7 +30,7 @@ export class GeozoneEditComponent {
   }
 
   async submit() {
-    const collectionId = this.geozone?.gzCollectionId;
+    const collectionId = this.geozone?.collectionId;
     const geozoneId = this.geozone?.geozoneId;
     const props = this.formatFormForSubmission();
     const res = await this.geozoneService.updateGeozone(collectionId, geozoneId, props);
@@ -59,7 +59,7 @@ export class GeozoneEditComponent {
         ]
       };
     }
-    delete props['gzCollectionId']; // Remove gzCollectionId from the props
+    delete props['collectionId']; // Remove collectionId from the props
     delete props['enforceZoomVisibility']; // Remove enforceZoomVisibility from the props
     delete props['mandatoryFields']; // Remove location from the props
     return props;
@@ -79,8 +79,8 @@ export class GeozoneEditComponent {
 
 
 
-  navigateToGeozone(gzCollectionId, geozoneId) {
-    this.router.navigate([`/inventory/geozone/${gzCollectionId}/${geozoneId}`]).then(() => {
+  navigateToGeozone(collectionId, geozoneId) {
+    this.router.navigate([`/inventory/geozone/${collectionId}/${geozoneId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
       window.location.reload();

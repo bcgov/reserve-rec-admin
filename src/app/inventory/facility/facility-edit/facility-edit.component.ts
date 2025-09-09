@@ -29,7 +29,7 @@ export class FacilityEditComponent {
   }
 
     async submit() {
-    const collectionId = this.facility?.fcCollectionId;
+    const collectionId = this.facility?.collectionId;
     const facilityType = this.facility?.facilityType;
     const facilityId = this.facility?.facilityId;
     const props = this.formatFormForSubmission();
@@ -54,13 +54,13 @@ export class FacilityEditComponent {
         coordinates: [location.longitude, location.latitude]
       };
     };
-    delete props['fcCollectionId']; // Remove gzCollectionId from the props
+    delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;
   }
 
-  navigateToFacility(fcCollectionId, facilityType, facilityId) {
-    this.router.navigate([`/inventory/facility/${fcCollectionId}/${facilityType}/${facilityId}`]).then(() => {
+  navigateToFacility(collectionId, facilityType, facilityId) {
+    this.router.navigate([`/inventory/facility/${collectionId}/${facilityType}/${facilityId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
       window.location.reload();

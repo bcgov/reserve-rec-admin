@@ -32,22 +32,22 @@ export class ActivityCreateComponent {
   // Submit new activity
   async submit(): Promise<void> {
     // For creating new activities, get the values from the form instead of route data
-    const acCollectionId = this.activity?.acCollectionId || this.activityForm?.get('acCollectionId')?.value;
+    const collectionId = this.activity?.collectionId || this.activityForm?.get('collectionId')?.value;
     const orcs = this.activity?.orcs || this.activityForm?.get('orcs')?.value;
 
-    if (!acCollectionId || !orcs) {
+    if (!collectionId || !orcs) {
       console.error('Missing required collection ID or ORCS values');
       return;
     }
 
     const payload = this.formatFormForSubmission();
 
-    const res = await this.activityService.createActivity(acCollectionId, orcs, payload);
+    const res = await this.activityService.createActivity(collectionId, orcs, payload);
     // get newly created activityId from response
     const activityType = res[0]?.data?.activityType;
     const activityId = res[0]?.data?.activityId;
     if (activityId) {
-      this.navigateToActivity(acCollectionId, orcs, activityType, activityId);
+      this.navigateToActivity(collectionId, orcs, activityType, activityId);
     }
   }
 
@@ -81,7 +81,7 @@ export class ActivityCreateComponent {
     delete props['geozonePkSk'];
     delete props['facilityPkSk'];
     delete props['protectedArea'];
-    delete props['acCollectionId'];
+    delete props['collectionId'];
 
     return props;
   }

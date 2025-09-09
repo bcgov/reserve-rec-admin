@@ -7,10 +7,10 @@ export class FacilityResolver implements Resolve<any> {
   constructor(private facilityService: FacilityService) { }
 
   async resolve(route: ActivatedRouteSnapshot) {
-    const fcCollectionId = route.paramMap.get('fcCollectionId');
+    const collectionId = route.paramMap.get('collectionId');
     const facilityType = route.paramMap.get('facilityType');
     const facilityId = route.paramMap.get('facilityId');
-    const facility = await this.facilityService.getFacility(fcCollectionId, facilityType, facilityId, true);
+    const facility = await this.facilityService.getFacility(collectionId, facilityType, facilityId, true);
     return facility?.items?.[0] || facility;
   }
 }

@@ -30,7 +30,7 @@ export class FacilityCreateComponent {
   }
 
   async submit() {
-    const collectionId = this.facilityForm.get('fcCollectionId').value || this.facility?.fcCollectionId;
+    const collectionId = this.facilityForm.get('collectionId').value || this.facility?.collectionId;
     const facilityType = this.facilityForm.get('facilityType').value || this.facility?.facilityType;
 
     if (!collectionId || !facilityType) {
@@ -65,13 +65,13 @@ export class FacilityCreateComponent {
         coordinates: [location.longitude, location.latitude]
       };
     };
-    delete props['fcCollectionId']; // Remove fcCollectionId from the props
+    delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;
   }
 
-  navigateToFacility(fcCollectionId, facilityType, facilityId) {
-    this.router.navigate([`/inventory/facility/${fcCollectionId}/${facilityType}/${facilityId}`]).then(() => {
+  navigateToFacility(collectionId, facilityType, facilityId) {
+    this.router.navigate([`/inventory/facility/${collectionId}/${facilityType}/${facilityId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
       window.location.reload();

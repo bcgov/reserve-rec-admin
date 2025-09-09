@@ -41,26 +41,26 @@ export class FacilityComponent {
   }
 
   navToEdit() {
-    if (this.data?.fcCollectionId && this.data?.facilityType && this.data?.facilityId) {
-      this.router.navigate([`/inventory/facility/${this.data.fcCollectionId}/${this.data.facilityType}/${this.data.facilityId}/edit`]);
+    if (this.data?.collectionId && this.data?.facilityType && this.data?.facilityId) {
+      this.router.navigate([`/inventory/facility/${this.data.collectionId}/${this.data.facilityType}/${this.data.facilityId}/edit`]);
     }
     this.cdr.detectChanges();
   }
 
   onDelete() {
-    const fcCollectionId = this.data?.fcCollectionId;
+    const collectionId = this.data?.collectionId;
     const facilityType = this.data?.facilityType;
     const facilityId = this.data?.facilityId;
 
-    this.displayConfirmationModal(fcCollectionId, facilityType, facilityId);
+    this.displayConfirmationModal(collectionId, facilityType, facilityId);
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with the details of the protected area and its status.
-  displayConfirmationModal(fcCollectionId, facilityType, facilityId) {
+  displayConfirmationModal(collectionId, facilityType, facilityId) {
     const details: ModalRowSpec[] = [
       { label: 'Facility Name', value: this.data?.displayName },
-      { label: 'Facility Collection ID', value: fcCollectionId },
+      { label: 'Facility Collection ID', value: collectionId },
       { label: 'Facility Type', value: this.getFacilityTypeOption()?.display },
       { label: 'Facility ID', value: facilityId }
     ];
@@ -80,7 +80,7 @@ export class FacilityComponent {
     // Listen for confirmation and cancellation events from the modal.
     const modalContent = modalRef.content as ConfirmationModalComponent;
     modalContent.confirmButton.subscribe(() => {
-      this.facilityService.deleteFacility(fcCollectionId, facilityType, facilityId)
+      this.facilityService.deleteFacility(collectionId, facilityType, facilityId)
       modalRef.hide();
       this.router.navigate(['/inventory']);
     });

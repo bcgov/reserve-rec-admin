@@ -35,11 +35,11 @@
       
       <!-- Collection ID input field -->
       <ngds-text-input
-        [control]="form.get('acCollectionId')"
+        [control]="form.get('collectionId')"
         [label]="'Collection ID'"
         [placeholder]="'Enter Collection ID'"
         [resetButton]="true"
-        [disabled]="activity?.acCollectionId"
+        [disabled]="activity?.collectionId"
       >
       </ngds-text-input>
     </div>
@@ -95,7 +95,7 @@
               [selectionListItems]="protectedAreas"
               [placeholder]="'Select a protected area'"
               [resetButton]="true"
-              [disabled]="!form.get('acCollectionId').value"
+              [disabled]="!form.get('collectionId').value"
             >
             </ngds-typeahead-input>
           </ng-template>

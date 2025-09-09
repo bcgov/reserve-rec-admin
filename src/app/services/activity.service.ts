@@ -19,7 +19,7 @@ export class ActivityService {
     private loadingService: LoadingService
   ) { }
 
-  async getActivity(acCollectionId, activityType, activityId) {
+  async getActivity(collectionId, activityType, activityId) {
     const queryParams = {};
     if (activityType) {
       queryParams['activityType'] = activityType;
@@ -30,7 +30,7 @@ export class ActivityService {
 
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`activities/${acCollectionId}`, queryParams)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`activities/${collectionId}`, queryParams)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       return res;
@@ -41,10 +41,10 @@ export class ActivityService {
     }
   }
 
-  async createActivity(acCollectionId, orcs, props) {
+  async createActivity(collectionId, orcs, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.post(`activities/${acCollectionId}_${orcs}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.post(`activities/${collectionId}_${orcs}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(
@@ -64,10 +64,10 @@ export class ActivityService {
     }
   }
 
-  async updateActivity(acCollectionId, activityType, activityId, props) {
+  async updateActivity(collectionId, activityType, activityId, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.put(`activities/${acCollectionId}/${activityType}/${activityId}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.put(`activities/${collectionId}/${activityType}/${activityId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(
@@ -87,10 +87,10 @@ export class ActivityService {
     }
   }
 
-  async deleteActivity(acCollectionId, activityType, activityId) {
+  async deleteActivity(collectionId, activityType, activityId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.delete(`activities/${acCollectionId}/${activityType}/${activityId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.delete(`activities/${collectionId}/${activityType}/${activityId}`)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(

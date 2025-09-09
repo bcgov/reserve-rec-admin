@@ -150,7 +150,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
 
   private initializeForm() {
     this.form = new UntypedFormGroup({
-      acCollectionId: new UntypedFormControl('', {
+      collectionId: new UntypedFormControl('', {
         nonNullable: true,
         validators: [Validators.required]
       }),
@@ -211,7 +211,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
 
     // Update form with activity data
     this.form.patchValue({
-      acCollectionId: this.activity?.acCollectionId || '',
+      collectionId: this.activity?.collectionId || '',
       protectedArea: this.activity?.protectedArea || '',
       orcs: this.activity?.orcs || '',
       facility: facilityDisplayName,
@@ -286,7 +286,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
   }
 
   async getFacilities() {
-    const collectionId = this.activity?.acCollectionId.split('_')[0] || this.form.get('acCollectionId').value;
+    const collectionId = this.activity?.collectionId.split('_')[0] || this.form.get('collectionId').value;
     const orcs = this.activity?.orcs || this.form.get('orcs').value;
 
     // Load facilities based on collectionId and ORCS
@@ -311,7 +311,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
 
   // Load geozones based on ORCS
   async getGeozones() {
-    const collectionId = this.activity?.acCollectionId.split('_')[0] || this.form.get('acCollectionId').value;
+    const collectionId = this.activity?.collectionId.split('_')[0] || this.form.get('collectionId').value;
     const orcs = this.activity?.orcs || this.form.get('orcs').value;
 
     const geozoneRes = await this.geozoneService.getGeozoneByCollectionId(`${collectionId}_${orcs}`);
@@ -440,14 +440,14 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
 
   // Allow user to go an create a new facility
   navigateCreateFacility() {
-    const collectionId = this.form.get('acCollectionId')?.value;
+    const collectionId = this.form.get('collectionId')?.value;
     const orcs = this.form.get('orcs')?.value;
     this.router.navigate([`/inventory/facility/create/${collectionId}/${orcs}`]);
   }
   
   // Allow user to go an create a new facility
   navigateCreateGeozone() {
-    const collectionId = this.form.get('acCollectionId')?.value;
+    const collectionId = this.form.get('collectionId')?.value;
     const orcs = this.form.get('orcs')?.value;
     this.router.navigate([`/inventory/geozone/create/${collectionId}/${orcs}`]);
   }

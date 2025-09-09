@@ -59,16 +59,16 @@ export class SearchResultComponent {
         route = `inventory/protected-area/${data?.orcs}`;
         break;
       case 'facility':
-        route = `inventory/facility/${data?.fcCollectionId}/${data?.facilityType}/${data?.facilityId}`;
+        route = `inventory/facility/${data?.collectionId}/${data?.facilityType}/${data?.facilityId}`;
         break;
       case 'activity':
-        route = `inventory/activity/${data?.acCollectionId}/${data?.activityType}/${data?.activityId}`;
+        route = `inventory/activity/${data?.collectionId}/${data?.activityType}/${data?.activityId}`;
         break;
       case 'product':
         route = `inventory/product/${data.id}`;
         break;
       case 'geozone':
-        route = `inventory/geozone/${data?.gzCollectionId}/${data?.geozoneId}`;
+        route = `inventory/geozone/${data?.collectionId}/${data?.geozoneId}`;
         break;
       default:
         console.warn('Unknown schema type:', data?.schema);
