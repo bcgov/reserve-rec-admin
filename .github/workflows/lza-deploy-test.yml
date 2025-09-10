@@ -1,11 +1,11 @@
-name: Deploy Reserve Rec Admin Test
+name: LZA Deploy Reserve Rec Admin Test
 
-run-name: Deploying ${{ github.ref_name }} to test
+run-name: Deploying ${{ github.ref_name }} to lzatest
 
 on:
   push:
-    tags:
-      - "*"
+    tags: 
+      - '*'
   workflow_dispatch:
     inputs:
       releaseTag:
@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-reserve-rec-admin
+  group: lza-deploy-reserve-rec-admin
   cancel-in-progress: false
 
 env:
@@ -28,7 +28,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: test
+    environment: lzatest
     strategy:
       max-parallel: 1
       matrix:
@@ -89,16 +89,9 @@ jobs:
       ### Upload dist to S3 ###
       - name: Deploy to S3
         env:
-          S3_BUCKET: ${{ vars.S3_BUCKET }}
           DIR_NAME: ${{ github.sha }}
         run: |
           echo "Deploying to $S3_BUCKET/$DIR_NAME"
           aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
           aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
           aws s3 sync dist s3://$S3_BUCKET/latest
-
-      # - name: Invalidate CloudFront
-      #   uses: chetan/invalidate-cloudfront-action@v2
-      #   env:
-      #     DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
-      #     PATHS: "/*"
