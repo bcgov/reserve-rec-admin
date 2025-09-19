@@ -56,6 +56,16 @@ assignees: ''
   - [ ] Acceptance criteria are tested (Functionality meets the acceptance criteria defined in the ticket)
   - [ ] Reviewed and approved by Product Owner
 
+**Security Validation Checklist** 
+- Security-focused Peer Review:
+  - [ ] Reviewer explicitly considers abuse cases, privilege boundaries, and insecure patterns.
+- Static Analysis Passed:
+  - [ ] Security linting tools (e.g., Bandit, ESLint plugins, SonarQube) executed and cleared
+- Rate Limiting & Bot Defenses Verified:
+  - [ ] Anti-automation strategies (e.g., throttling, CAPTCHA/Turnstile, scoring) tested and confirmed.
+- Threat Model Completed:
+  - [ ] Developers have identified potential attack vectors (e.g., spoofing, privilege escalation, data leakage), documented mitigations, and validated that defenses align with system goals and fairness principles.
+
 #### Notes:
 - 
 -
