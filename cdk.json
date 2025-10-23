@@ -1,5 +1,5 @@
 {
-  "app": "node bin/reserve-rec-admin.js",
+  "app": "node bin/app.js",
   "watch": {
     "include": [
       "**"
@@ -74,6 +74,30 @@
     "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": true,
     "@aws-cdk/aws-lambda-nodejs:sdkV3ExcludeSmithyPackages": true,
     "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": true,
-    "@aws-cdk/aws-ec2:bastionHostUseAmazonLinux2023ByDefault": true
+    "@aws-cdk/aws-ec2:bastionHostUseAmazonLinux2023ByDefault": true,
+    "dev": {
+      "DEPLOYMENT_NAME": "dev",
+      "AWS_REGION": "ca-central-1",
+      "IS_OFFLINE": "false",
+      "FAIL_FAST": "false"
+    },
+    "staging": {
+      "DEPLOYMENT_NAME": "staging",
+      "AWS_REGION": "ca-central-1",
+      "IS_OFFLINE": "false",
+      "FAIL_FAST": "false"
+    },
+    "prod": {
+      "DEPLOYMENT_NAME": "prod",
+      "AWS_REGION": "ca-central-1",
+      "IS_OFFLINE": "false",
+      "FAIL_FAST": "false"
+    },
+    "local": {
+      "DEPLOYMENT_NAME": "local",
+      "AWS_REGION": "local",
+      "IS_OFFLINE": "true",
+      "FAIL_FAST": "true"
+    }
   }
 }
