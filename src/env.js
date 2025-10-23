@@ -4,7 +4,7 @@
   window.__env.logLevel = 0; // All
 
   // Get config from remote host?
-  window.__env.configEndpoint = true;
+  window.__env.configEndpoint = false;
 
   // Environment name
   window.__env.ENVIRONMENT = "local"; // local | dev | test | prod
