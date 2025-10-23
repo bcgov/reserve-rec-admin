@@ -5,14 +5,12 @@
     "reserve-rec-admin": "bin/reserve-rec-admin.js"
   },
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve --port 4300",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "test-ci": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox",
     "cdk": "cdk",
-    "lint": "ng lint"
+    "test": "jest",
+    "build": "ng build",
+    "synth:local": "cdk synth -c @context=local --all",
+    "synth:dev": "cdk synth -c @context=dev --all",
+    "deploy:dev": "cdk deploy -c @context=dev --all"
   },
   "private": true,
   "dependencies": {
@@ -34,10 +32,11 @@
     "@popperjs/core": "^2.11.8",
     "@types/bootstrap": "^5.2.10",
     "aws-amplify": "^6.6.1",
-    "aws-cdk": "2.179.0",
+    "aws-cdk": "^2.1031.0",
     "aws-cdk-lib": "2.179.0",
     "bootstrap-icons": "^1.13.1",
     "constructs": "^10.0.0",
+    "global": "^4.4.0",
     "guid-typescript": "^1.0.9",
     "luxon": "^3.6.1",
     "mapbox-gl": "^3.6.0",
@@ -47,6 +46,7 @@
     "ngx-toastr": "^19.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "winston": "^3.18.3",
     "ws": "^8.18.0",
     "zone.js": "~0.15.0"
   },
