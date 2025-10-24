@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom, map } from 'rxjs';
 
 declare global {
   interface Window { __env: any; }
@@ -64,7 +65,13 @@ export class ConfigService {
     // The delay is increased based on the fibonacci sequence.
     while (true) {
       try {
-        return (await this.httpClient.get<any>(`/api/config?config=admin`).toPromise())['data'];
+        const headers = new HttpHeaders().set('Authorization', 'config');
+        return firstValueFrom(this.httpClient.get(`/api/config?config=admin`, {
+          headers: headers,
+          observe: 'response'
+        })).then(response => {
+          return response.body['data'];
+        });
       } catch (err) {
         console.log(err);
         const delay = n1 + n2;
