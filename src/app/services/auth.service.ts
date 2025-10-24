@@ -16,10 +16,12 @@ export class AuthService {
  public user = signal<any>(null); // Make sure observable for user updates
  public session = signal(null);
  jwtToken: any;
- public reDirectValues; 
+ public reDirectValues;
+ public allAccessRoleName = 'superadmin';
 
   async init() {
-    
+    console.log('this.configService.config:', this.configService.config);
+
     if(this.configService.config.ENVIRONMENT === 'local') {
       this.reDirectValues = 'http://localhost:4300';
     } else {
@@ -33,7 +35,7 @@ export class AuthService {
           identityPoolId: this.configService.config['ADMIN_IDENTITY_POOL_ID'],
           loginWith: {
             oauth: {
-              domain: this.configService.config['OAUTH_DOMAIN'],
+              domain: this.configService.config['ADMIN_USER_POOL_DOMAIN_URL'],
               scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
               redirectSignIn: [this.reDirectValues],
               redirectSignOut: [this.reDirectValues],
@@ -43,6 +45,7 @@ export class AuthService {
         },
       },
     });
+    this.listenToAuthEvents();
     return Promise.resolve();
   }
 
@@ -56,9 +59,6 @@ export class AuthService {
     signInWithRedirect({ provider: { custom: idpName } });
   }
 
-
-
-
   private async listenToAuthEvents() {
     Hub.listen('auth', async ({ payload }) => {
       switch (payload.event) {
@@ -70,6 +70,7 @@ export class AuthService {
           this.loggerService.info('User has signed in successfully.');
           const session = await fetchAuthSession();
           this.jwtToken = session.credentials.sessionToken;
+          console.log('this.jwtToken:', this.jwtToken);
           await this.setRefresh();
           this.router.navigate(['/']);
           console.log('Session:', session);
@@ -165,11 +166,25 @@ export class AuthService {
     }
   }
 
-  async userIsAdmin() {
+  async getAdminRole() {
     try {
       const user = await this.getCurrentUser();
-      console.log("IS the user and admin: ", user);
-      if (user && user['custom:isAdmin'] && user['custom:isAdmin'].toLowerCase() === 'true') {
+      console.log("The user is: ", user);
+      if (user && user['custom:adminRole']) {
+        return user['custom:adminRole'];
+      }
+      return null;
+    } catch (error) {
+      this.loggerService.error(`Error fetching admin role: ${error}`);
+      return null;
+    }
+  }
+
+  async userIsAdmin() {
+    try {
+      const role = await this.getAdminRole();
+      console.log("The role is: ", role);
+      if (role == this.allAccessRoleName) {
         return true;
       }
       return false;

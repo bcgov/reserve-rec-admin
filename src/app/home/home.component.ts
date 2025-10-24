@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut, fetchUserAttributes } from 'aws-amplify/auth';
+import { getCurrentUser, fetchAuthSession} from 'aws-amplify/auth';
 import { SearchComponent } from './search/search.component';
 import { InventoryComponent } from '../inventory/inventory.component';
 import { SalesComponent } from '../sales/sales.component';
@@ -26,9 +26,8 @@ async ngOnInit() {
       await getCurrentUser();
       this.isAuthenticed = true;
       this.isAdmin = await this.authService.userIsAdmin();
-      console.log("are you the admin??:", this.isAdmin)
-      console.log('User is authenticated', getCurrentUser());
       const session = await fetchAuthSession();
+      this.authService.jwtToken = session.credentials.sessionToken;
       console.log('Session:', session);
     } catch (e) {
       console.log(e);

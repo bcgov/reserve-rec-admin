@@ -1,7 +1,5 @@
 const cdk = require('aws-cdk-lib');
 const { logger } = require('../lib/helpers/utils.js');
-const { createS3Stack } = require('../lib/s3-stack/s3-stack.js');
-const { createCloudFrontStack } = require('../lib/cloudfront-stack/cloudfront-stack.js');
 const { createDistributionStack } = require('../lib/distribution-stack/distribution-stack.js');
 
 class CDKProject {
