@@ -8,6 +8,7 @@
     "cdk": "cdk",
     "test": "jest",
     "build": "ng build",
+    "start": "ng serve",
     "synth:local": "cdk synth -c @context=local --all",
     "synth:dev": "cdk synth -c @context=dev --all",
     "deploy:dev": "cdk deploy -c @context=dev --all"

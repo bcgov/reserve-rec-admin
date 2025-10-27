@@ -66,7 +66,11 @@ export class ConfigService {
     while (true) {
       try {
         const headers = new HttpHeaders().set('Authorization', 'config');
-        return firstValueFrom(this.httpClient.get(`/api/config?config=admin`, {
+        let url = '/api/config?config=admin';
+        if (this.configuration['CONFIG_URL']) {
+          url = this.configuration['CONFIG_URL'] + url;
+        }
+        return firstValueFrom(this.httpClient.get(url, {
           headers: headers,
           observe: 'response'
         })).then(response => {
