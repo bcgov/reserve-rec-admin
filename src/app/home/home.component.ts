@@ -27,8 +27,6 @@ async ngOnInit() {
       this.isAuthenticed = true;
       this.isAdmin = await this.authService.userIsAdmin();
       const session = await fetchAuthSession();
-      this.authService.jwtToken = session?.tokens?.accessToken?.toString();
-      console.log('Session:', session);
     } catch (e) {
       console.log(e);
     }

@@ -23,7 +23,7 @@ export function initConfig(
   return async () => {
     await configService.init();
     await authService.init();
-    apiService.init();
+    await apiService.init();
     await websocketService.init(configService.config['WEBSOCKET_URL']);
   };
 }

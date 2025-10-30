@@ -220,7 +220,7 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  updateFacilitySubTypeOptions() {    
+  updateFacilitySubTypeOptions() {
     const type = this.form.get('facilityType')?.value;
     this.facilitySubtypes = Object.entries(Constants.facilityTypes?.[type]?.subTypes || {}).map(([key, value]) => value);
   }

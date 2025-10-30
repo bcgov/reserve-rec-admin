@@ -241,7 +241,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
         delete filters[key];
       }
     }
-    
+
     // Remove empty filters
     return filters;
   }
@@ -250,7 +250,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     if (bounds && bounds.length === 2) {
       this.searchService.searchByQuery('', {
         bbox: bounds,
-        size: 100
+        size: 25
       },
         null,
         true
