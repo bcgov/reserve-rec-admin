@@ -13,16 +13,15 @@ export class AuthService {
   constructor(private configService: ConfigService, private loggerService: LoggerService, private router: Router) {
   }
 
- public user = signal<any>(null); // Make sure observable for user updates
- public session = signal(null);
- jwtToken: any;
- public reDirectValues;
- public allAccessRoleName = 'superadmin';
+  public user = signal<any>(null); // Make sure observable for user updates
+  public session = signal(null);
+  public reDirectValues;
+  public allAccessRoleName = 'superadmin';
 
   async init() {
     console.log('this.configService.config:', this.configService.config);
-
-    if(this.configService.config.ENVIRONMENT === 'local') {
+    console.time('timer');
+    if (this.configService.config.ENVIRONMENT === 'local') {
       this.reDirectValues = 'http://localhost:4300';
     } else {
       this.reDirectValues = this.configService.config['COGNITO_REDIRECT_URI'];
@@ -45,7 +44,7 @@ export class AuthService {
         },
       },
     });
-    this.listenToAuthEvents();
+    await this.setRefresh();
     return Promise.resolve();
   }
 
@@ -63,43 +62,41 @@ export class AuthService {
     Hub.listen('auth', async ({ payload }) => {
       switch (payload.event) {
         case 'signedIn': {
-          console.timeLog("In hub signed in")
+          console.timeLog("timer", "In hub signed in");
           const userAttributes = await fetchUserAttributes(); // Await the user attributes
           this.updateUser(userAttributes); // Set the resolved user attributes
           console.log('User attributes:', userAttributes);
           this.loggerService.info('User has signed in successfully.');
           const session = await fetchAuthSession();
-          this.jwtToken = session.credentials.sessionToken;
-          console.log('this.jwtToken:', this.jwtToken);
           await this.setRefresh();
           this.router.navigate(['/']);
           console.log('Session:', session);
           break;
         }
         case 'signedOut': {
-          console.timeLog("In hub signed out")
+          console.timeLog("timer", "In hub signed out");
           this.loggerService.info('User has signed out successfully.');
           this.updateUser(null);
           this.session.set(null);
           break;
         }
         case 'tokenRefresh': {
-          console.timeLog("In hub refresj")
+          console.timeLog("timer", "In hub refresh");
           this.loggerService.info('Auth tokens have been refreshed.');
           break;
         }
-        case 'tokenRefresh_failure':{
-          console.timeLog("In hub refresh failure")
+        case 'tokenRefresh_failure': {
+          console.timeLog("timer", "In hub refresh failure");
           this.loggerService.info('Failure while refreshing auth tokens.');
           break;
         }
-        case 'signInWithRedirect':{
-          console.timeLog("In hub signed in with Redirect")
+        case 'signInWithRedirect': {
+          console.timeLog("timer", "In hub signed in with Redirect");
           this.loggerService.info('signInWithRedirect API has successfully been resolved.');
           break;
         }
-        case 'signInWithRedirect_failure':{
-          console.timeLog("In hub signed redirect failure")
+        case 'signInWithRedirect_failure': {
+          console.timeLog("timer", "In hub signed redirect failure");
           this.loggerService.info('Failure while trying to resolve signInWithRedirect API.');
           break;
         }
@@ -113,10 +110,9 @@ export class AuthService {
 
 
   async setRefresh(forceRefresh = false) {
-    try{
+    try {
       this.session.set(await fetchAuthSession({ forceRefresh: forceRefresh }));
       if (this.session().tokens) {
-        this.jwtToken = this.session().tokens.accessToken.toString();
         this.loggerService.debug(JSON.stringify(this.session(), null, 2));
         const refreshInterval = ((this.session().tokens.accessToken.payload.exp * 1000) - Date.now()) / 2;
         if (refreshInterval > 0) {
@@ -138,11 +134,18 @@ export class AuthService {
           }, refreshInterval);
         }
       }
-    }catch (error) {
+    } catch (error) {
       console.error('Error setting refresh token:', error);
       await this.logout(); // Log out on error
       this.router.navigate(['/login']); // Redirect to login
     }
+  }
+
+  public get jwtToken() {
+    console.log('getting token');
+    const currentSession = this.session();
+    console.log('currentSession:', currentSession);
+    return currentSession?.tokens?.accessToken?.toString() || null;
   }
 
 

@@ -50,21 +50,20 @@ export class ApiService implements OnDestroy {
       this.apiPath = window.location.origin + '/api';
     }
 
+    this.headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
     this.env = this.configService.config['ENVIRONMENT'];
     this.checkNetworkStatus();
   }
 
-  createHeaders() {
-    if (this.authService.jwtToken) {
-      return new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.authService.jwtToken}`,
-      });
+  updateHeaders() {
+    this.token = this.authService.jwtToken;
+    if (this.token) {
+      this.headers = this.headers.set('Authorization', `Bearer ${this.token}`);
     } else {
-      return new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': `guest`,
-      });
+      this.headers = this.headers.set('Authorization', 'guest');
     }
   }
 
@@ -90,7 +89,7 @@ export class ApiService implements OnDestroy {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
       // If logged in, add the JWT token to the headers.
-      this.headers = this.createHeaders();
+      this.updateHeaders();
       return this.http.get(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers, observe: 'response' })
         .pipe(
           map(response => response?.body),
@@ -104,7 +103,7 @@ export class ApiService implements OnDestroy {
   post(pk, obj, queryParamsObject = null as any) {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
-      this.headers = this.createHeaders();
+      this.updateHeaders();
       return this.http
         .post<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
         .pipe(
@@ -122,7 +121,7 @@ export class ApiService implements OnDestroy {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
       // If logged in, append the JWT token to the headers.
-      this.headers = this.createHeaders();
+      this.updateHeaders();
       return this.http.put<any>(`${this.apiPath}/${pk}?${queryString}`, obj, { headers: this.headers, observe: 'response' })
         .pipe(
           map(response => response?.body),
@@ -135,6 +134,7 @@ export class ApiService implements OnDestroy {
   delete(pk, queryParamsObject = null as any) {
     if (this.networkStatus) {
       const queryString = this.generateQueryString(queryParamsObject);
+      this.updateHeaders();
       return this.http
         .delete<any>(`${this.apiPath}/${pk}?${queryString}`, { headers: this.headers })
         .pipe(catchError(this.errorHandler));
