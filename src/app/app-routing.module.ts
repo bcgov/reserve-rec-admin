@@ -55,7 +55,7 @@ export const routes: Routes = [
       {
         path: 'activity',
         loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent),
-        resolve: { protectedAreas: ProtectedAreasResolver }
+        // resolve: { protectedAreas: ProtectedAreasResolver }
       },
     ],
   },

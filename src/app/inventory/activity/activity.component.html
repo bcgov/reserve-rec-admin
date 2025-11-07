@@ -9,9 +9,9 @@
         <div class="col-auto">
           <div
             *ngIf="data"
-            class="badge bg-primary d-flex justify-content-between align-items-center rounded-pill px-3"
+            class="badge bg-danger d-flex justify-content-between align-items-center rounded-pill px-3"
           >
-            <i class="fa-solid fa-location-dot me-1 fa-xl"></i>
+            <i class="fa-solid fa-campground me-1 fa-xl"></i>
             <h4 class="mb-0">{{data?.schema | uppercase}}</h4>
           </div>
         </div>
@@ -70,7 +70,7 @@
   let-type="type"
   let-subtype="subtype"
 >
-  <div class="badge bg-secondary d-flex align-items-center rounded-pill px-2">
+  <div class="badge bg-danger d-flex align-items-center rounded-pill px-2">
     <i
       [ngClass]="type?.iconClass"
       class="me-1 fa-xl"
@@ -78,7 +78,7 @@
     <h6 class="mb-0">{{type?.display}}</h6>
     <div
       *ngIf="subtype?.value"
-      class="badge bg-info text-dark rounded-pill d-flex align-items-center px-2 ms-2"
+      class="badge bg-red-300 text-dark rounded-pill d-flex align-items-center px-2 ms-2"
     >
       <i
         [ngClass]="subtype?.iconClass"

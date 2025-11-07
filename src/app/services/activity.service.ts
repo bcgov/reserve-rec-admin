@@ -19,13 +19,16 @@ export class ActivityService {
     private loadingService: LoadingService
   ) { }
 
-  async getActivity(collectionId, activityType, activityId) {
+  async getActivity(collectionId, activityType, activityId, getFacilities = false) {
     const queryParams = {};
     if (activityType) {
       queryParams['activityType'] = activityType;
     }
     if (activityId) {
       queryParams['activityId'] = activityId;
+    }
+    if (getFacilities) {
+      queryParams['fetchFacilities'] = true;
     }
 
     try {
@@ -41,10 +44,10 @@ export class ActivityService {
     }
   }
 
-  async createActivity(collectionId, orcs, props) {
+  async createActivity(collectionId, activityType, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      const res = (await lastValueFrom(this.apiService.post(`activities/${collectionId}_${orcs}`, props)))['data'];
+      const res = (await lastValueFrom(this.apiService.post(`activities/${collectionId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.toastService.addMessage(

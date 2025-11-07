@@ -11,7 +11,7 @@ export class ActivityResolver implements Resolve<any> {
     const collectionId = route.paramMap.get('collectionId') || route.parent?.paramMap.get('collectionId');
     const activityType = route.paramMap.get('activityType') || route.parent?.paramMap.get('activityType');
     const activityId = route.paramMap.get('activityId') || route.parent?.paramMap.get('activityId');
-    const activity = this.ActivityService.getActivity(collectionId, activityType, activityId);
+    const activity = this.ActivityService.getActivity(collectionId, activityType, activityId, true);
     return activity;
   }
 }

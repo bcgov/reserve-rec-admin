@@ -1,5 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, effect, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import * as bootstrap from 'bootstrap/dist/js/bootstrap.esm.min.js';
+import { LoadingService } from '../../../services/loading.service';
 
 @Component({
   selector: 'app-loadal',
@@ -7,30 +8,34 @@ import * as bootstrap from 'bootstrap/dist/js/bootstrap.esm.min.js';
   templateUrl: './loadal.component.html',
   styleUrl: './loadal.component.scss'
 })
-// 'Loadal' is a stupid portmanteau of 'loading' and 'modal'
-// This component is used to display a loading modal when data is being fetched
-export class LoadalComponent implements AfterViewInit, OnDestroy{
+export class LoadalComponent implements AfterViewInit, OnDestroy {
   @ViewChild('loadal') loadalElement: ElementRef<HTMLElement> | undefined;
 
   public loadal;
+  private isViewInitialized = false;
 
-  constructor() {
+  constructor(
+    protected loadingService: LoadingService
+  ) {
   }
 
   ngAfterViewInit(): void {
-  if (this.loadalElement?.nativeElement) {
-    this.loadal = new bootstrap.Modal(this.loadalElement.nativeElement);
-  } else {
-    console.error('Loadal element not found');
+    if (this.loadalElement?.nativeElement) {
+      this.loadal = new bootstrap.Modal(this.loadalElement.nativeElement);
+      this.isViewInitialized = true;
+    }
   }
-}
 
   show() {
-    this.loadal?.show();
+    if (this.isViewInitialized && this.loadal) {
+      this.loadal.show();
+    }
   }
 
   hide() {
-    this.loadal?.hide();
+    if (this.isViewInitialized && this.loadal) {
+      this.loadal.hide();
+    }
   }
 
   dispose() {

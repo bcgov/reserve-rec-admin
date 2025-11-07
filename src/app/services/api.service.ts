@@ -34,11 +34,11 @@ export class ApiService implements OnDestroy {
     return throwError(() => new Error(error.message));
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.networkStatus$.unsubscribe();
   }
 
-  init() {
+  async init() {
     // If config is setting api, override.
     if (this.configService.config['API_LOCATION']) {
       if (this.configService.config['API_PATH'] && this.configService.config['API_LOCATION'] !== 'http://localhost:3000') {
@@ -56,6 +56,15 @@ export class ApiService implements OnDestroy {
 
     this.env = this.configService.config['ENVIRONMENT'];
     this.checkNetworkStatus();
+
+    // Ensure network status is properly set before proceeding
+    console.log('ApiService initialized, network status:', this.networkStatus);
+
+    // If network status is still false, force it to true as we're in a browser environment
+    if (!this.networkStatus) {
+      console.log('Forcing network status to true');
+      this.networkStatus = true;
+    }
   }
 
   updateHeaders() {

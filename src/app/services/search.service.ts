@@ -34,6 +34,7 @@ export class SearchService {
         this.clearSearchResults();
         this.loadingService.addToFetchList(Constants.dataIds.SEARCH_RESULTS);
       }
+      console.log('search');
       const res: any[] = (await lastValueFrom(this.apiService.post(`search`, body, filters)))['data']['hits'];
       if (!passiveSearch) {
         this.dataService.setItemValue(Constants.dataIds.SEARCH_RESULTS, res);
