@@ -1,7 +1,5 @@
-<!-- Loading indicator while data is being fetched -->
-<div *ngIf="loadingService?.loading()">
-  <app-loadal #loadal></app-loadal>
-</div>
+<!-- Loading indicator - always present but only shows when loading -->
+<app-loadal #loadal></app-loadal>
 
 <!-- Main form container - only shown when form is initialized -->
 <div *ngIf="form">
@@ -10,7 +8,8 @@
     <div class="d-flex flex-column align-items-center justify-content-center my-5">
       <!-- Step 1 header with help link -->
       <div class="d-flex align-items-center mb-5">
-        <h5 class="text-center me-2 my-0">Step 1: Select Collection ID</h5>
+        <h5 class="text-center me-2 my-0">Step 1: Select Partition Information
+        </h5>
         <a
           class="p-0"
           href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activity-collections"
@@ -25,28 +24,48 @@
       </div>
       <!-- Collection ID instructions and warnings -->
       <div class="text-center mb-2">
-        Enter the <strong>Collection ID</strong> for the activity you are creating. A <strong>Collection ID</strong> is an
+        Enter the <strong>Collection ID</strong> and <strong>Activity Type</strong> for the activity you are creating. A
+        <strong>Collection ID</strong> is an
         identifier that differentiates groups of activities within the system based on their
         purpose, ownership, or intended audience.
       </div>
       <div class="mb-2">
+        An <strong>Activity Type</strong> is a classification that describes the type of experience being offered by the
+        activity, like camping, day use, boating, etc.
+      </div>
+      <div class="mb-2">
         Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.
       </div>
-      
+
       <!-- Collection ID input field -->
-      <ngds-text-input
-        [control]="form.get('collectionId')"
-        [label]="'Collection ID'"
-        [placeholder]="'Enter Collection ID'"
-        [resetButton]="true"
-        [disabled]="activity?.collectionId"
-      >
-      </ngds-text-input>
+      <div class="row">
+        <div class="col">
+          <ngds-text-input
+            [control]="form.get('collectionId')"
+            [label]="'Collection ID'"
+            [placeholder]="'Enter Collection ID'"
+            [resetButton]="true"
+            [disabled]="activity?.collectionId"
+          >
+          </ngds-text-input>
+        </div>
+        <div class="col">
+          <ngds-typeahead-input
+            [control]="form.get('activityType')"
+            [selectionListItems]="activityTypes"
+            [label]="'Activity Type'"
+            [placeholder]="'Select Activity Type'"
+            [resetButton]="true"
+            [disabled]="activity?.activityType"
+          >
+          </ngds-typeahead-input>
+        </div>
+      </div>
     </div>
   </section>
-  
+
   <hr>
-  
+
   <!-- STEP 2: Mandatory Fields -->
   <section #mandatoryFieldsSection>
     <div class="d-flex flex-column align-items-center justify-content-center my-5">
@@ -65,130 +84,177 @@
           </button>
         </a>
       </div>
-      
+
       <!-- Step 2 instructions -->
       <div class="text-center mb-2">
         Complete the mandatory fields for the activity you are creating. These fields are required to ensure that the
         activity is properly defined and can be used within the system.
       </div>
-      
-      <!-- Protected Area field -->
-      <div class="row w-100">
-        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <!-- Existing activity - show as picklist -->
-          <div *ngIf="activity?.protectedArea; else createProtectedArea">
-            <ngds-text-input
-              [control]="form.get('protectedArea')"
-              [label]="'Protected Area'"
-              [selectionListItems]="protectedAreas"
-              [placeholder]="'Select a protected area'"
-              [resetButton]="true"
-              [disabled]="true"
-            >
-            </ngds-text-input>
-          </div>
-          <!-- New activity - show typeahead for selection -->
-          <ng-template #createProtectedArea>
-            <ngds-typeahead-input
-              [control]="form.get('protectedArea')"
-              [label]="'Protected Area'"
-              [selectionListItems]="protectedAreas"
-              [placeholder]="'Select a protected area'"
-              [resetButton]="true"
-              [disabled]="!form.get('collectionId').value"
-            >
-            </ngds-typeahead-input>
-          </ng-template>
-        </div>
-      </div>
-      
-      <!-- ORCS field (auto-populated from Protected Area) -->
-      <div class="row w-100">
-        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <ngds-number-input
-            [control]="form.get('orcs')"
-            [label]="'ORCS'"
-            [placeholder]="'Enter ORCS for the activity'"
-            [resetButton]="true"
-            [disabled]="true"
-          >
-          </ngds-number-input>
-        </div>
-      </div>
-      
-      <!-- Facility field -->
-      <div class="row w-100">
-        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <!-- Existing activity with facilities -->
-          <div *ngIf="activity?.facilities">
-            <ngds-picklist-input
-              [control]="form.get('facility')"
-              [label]="'Facility'"
-              [selectionListItems]="facilities"
-              [placeholder]="'Select a facility'"
-              [resetButton]="true"
-            >
-            </ngds-picklist-input>
-          </div>
-          
-          <!-- New activity with available facilities -->
-          <div *ngIf="!activity?.facilities && protectedAreas && facilities[0]?.label !== null">
-            <ngds-typeahead-input
-              [control]="form.get('facility')"
-              [label]="'Facility'"
-              [selectionListItems]="facilities"
-              [placeholder]="'Select a facility'"
-              (valueChange)="updateFacility()"
-              [resetButton]="true"
-              [disabled]="!form.get('orcs').value"
-            >
-            </ngds-typeahead-input>
-          </div>
-          
-          <!-- No facilities available - show create facility prompt -->
-          <div *ngIf="!activity?.facilities && (!protectedAreas || facilities[0]?.label === null)" class="alert alert-warning mt-3">
-            No facilities found for the selected Protected Area. Please create a facility first.
-            <br>
-            <button
-              class="btn btn-primary btn-sm mt-2"
-              (click)="navigateCreateFacility()">Create facility</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Display Name field -->
-      <div class="row w-100">
+
+      <!-- Display Name Field -->
+      <div class="row w-100 d-flex justify-content-center mt-3 mb-5">
         <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
           <ngds-text-input
             [control]="form.get('displayName')"
-            [label]="'Display name'"
-            [placeholder]="'Type a display name for the activity'"
+            [label]="'Activity Name'"
+            [placeholder]="'Activity Name'"
             [resetButton]="true"
           >
           </ngds-text-input>
         </div>
       </div>
-      
-      <!-- Activity Type field -->
+
+      <!-- Facilities Field -->
+      <p class="text-center">
+        The activitity must be linked to a geospatial entity within its <strong>Collection ID</strong>, either a
+        facility or a geozone. Select at least one entity from the lists below. If no facilities or geozones are
+        available for the selected <strong>Collection ID</strong>, please create them first.
+      </p>
       <div class="row w-100">
         <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <ngds-picklist-input
-              [control]="form.get('activityType')"
-              [label]="'Activity'"
-              [selectionListItems]="activityTypes"
-              (valueChange)="updateFilteredActivitySubTypes()"
-              [placeholder]="'Select an activity'"
-              [resetButton]="true"
-              [disabled]="this.activity?.activityType"
-            >
-            </ngds-picklist-input>
+          <ngds-typeahead-input
+            [control]="form.get('allFacilities')"
+            [label]="'Add facilities to this activity'"
+            [selectionListItems]="_facilities()"
+            [displaySelectionItems]="'false'"
+            [resetButton]="true"
+            [multiselect]="true"
+            [placeholder]="'Start typing to search facilities...'"
+            [selectionListTemplate]="facilitySelectTemplate"
+            [loadWhile]="facilitiesLoading"
+          >
+          </ngds-typeahead-input>
+
+          <!-- Selected facilites list -->
+          <div class="text-center mt-2">
+            <strong>Selected Facilities</strong>
+          </div>
+          <div
+            *ngIf="!form.get('allFacilities')?.value"
+            class=" border rounded-3 m-4 p-4 text-center text-muted my-2"
+          >
+            No facilities linked to this activity.
+          </div>
+          <div *ngFor="let facility of this.form.get('allFacilities')?.value">
+            <div class="border rounded-3 d-flex justify-content-between">
+              <div class="w-100">
+                <app-facility-list-item [facility]="facility">
+                </app-facility-list-item>
+              </div>
+              <button class="btn btn-outline-danger my-1 me-1" title="Remove facility from this activity">
+                <i
+                  class="fs-5 fa-solid fa-trash me-1"
+                  (click)="removeLinkedFacility(facility)"
+                ></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+          <!-- Dont add geozones for now -->
+          <ngds-typeahead-input
+            [control]="form.get('allGeozones')"
+            [label]="'Add geozones to this activity (coming soon)'"
+            [selectionListItems]="_geozones()"
+            [resetButton]="true"
+            [placeholder]="'Start typing to search geozones...'"
+            [selectionListTemplate]="geozoneSelectTemplate"
+            [disabled]="true"
+          >
+          </ngds-typeahead-input>
+
+          <!-- Selected geozone list -->
+          <div class="mt-2">
+            <div class="text-center">
+              <strong>
+                Selected Geozones:
+              </strong>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
-  
+
+  <ng-template
+    #geozoneSelectTemplate
+    let-matches="matches"
+    let-query="query"
+    let-item="item"
+    let-control="control"
+  >
+  </ng-template>
+
+  <ng-template
+    #facilitySelectTemplate
+    let-matches="matches"
+    let-query="query"
+    let-item="item"
+    let-control="control"
+  >
+    <div
+      *ngIf="matches.length === 0"
+      class="text-center text-muted my-3"
+    >
+      No <strong>{{activity?.collectionId}}</strong> facilities found matching "{{query}}".
+    </div>
+    <div *ngFor="let match of matches">
+      <div
+        class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between facility-select"
+        (click)="selectFacility(match, control)"
+      >
+        <div class="p-3">
+          <div class="mb-1">
+            {{match.display}}
+          </div>
+          <div class="d-flex">
+            <div class="badge bg-primary">
+              Facility
+            </div>
+            <div class="badge bg-secondary ms-1">
+              {{match?.value?.collectionId}}
+            </div>
+            <div class="badge bg-primary ms-1">
+              {{match?.value?.facilityType | titlecase}}
+            </div>
+            <div class="badge bg-secondary ms-1">
+              #{{match?.value?.facilityId || 'N/A'}}
+            </div>
+            <div class="badge bg-light text-muted  border border-1 ms-1">
+              v{{match?.value?.version || 'N/A'}}
+            </div>
+          </div>
+        </div>
+        <div class="p-1">
+
+          <div class="d-flex align-items-center justify-content-center">
+            <div class="border border-1 rounded-3">
+              <div *ngIf="match?.value?.imageUrl">
+                <img
+                  [src]="match?.value?.imageUrl"
+                  alt="image"
+                  width="100%"
+                  height="80px"
+                  style="object-fit: cover;"
+                />
+              </div>
+              <div
+                *ngIf="!match?.value?.imageUrl"
+                class="text-muted d-flex justify-content-center m-4"
+              >
+                No image
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+
   <hr>
-  
+
   <!-- STEP 3: Optional Fields -->
   <section #optionalFieldsSection>
     <div class="d-flex flex-column align-items-center justify-content-center my-5">
@@ -207,13 +273,13 @@
           </button>
         </a>
       </div>
-      
+
       <!-- Step 3 instructions -->
       <div class="text-center mb-2">
         Complete the optional fields for the activity you are creating.
       </div>
     </div>
-    
+
     <div class="row">
       <!-- Left column - Form fields -->
       <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
@@ -226,52 +292,25 @@
             [placeholder]="'Select an activity sub type'"
             [resetButton]="true"
           >
-        </ngds-picklist-input>
-        </div>
-      
-        <!-- Existing activity with geozones -->
-        <div *ngIf="activity?.geozones">
-          <ngds-picklist-input
-            [control]="form.get('geozone')"
-            [label]="'Geozone'"
-            [selectionListItems]="geozones"
-            [placeholder]="'Select a geozone'"
-            (valueChange)="updateCurrentMapMarker()"
-            [resetButton]="true"
-          >
           </ngds-picklist-input>
         </div>
-        
-        <!-- New activity with available geozones -->
-        <div *ngIf="!activity?.geozones && protectedAreas && geozones[0]?.label !== null">
-          <ngds-typeahead-input
-            [control]="form.get('geozone')"
-            [label]="'Geozone'"
-            [selectionListItems]="geozones"
-            [placeholder]="'Select a geozone'"
-            (valueChange)="updateCurrentMapMarker()"
-            [resetButton]="true"
-            [disabled]="!form.get('orcs').value"
-          >
-          </ngds-typeahead-input>
-        </div>
-        
-        <!-- No geozones available - show create geozone prompt -->
-        <div *ngIf="!activity?.geozones && (!protectedAreas || geozones[0]?.label === null)" class="alert alert-warning mt-3">
-          No geozones found for this area. Create a geozone for this protected area.
-          <br>
-          <button
-            class="btn btn-primary btn-sm mt-2"
-            (click)="navigateCreateGeozone()">Create geozone</button>
-        </div>
-        
+
         <!-- Public visibility toggle -->
         <ngds-toggle-input
           [control]="form.get('isVisible')"
           [switch]="true"
           [label]="'Toggle public visibility of the activity. If unchecked, the activity will not be visible to public users.'"
         ></ngds-toggle-input>
-        
+
+        <!-- ORCS -->
+        <ngds-text-input
+          [control]="form.get('orcs')"
+          [label]="'ORCS'"
+          [placeholder]="'Enter ORCS of the parent protected area'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+
         <!-- Activity description -->
         <ngds-text-input
           [control]="form.get('description')"
@@ -281,7 +320,7 @@
           [resetButton]="true"
         >
         </ngds-text-input>
-        
+
         <!-- Search terms component -->
         <app-search-terms
           #searchTerms
@@ -289,7 +328,7 @@
           (searchTermsChange)="onSearchTermsChange($event)"
           (searchTermDirty)="onSearchTermDirty()"
         ></app-search-terms>
-        
+
         <!-- Administrative notes -->
         <ngds-text-input
           [control]="form.get('adminNotes')"
@@ -300,23 +339,7 @@
         >
         </ngds-text-input>
       </div>
-      
-      <!-- Center column - Map component -->
-      <div class="col-lg-6 d-flex flex-column text-center justify-content-center align-items-center">
-        <div class="my-2 h-100 w-100">
-          <div class="position-sticky sticky-top mt-2">
-            <h5>Geospatial information</h5>
-            <div class="w-100 border rounded-5 h-100 overflow-hidden">
-              <app-map
-                #mapComponent
-                [_markers]="_locationMarkers"
-                [_polygons]="_envelopeMarkers"
-              ></app-map>
-            </div>
-          </div>
-        </div>
-      </div>
-      
+
       <!-- Right column - Image preview -->
       <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
         <!-- Image URL input -->
@@ -327,7 +350,7 @@
           [resetButton]="true"
         >
         </ngds-text-input>
-        
+
         <!-- Image preview container -->
         <div
           class="w-100 rounded-5 mt-2 border text-center text-muted d-flex align-items-center justify-content-center"
@@ -345,6 +368,5 @@
       </div>
     </div>
   </section>
-  
   <hr>
 </div>

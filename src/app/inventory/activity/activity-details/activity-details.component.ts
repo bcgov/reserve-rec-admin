@@ -8,11 +8,12 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { ActivityService } from '../../../services/activity.service';
 import { Constants } from '../../../app.constants';
 import { FacilityService } from '../../../services/facility.service';
+import { FacilityListItemComponent } from '../../facility/facility-list-item/facility-list-item.component';
 
 @Component({
   selector: 'app-activity-details',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe, DatePipe, MapComponent],
+  imports: [CommonModule, UpperCasePipe, DatePipe, MapComponent, FacilityListItemComponent],
   templateUrl: './activity-details.component.html',
   styleUrl: './activity-details.component.scss',
   providers: [BsModalService]
@@ -47,7 +48,6 @@ export class ActivityDetailsComponent {
         this.activity = data['activity'];
         // Refresh geozone data when activity changes
         this.getGeozoneData();
-        this.getFacility();
       }
     });
   }
@@ -66,14 +66,6 @@ export class ActivityDetailsComponent {
         console.error('Error fetching geozone data:', error);
       }
     }
-  }
-
-  async getFacility() {
-    const collectionId = this.activity?.facilities?.pk.split('::')[1];
-    const facilityType = this.activity?.facilities?.sk.split('::')[0];
-    const facilityId = this.activity?.facilities?.sk.split('::')[1];
-    const facility = await this.facilityService.getFacility(collectionId, facilityType, facilityId);
-    this.facility = facility.displayName || null;
   }
 
   getActivityTypeOption() {

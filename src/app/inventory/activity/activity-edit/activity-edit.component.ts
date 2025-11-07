@@ -24,7 +24,7 @@ export class ActivityEditComponent {
     }
   }
 
-    updateActivityForm(event) {
+  updateActivityForm(event) {
     this.activityForm = event;
   }
 
@@ -36,7 +36,7 @@ export class ActivityEditComponent {
     const activityId = this.activity?.activityId || this.activityForm?.get('activityId')?.value;
 
     if (!collectionId || !activityType || !activityId) {
-      console.error('Missing required collection ID or ORCS values');
+      console.error('Missing required collection ID, activityType, or activityId values');
       return;
     }
 
@@ -44,8 +44,8 @@ export class ActivityEditComponent {
 
     const res = await this.activityService.updateActivity(collectionId, activityType, activityId, payload);
     // get newly created activityId from response
-    if (activityId) {
-      this.navigateToActivity(collectionId, activityType, activityId);
+    if (res?.activityId) {
+      this.navigateToActivity(collectionId, activityType, res?.activityId);
     }
   }
 
@@ -65,22 +65,17 @@ export class ActivityEditComponent {
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
     // Delete facility and geozone form values that aren't a {pk, sk} pair
-    delete props['facility'];
-    delete props['geozone'];
-    
-    // Assign the {pk, sk} values to the form values instead
-    props['geozone'] = this.activityForm.get('geozonePkSk')?.value
-    props['facilities'] = this.activityForm.get('facilityPkSk')?.value
+    delete props['allFacilities'];
+    delete props['allGeozones'];
 
     // Handle search terms to be a comma-separated string
-    props['searchTerms'] = this.activityForm.get('searchTerms')?.value.join(',') || '';
-    
+    if (this.activityForm.get('searchTerms')?.value) {
+      props['searchTerms'] = this.activityForm.get('searchTerms')?.value?.join(',') || '';
+    }
+
     // Remove other form values that are not needed for submission
-    delete props['geozonePkSk'];
-    delete props['facilityPkSk'];
-    delete props['protectedArea'];
     delete props['collectionId'];
-    
+
     return props;
   }
 

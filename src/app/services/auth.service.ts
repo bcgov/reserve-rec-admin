@@ -22,7 +22,7 @@ export class AuthService {
     console.log('this.configService.config:', this.configService.config);
     console.time('timer');
     if (this.configService.config.ENVIRONMENT === 'local' || !this.configService.config['COGNITO_REDIRECT_URI']) {
-      this.reDirectValues = 'http://localhost:4300';
+      this.reDirectValues = 'http://localhost:4200';
     } else {
       this.reDirectValues = this.configService.config['COGNITO_REDIRECT_URI'];
     }
@@ -142,9 +142,7 @@ export class AuthService {
   }
 
   public get jwtToken() {
-    console.log('getting token');
     const currentSession = this.session();
-    console.log('currentSession:', currentSession);
     return currentSession?.tokens?.accessToken?.toString() || null;
   }
 

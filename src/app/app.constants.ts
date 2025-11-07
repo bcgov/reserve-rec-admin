@@ -67,6 +67,12 @@ export class Constants {
   };
 
   public static readonly activityTypes = {
+    noType: {
+      display: 'No Type',
+      value: 'noType',
+      iconClass: 'fa-solid fa-campground',
+      subTypes: {}
+    },
     frontcountryCamp: {
       display: 'Frontcountry Camping',
       value: 'frontcountryCamp',
@@ -132,7 +138,7 @@ export class Constants {
         fullCircuit: { display: 'Full Circuit', value: 'fullCircuit', iconClass: 'fa-solid fa-water' }
       }
     }
-  }
+  };
 
   public static readonly timezones = [
     { value: 'America/Vancouver', display: 'America/Vancouver (Pacific Time, PST/PDT)' },

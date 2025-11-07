@@ -97,58 +97,29 @@
   <div class="row">
     <div class="col-md-6">
       <h4 class="mb-3">Facilities Details</h4>
+      <div class="mb-3">
+        This activity is associated with the following facilities:
+      </div>
       <div class="mb-2">
         <div class="row">
-          <div class="col-auto">
-            <strong class="me-1">Facility Name: </strong>
-          </div>
-          <div class="col">
-            <span>{{facility || 'No facility name available.'}}</span>
-          </div>
+          <app-facility-list-item
+            *ngFor="let facility of activity?.facilities"
+            [facility]="facility"
+          ></app-facility-list-item>
         </div>
       </div>
     </div>
-  </div>
-</section>
-<hr>
-
-<section class="container">
-  <div class="row">
     <div class="col-md-6">
-      <h4 class="mb-3">Geospatial Details</h4>
-      <div *ngIf="activity?.geozone; else noGeozone">
-        <div class="mb-2">
-          <div class="row">
-            <div class="col-auto">
-              <strong class="me-1">Location: </strong>
-            </div>
-            <div class="col">
-              <span>{{location?.coordinates[1] || 'Invalid latitude.'}}, {{location?.coordinates[0] || 'Invalid longitude'}}</span>
-            </div>
-          </div>
-        </div>
-        <div class="mb-2">
-          <div class="row">
-            <div class="col-auto">
-              <strong class="me-1">Envelope: </strong>
-            </div>
-            <div class="col">
-              <div *ngFor="let coord of envelope?.coordinates">{{coord[1] || 'Invalid latitude.'}}, {{coord[0] ||
-                'Invalid longitude'}}</div>
-            </div>
-          </div>
-        </div>
+      <h4 class="mb-3">Geozones Details</h4>
+      <div class="mb-3">
+        This activity is associated with the following geozones:
       </div>
-      <ng-template #noGeozone>
-        <div class="alert alert-warning" role="alert">
-          No geozone assigned to this activity.
+      <div class="mb-2">
+        <div class="row">
+          <div class="d-flex align-items-center justify-content-center border rounded-3 py-3">
+            Coming soon...
+          </div>
         </div>
-      </ng-template>
-    </div>
-    <div class="col-md-6">
-      <h4 class="mb-3">Map</h4>
-      <div class="border rounded-5 overflow-hidden">
-        <app-map #mapComponent [_markers]="_markers" [_polygons]="_envelope" [showGrips]="false"></app-map>
       </div>
     </div>
   </div>
@@ -189,8 +160,8 @@
 >
   <div
     class="badge d-flex align-items-center rounded-pill px-2"
-    [class.bg-secondary]="!isSubtype"
-    [class.bg-info]="isSubtype"
+    [class.bg-danger]="!isSubtype"
+    [class.bg-red-300]="isSubtype"
     [class.text-dark]="isSubtype"
   >
     <i
