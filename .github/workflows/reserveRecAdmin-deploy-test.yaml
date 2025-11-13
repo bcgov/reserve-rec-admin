@@ -111,5 +111,5 @@ jobs:
           DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           echo "Invalidating CloudFront Distribution ID: $DISTRIBUTION_ID"
-          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*" --caller-reference "${{ github.run_id }}-${{ github.sha }}"
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
 
