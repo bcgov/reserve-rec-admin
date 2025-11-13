@@ -1,8 +1,10 @@
-name: LZA Deploy Reserve Rec Admin Dev
+name: Deploy ReserveRecAdmin Dev
 
-run-name: Deploying ${{ github.ref_name }} to lzadev
+run-name: Deploying ${{ github.ref_name }} (Admin) to ReserveRecAdmin Dev Environment
 
 on:
+  push:
+    branches: [main, multistack]
   workflow_dispatch:
 
 permissions:
@@ -10,23 +12,31 @@ permissions:
   contents: read
 
 concurrency:
-  group: lza-deploy-reserve-rec-admin
+  group: deploy-reserve-rec-admin
   cancel-in-progress: false
 
 env:
-  STACK_NAME: ${{ vars.STACK_NAME }}
   S3_BUCKET: ${{ vars.S3_BUCKET }}
-  ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: lzadev
+    environment: reserveRecAdminDev
     strategy:
       max-parallel: 1
       matrix:
         node-version: [20.x]
     steps:
+      ### Restore cdk.out cache
+      - name: Restore cdk.out cache
+        uses: actions/cache@v4
+        with:
+          path: cdk.out
+          # a static cache key is fine since cdk deploy will overwrite files as needed
+          key: ${{ runner.os }}-dev-cdk-out
+          restore-keys: |
+            ${{ runner.os }}-dev-cdk-out
+
       ### Checkout GitHub Repo
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -44,15 +54,16 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      ### CDK Synth
-      - name: CDK Synth
-        run: cdk synth
-
       ## CDK Deploy
       - name: CDK Deploy
-        run: |
-          echo "Deploying $STACK_NAME"
-          cdk deploy $STACK_NAME --require-approval never --rollback
+        run: export LOG_LEVEL=debug && cdk deploy -c @context=dev --all --require-approval never --rollback
+
+      ### Save cdk.out cache
+      - name: Save cdk.out cache
+        uses: actions/cache@v4
+        with:
+          path: cdk.out
+          key: ${{ runner.os }}-dev-cdk-out
 
       ### Install if no cache exists ###
       - name: Setup node
