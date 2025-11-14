@@ -81,8 +81,8 @@
       "IS_OFFLINE": "false",
       "FAIL_FAST": "false"
     },
-    "staging": {
-      "DEPLOYMENT_NAME": "staging",
+    "test": {
+      "DEPLOYMENT_NAME": "test",
       "AWS_REGION": "ca-central-1",
       "IS_OFFLINE": "false",
       "FAIL_FAST": "false"
