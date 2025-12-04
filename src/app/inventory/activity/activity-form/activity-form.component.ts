@@ -145,7 +145,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
       if (!facilities) {
         facilities = [];
       }
-      let formValue = facilities.map(f => {
+      const formValue = facilities.map(f => {
         return {
           pk: f.pk,
           sk: f.sk
@@ -295,9 +295,9 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
 
   updateFacilitiesList() {
     if (this.activity?.facilities?.length > 0) {
-      let linkedFacilitiesSet = new Set();
+      const linkedFacilitiesSet = new Set();
       for (const facility of this.activity.facilities) {
-        let fullFacility = this._facilities().find(f => f.value.pk === facility.pk && f.value.sk === facility.sk);
+        const fullFacility = this._facilities().find(f => f.value.pk === facility.pk && f.value.sk === facility.sk);
         if (fullFacility) {
           linkedFacilitiesSet.add(fullFacility.value);
         }
