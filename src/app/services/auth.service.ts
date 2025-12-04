@@ -52,7 +52,7 @@ export class AuthService {
     let idpName = '';
     if (provider === 'idir') idpName = 'ReserveRecCdkStazureIDIRE9710E8C';
     else if (provider === 'bceid') idpName = 'BCEID';
-    else if (provider === 'bcsc') idpName = 'ReserveRecCdkStackBCSC91AD0D61';
+    else if (provider === 'bcsc') idpName = 'BCSC';
     else return;
     // Use Amplify's signInWithRedirect method to initiate the OAuth flow instead of custome method
     signInWithRedirect({ provider: { custom: idpName } });
