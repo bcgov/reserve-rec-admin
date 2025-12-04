@@ -14,6 +14,14 @@ describe('FacilityListItemComponent', () => {
 
     fixture = TestBed.createComponent(FacilityListItemComponent);
     component = fixture.componentInstance;
+  
+    component.facility = {
+      collectionId: 'test-collection',
+      facilityType: 'trail',
+      facilityId: 'test-facility-123',
+      displayName: 'Test Facility'
+    };
+    
     fixture.detectChanges();
   });
 

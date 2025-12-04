@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { LoadalComponent } from './loadal.component';
+import { ConfigService } from '../../../services/config.service';
 
 describe('LoadalComponent', () => {
   let component: LoadalComponent;
@@ -8,7 +10,8 @@ describe('LoadalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoadalComponent]
+      imports: [LoadalComponent, HttpClientTestingModule],
+      providers: [ConfigService]
     })
     .compileComponents();
 

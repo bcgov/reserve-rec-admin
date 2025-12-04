@@ -141,10 +141,9 @@
                 <app-facility-list-item [facility]="facility">
                 </app-facility-list-item>
               </div>
-              <button class="btn btn-outline-danger my-1 me-1" title="Remove facility from this activity">
+              <button class="btn btn-outline-danger my-1 me-1" title="Remove facility from this activity" (click)="removeLinkedFacility(facility)">
                 <i
                   class="fs-5 fa-solid fa-trash me-1"
-                  (click)="removeLinkedFacility(facility)"
                 ></i>
               </button>
             </div>
@@ -203,6 +202,8 @@
       <div
         class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between facility-select"
         (click)="selectFacility(match, control)"
+        (keydown.enter)="selectFacility(match, control)"
+        tabindex="0"
       >
         <div class="p-3">
           <div class="mb-1">

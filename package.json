@@ -6,14 +6,16 @@
   },
   "scripts": {
     "cdk": "cdk",
-    "test": "jest",
     "build": "ng build",
     "start": "ng serve",
     "synth:local": "cdk synth -c @context=local --all",
     "synth:dev": "cdk synth -c @context=dev --all",
     "synth:test": "cdk synth -c @context=test --all",
     "deploy:dev": "cdk deploy -c @context=dev --all",
-    "deploy:test": "cdk deploy -c @context=test --all"
+    "deploy:test": "cdk deploy -c @context=test --all",
+    "lint": "ng lint",
+    "test": "jest",
+    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
