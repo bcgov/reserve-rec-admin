@@ -35,7 +35,7 @@ export class PolicyCreateSelectorComponent implements AfterViewChecked {
     if (!policyType) {
       policyType = this.getPolicyTypeFromUrl().toLowerCase();
     }
-    return `fa-solid ${Constants.policyTypes[policyType]?.iconClass}` || 'fa-solid fa-question';
+    return `fa-solid` + (Constants.policyTypes[policyType]?.iconClass || 'fa-solid fa-question');
   }
 
   getPolicyTypeFromUrl() : string {
