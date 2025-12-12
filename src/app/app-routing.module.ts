@@ -2,9 +2,9 @@ import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
-import { ProtectedAreasResolver } from './resolvers/protected-areas.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
 import { ActivityResolver } from './resolvers/activity.resolver';
+import { policyResolver } from './resolvers/policy.resolver';
 
 export const routes: Routes = [
   {
@@ -111,6 +111,28 @@ export const routes: Routes = [
         path: 'edit',
         loadComponent: () => import('./inventory/activity/activity-edit/activity-edit.component').then(mod => mod.ActivityEditComponent),
         canActivate: [UserGuard],
+      }
+    ]
+  },
+  {
+    path: 'inventory/policy/:policyType/:policyId',
+    loadComponent: () => import('./inventory/policy/policy.component').then(mod => mod.PolicyComponent),
+    canActivate: [UserGuard],
+    resolve: { policy: policyResolver },
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        redirectTo: 'latest',
+        pathMatch: 'full'
+      },
+      {
+        path: ':policyIdVersion',
+        loadComponent: () => import('./inventory/policy/policy-details/policy-details.component').then(mod => mod.PolicyDetailsComponent),
+        resolve: { policy: policyResolver },
+        canActivate: [UserGuard],
+        children: [
+        ]
       }
     ]
   },
