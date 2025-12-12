@@ -11,6 +11,7 @@ export class Constants {
     FACILITIES_RESULT: 'facilitiesResult',
     PROTECTED_AREA_RESULT: 'protectedAreaResult',
     PROTECTED_AREAS_RESULT: 'protectedAreasResult',
+    POLICY_RESULT: 'policyResult',
   };
 
   public static readonly timeZoneIANA = 'America/Vancouver';
@@ -139,6 +140,29 @@ export class Constants {
       }
     }
   };
+
+  public static readonly policyTypes = {
+    booking: {
+      display: 'Booking',
+      value: 'booking',
+      iconClass: 'fa-solid fa-calendar-check'
+    },
+    change: {
+      display: 'Change',
+      value: 'change',
+      iconClass: 'fa-solid fa-arrow-right-arrow-left'
+    },
+    party: {
+      display: 'Party',
+      value: 'party',
+      iconClass: 'fa-solid fa-people-group'
+    },
+    fee: {
+      display: 'Fee',
+      value: 'fee',
+      iconClass: 'fa-solid fa-hand-holding-dollar'
+    }
+  }
 
   public static readonly timezones = [
     { value: 'America/Vancouver', display: 'America/Vancouver (Pacific Time, PST/PDT)' },

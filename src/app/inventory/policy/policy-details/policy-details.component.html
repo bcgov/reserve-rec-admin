@@ -1,0 +1,292 @@
+<!-- Booking Policy Details -->
+<section>
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Summary</h4>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Global ID: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{policy?.globalId}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Display name: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{policy?.displayName}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Policy type: </strong>
+        </div>
+        <div class="col-auto">
+          <div
+            class="badge text-dark"
+            [ngClass]="getPolicyColour()"
+          >
+            <i [ngClass]="getPolicyIcon()"></i>
+            <span>{{policy?.policyType}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Policy ID: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{policy?.policyId}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Policy version: </strong>
+        </div>
+        <div class="col-auto">
+          <div class="badge bg-light text-dark border rounded-pill">
+            <div class="mb-0">v{{policy?.policyIdVersion}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Latest version?: </strong>
+        </div>
+        <div class="col-auto">
+          <div *ngIf="policy?.sk === 'latest'">
+            <div class="ms-1 badge bg-success rounded-pill d-flex">
+              <i class="fa-solid fa-star me-1"></i>
+              <div class="mb-0">LATEST</div>
+            </div>
+          </div>
+          <div *ngIf="policy?.sk !== 'latest'">
+            <div class="ms-1 badge bg-secondary rounded-pill d-flex">
+              <i class="fa-solid fa-clock me-1"></i>
+              <div class="mb-0">NOT LATEST</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Created at: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{policy?.creationDate | date:'medium'}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-3">
+          <strong class="me-1">Last updated: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{policy?.lastUpdated | date:'medium'}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <h5 class="mt-3">Description</h5>
+    <p>{{policy?.description || 'No description available.'}}</p>
+    <h5 class="mt-3">Search Terms</h5>
+    <p>{{policy?.searchTerms || 'No search terms available.'}}</p>
+    <h5 class="mt-3">Admin Notes</h5>
+    <p>{{policy?.adminNotes || 'No adminNotes available.'}}</p>
+  </div>
+</section>
+
+<hr />
+
+<section *ngIf="policy?.policyType === 'booking'">
+  <div class="row">
+    <h4 class="mb-3">Reservation window information</h4>
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <div class="col-auto">
+          <strong class="me-1">Reservation window type: </strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-policy-booking">
+            <i class="me-1 fa-solid fa-calendar-plus"></i>
+            {{policy?.reservationWindowType || 'No reservation window type available.'}}
+          </span>
+        </div>
+      </div>
+      <div
+        *ngIf="policy?.reservationWindowType === 'rolling'"
+        class="col-md-3"
+      >
+        <div class="col-auto">
+          <strong class="me-1">Rolling window duration: </strong>
+        </div>
+        <div class="col-auto">
+          <div *ngFor="let unit of getDurationUnitArray(policy?.rollingWindowOpenDuration)">
+            <strong>{{unit?.value}}</strong> {{unit?.name}} &nbsp;
+          </div>
+        </div>
+      </div>
+      <div
+        *ngIf="policy?.reservationWindowType === 'fixed'"
+        class="col-md-3"
+      >
+        <div>
+          <strong class="me-1">Fixed launch date: </strong>
+        </div>
+        <div>{{policy?.fixedWindowLaunchDate | date: 'mediumDate'}}</div>
+      </div>
+      <div class="col-md-3">
+        <div>
+          <strong class="me-1">Reservations open at: </strong>
+        </div>
+        <div>{{formatTime(policy?.reservationOpeningTime)}} (24H)</div>
+      </div>
+      <div class="col-md-3">
+        <div>
+          <strong class="me-1">Reservations close at: </strong>
+        </div>
+        <div>{{formatTime(policy?.reservationClosingTime)}} (24H)</div>
+      </div>
+    </div>
+    <div class="row">
+      <p *ngIf="policy?.reservationWindowType === 'rolling'">
+        Reservations open at <strong>{{formatTime(policy?.reservationOpeningTime)}}</strong> up to
+        <strong>{{formatDuration(policy?.rollingWindowOpenDuration)}}</strong> before the desired arrival date, and close at
+        <strong>{{formatTime(policy?.reservationClosingTime)}}</strong> on the desired arrival date.
+      </p>
+      <p *ngIf="policy?.reservationWindowType === 'fixed'">
+        Reservations open at <strong>{{formatTime(policy?.openBookingTime)}}</strong> on
+        <strong>{{policy?.fixedWindowLaunchDate
+          | date: 'mediumDate'}}</strong>, and close at <strong>{{formatTime(policy?.reservationClosingTime)}}</strong> on the
+        desired arrival
+        date.
+      </p>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <h4 class="mb-3">Check-in window information</h4>
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <div>
+          <strong class="me-1">Check-in after: </strong>
+        </div>
+        <div>{{formatTime(policy?.checkInTime)}} (24H) on the arrival date.</div>
+      </div>
+      <div class="col-md-3">
+        <div>
+          <strong class="me-1">Check-out before: </strong>
+        </div>
+        <div>{{formatTime(policy?.checkOutTime)}} (24H) on the departure date.</div>
+      </div>
+      <div class="col-md-3">
+        <div>
+          <strong class="me-1">No-show time: </strong>
+        </div>
+        <div>{{formatTime(policy?.noShowTime)}} on the arrival date.
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <p>
+        Guests can check in after <strong>{{formatTime(policy?.checkInTime)}}</strong> on the arrival date, and must check out
+        before <strong>{{formatTime(policy?.checkOutTime)}}</strong> on the departure date. No-shows are recorded after
+        <strong>{{formatTime(policy?.noShowTime)}}</strong> on the arrival date.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section *ngIf="policy?.policyType === 'change'">
+  <div class="row">
+    <h4 class="mb-3">Change policy information</h4>
+    <div class="col">
+      <div>
+        <strong class="me-1">Are changes allowed?: </strong>
+      </div>
+      <div>{{policy?.areChangesAllowed}}</div>
+    </div>
+    <div
+      *ngIf="policy?.areChangesAllowed"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">Change window duration: </strong>
+      </div>
+      <div>{{formatDuration(policy?.changeWindowDuration)}} before the desired arrival date</div>
+    </div>
+    <div
+      *ngIf="policy?.areChangesAllowed"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">Changes allowed until: </strong>
+      </div>
+      <div>{{formatTime(policy?.changesAcceptedUntil)}} on the desired arrival date</div>
+    </div>
+    <div
+      *ngIf="policy?.areChangesAllowed"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">Cancellations allowed until: </strong>
+      </div>
+      <div>{{formatTime(policy?.cancellationsAcceptedUntil)}} on the desired arrival date</div>
+    </div>
+    <div
+      *ngIf="!policy?.areChangesAllowed"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">No changes are allowed for reservations under this policy.</strong>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <h4 class="mb-3">Change penalites</h4>
+    <div class="col">
+      <div>
+        <strong class="me-1">Is the change fee waived?: </strong>
+      </div>
+      <div>{{policy?.isChangeFeeWaivedInWindow}}</div>
+    </div>
+
+    <div
+      *ngIf="!policy?.isChangeFeeWaivedInWindow"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">Nights forfeit if change within change window?: </strong>
+      </div>
+      <div>{{policy?.changeInWindowNightsForfeit}}</div>
+    </div>
+    <div
+      *ngIf="!policy?.isChangeFeeWaivedInWindow"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">Nights forfeit if change on day of arrival: </strong>
+      </div>
+      <div>{{policy?.changeSameDayNightsForfeit}}</div>
+    </div>
+    <div
+      *ngIf="policy?.isChangeFeeWaivedInWindow"
+      class="col"
+    >
+      <div>
+        <strong class="me-1">No change penalties apply to this policy.</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr />
+<section>
+  <div class="row">
+    <h4 class="mb-3">Raw data</h4>
+    <pre>{{policy | json}}</pre>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<section class="container justify-content-center my-5">
+  <h4 *ngIf="!getPolicyTypeFromUrl()">Create New Policy</h4>
+  <div *ngIf="showSelectionOptions()">
+
+    <div class="mb-3">
+      Select the type of policy you want to create:
+    </div>
+    <div class="row mb-3">
+      <div class="btn-group gap-4">
+        <div class="col">
+          <app-create-inventory-selector
+            class="col-md-4 mb-3 "
+            title="BOOKING"
+            titleClasses="bg-policy-booking rounded-pill text-dark"
+            description="Booking policies define the rules around how and when users can reserve inventory, including booking windows, lead times, and more."
+            link="/inventory/create/policy/booking"
+            [icon]="getPolicyIcon('booking')"
+          ></app-create-inventory-selector>
+        </div>
+        <div class="col">
+          <app-create-inventory-selector
+            class="col-md-4 mb-3"
+            title="CHANGE"
+            titleClasses="bg-policy-change rounded-pill"
+            description="Change policies outline the rules associated with modifying existing reservations, including timeframes and allowable changes and cancellations."
+            [icon]="getPolicyIcon('change')"
+            link="/inventory/create/policy/change"
+          ></app-create-inventory-selector>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="btn-group gap-4">
+        <div class="col">
+          <app-create-inventory-selector
+            class="col-md-4 mb-3"
+            title="PARTY"
+            titleClasses="bg-policy-party rounded-pill"
+            description="Party policies set the guidelines for group sizes and compositions, including maximum party sizes and allowable age distributions."
+            [icon]="getPolicyIcon('party')"
+            link="/inventory/create/policy/party"
+          ></app-create-inventory-selector>
+        </div>
+        <div class="col">
+          <app-create-inventory-selector
+            class="col-md-4 mb-3 "
+            title="FEE"
+            titleClasses="bg-policy-fee rounded-pill"
+            description="Fee policies specify the pricing structures and fee schedules associated with inventory items, including base fees, additional charges, and discounts."
+            [icon]="getPolicyIcon('fee')"
+            link="/inventory/create/policy/fee"
+          ></app-create-inventory-selector>
+        </div>
+      </div>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+</section>
