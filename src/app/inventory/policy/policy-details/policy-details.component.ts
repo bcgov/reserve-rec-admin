@@ -40,9 +40,9 @@ export class PolicyDetailsComponent {
 
     getPolicyIcon(policyType = null) {
     if (!policyType) {
-      policyType = this.policy.policyType;
+      policyType = this.policy?.policyType;
     }
-    return `fa-solid me-1 fa-xl ` + (Constants.policyTypes[policyType].iconClass || 'fa-solid fa-question me-1 fa-xl');
+    return `fa-solid me-1 fa-xl ` + (Constants.policyTypes?.[policyType]?.iconClass || 'fa-solid fa-question me-1 fa-xl');
   }
 
 
