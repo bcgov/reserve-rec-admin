@@ -47,7 +47,7 @@ export class PolicyComponent implements AfterViewInit {
     if (!policyType) {
       policyType = this.data?.policyType;
     }
-    return `fa-solid me-1 fa-xl ${Constants.policyTypes[policyType]?.iconClass}` || 'fa-solid fa-question me-1 fa-xl';
+    return `fa-solid me-1 fa-xl ` + (Constants.policyTypes[policyType].iconClass || 'fa-solid fa-question me-1 fa-xl');
   }
 
   getPolicyTypeOption() { }

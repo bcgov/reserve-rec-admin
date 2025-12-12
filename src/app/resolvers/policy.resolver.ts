@@ -5,7 +5,7 @@ import { inject } from '@angular/core';
 export const policyResolver: ResolveFn<any> = async (route: ActivatedRouteSnapshot, router: RouterStateSnapshot) => {
   const policyService = inject(PolicyService);
 
-  let params = {};
+  const params = {};
   let currentRoute = router.root
 
   // Get all parameters from the route
