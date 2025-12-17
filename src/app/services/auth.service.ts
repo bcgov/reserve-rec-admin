@@ -50,7 +50,7 @@ export class AuthService {
 
   loginWithProvider(provider: string) {
     let idpName = '';
-    if (provider === 'idir') idpName = 'ReserveRecCdkStazureIDIRE9710E8C';
+    if (provider === 'idir') idpName = 'IDIR';
     else if (provider === 'bceid') idpName = 'BCEID';
     else if (provider === 'bcsc') idpName = 'BCSC';
     else return;
