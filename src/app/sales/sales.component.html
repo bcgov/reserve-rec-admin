@@ -1,34 +1,330 @@
-<div class="container">
-
+<div class="container-fluid sales-container">
+  <!-- Header Section -->
   <div class="row mb-4">
-    <div class="col-md-6">
-      <h5>Location</h5>
-      <select class="form-select" aria-label="Select location">
-        <option selected>All</option>
-      </select>
+    <div class="col">
+      <h1 class="page-title">Sales & Bookings Management</h1>
+      <p class="text-muted">Search and manage all booking records</p>
     </div>
-    <div class="col-md-6">
-      <h5>Date</h5>
-      <div class="d-flex">
-        <select class="form-select me-2" aria-label="Start date">
-          <option selected>Start Date</option>
-        </select>
-        <select class="form-select" aria-label="End date">
-          <option selected>End Date</option>
-        </select>
+  </div>
+
+  <!-- Search Mode Toggle -->
+  <div class="row mb-3">
+    <div class="col">
+      <div class="btn-group" role="group" aria-label="Search mode">
+        <button 
+          type="button" 
+          class="btn" 
+          [class.btn-primary]="searchMode === 'filters'"
+          [class.btn-outline-primary]="searchMode !== 'filters'"
+          (click)="toggleSearchMode('filters')">
+          <i class="bi bi-funnel"></i> Filter Search
+        </button>
+        <button 
+          type="button" 
+          class="btn"
+          [class.btn-primary]="searchMode === 'keyword'"
+          [class.btn-outline-primary]="searchMode !== 'keyword'"
+          (click)="toggleSearchMode('keyword')">
+          <i class="bi bi-search"></i> Keyword Search
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="row align-items-center mb-4">
-    <div class="col">
-      <h2 class="text-primary">{{ numberOfPermits }}</h2>
-      <h3>Permits Booked</h3>
-    </div>
-    <div class="col d-flex justify-content-end">
-      <button class="btn btn-outline-primary me-2" (click)="seeAll()">See All</button>
-      <button class="btn btn-primary" (click)="createNew()">Create New</button>
+  <!-- Keyword Search Section -->
+  <div class="row mb-4" *ngIf="searchMode === 'keyword'">
+    <div class="col-md-8">
+      <div class="input-group input-group-lg">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Search bookings by any keyword (email, name, booking ID, etc.)..." 
+          [(ngModel)]="filters.keyword"
+          (input)="onKeywordChange(filters.keyword || '')"
+          [disabled]="isLoading">
+        <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()" [disabled]="isLoading">
+          <i class="bi bi-x-circle"></i> Clear
+        </button>
+      </div>
+      <small class="text-muted">Searches across all booking fields using OpenSearch</small>
     </div>
   </div>
 
+  <!-- Filter Search Section -->
+  <div class="filter-panel" *ngIf="searchMode === 'filters' && showFilters">
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="bookingIdInput" class="form-label fw-bold">Booking ID</label>
+        <input 
+          id="bookingIdInput"
+          type="text" 
+          class="form-control" 
+          placeholder="Specific booking ID" 
+          [(ngModel)]="filters.bookingId"
+          [disabled]="isLoading">
+      </div>
+      <div class="col-md-3">
+        <label for="collectionIdInput" class="form-label fw-bold">Collection ID</label>
+        <input 
+          id="collectionIdInput"
+          type="text" 
+          class="form-control" 
+          placeholder="e.g., bcparks_123" 
+          [(ngModel)]="filters.collectionId"
+          [disabled]="isLoading">
+        <small class="text-muted">Comma-separated for multiple</small>
+      </div>
+      <div class="col-md-3">
+        <label for="activityTypeSelect" class="form-label fw-bold">Activity Type</label>
+        <select id="activityTypeSelect" class="form-select" [(ngModel)]="filters.activityType" [disabled]="isLoading">
+          <option [ngValue]="undefined">All Types</option>
+          <option *ngFor="let type of activityTypeOptions" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="activityIdInput" class="form-label fw-bold">Activity ID</label>
+        <input 
+          id="activityIdInput"
+          type="text" 
+          class="form-control" 
+          placeholder="Specific activity ID" 
+          [(ngModel)]="filters.activityId"
+          [disabled]="isLoading">
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="startDateInput" class="form-label fw-bold">Start Date</label>
+        <input 
+          id="startDateInput"
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="filters.startDate"
+          [disabled]="isLoading">
+      </div>
+      <div class="col-md-3">
+        <label for="endDateInput" class="form-label fw-bold">End Date</label>
+        <input 
+          id="endDateInput"
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="filters.endDate"
+          [disabled]="isLoading">
+      </div>
+      <div class="col-md-2">
+        <label for="sortBySelect" class="form-label fw-bold">Sort By</label>
+        <select id="sortBySelect" class="form-select" [(ngModel)]="filters.sortBy" [disabled]="isLoading">
+          <option value="startDate">Start Date</option>
+          <option value="endDate">End Date</option>
+          <option value="collectionId">Collection</option>
+          <option value="activityType">Activity Type</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="sortOrderSelect" class="form-label fw-bold">Order</label>
+        <select id="sortOrderSelect" class="form-select" [(ngModel)]="filters.sortOrder" [disabled]="isLoading">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="limitSelect" class="form-label fw-bold">Results Per Page</label>
+        <select id="limitSelect" class="form-select" [(ngModel)]="filters.limit" [disabled]="isLoading">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="50">50</option>
+          <option [ngValue]="100">100</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col">
+        <button class="btn btn-primary me-2" (click)="applyFilters()" [disabled]="isLoading">
+          <i class="bi bi-search"></i> Search
+        </button>
+        <button class="btn btn-outline-secondary me-2" (click)="clearFilters()" [disabled]="isLoading">
+          <i class="bi bi-x-circle"></i> Clear Filters
+        </button>
+        <button class="btn btn-outline-secondary" (click)="toggleFiltersPanel()">
+          <i class="bi bi-chevron-up"></i> Hide Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Show Filters Button (when hidden) -->
+  <div class="row mb-3" *ngIf="searchMode === 'filters' && !showFilters">
+    <div class="col">
+      <button class="btn btn-outline-primary" (click)="toggleFiltersPanel()">
+        <i class="bi bi-chevron-down"></i> Show Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="row align-items-center mb-4 results-summary">
+    <div class="col-md-6">
+      <h2 class="text-primary mb-0">{{ numberOfPermits }}</h2>
+      <h4 class="text-muted">Bookings Found</h4>
+    </div>
+    <div class="col-md-6 d-flex justify-content-end">
+      <button class="btn btn-outline-success me-2" (click)="exportResults()" [disabled]="isLoading || numberOfPermits === 0">
+        <i class="bi bi-download"></i> Export CSV
+      </button>
+      <button class="btn btn-primary" (click)="createNew()">
+        <i class="bi bi-plus-circle"></i> Create New
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="row" *ngIf="isLoading">
+    <div class="col text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading bookings...</p>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="row" *ngIf="!isLoading && filteredBookings.length > 0">
+    <div class="col">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead class="table-light">
+            <tr>
+              <th>Booking ID</th>
+              <th>Collection</th>
+              <th>Activity Type</th>
+              <th>Activity ID</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let booking of filteredBookings" class="booking-row">
+              <td><code>{{ booking.bookingId }}</code></td>
+              <td>{{ booking.collectionId }}</td>
+              <td><span class="badge bg-info">{{ booking.activityType }}</span></td>
+              <td>{{ booking.activityId }}</td>
+              <td>{{ formatDate(booking.startDate) }}</td>
+              <td>{{ formatDate(booking.endDate) }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="booking.status === 'confirmed'"
+                      [class.bg-warning]="booking.status === 'pending'"
+                      [class.bg-danger]="booking.status === 'cancelled'">
+                  {{ booking.status || 'N/A' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" (click)="viewBookingDetails(booking)">
+                  <i class="bi bi-eye"></i> View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Results -->
+  <div class="row" *ngIf="!isLoading && filteredBookings.length === 0">
+    <div class="col text-center py-5">
+      <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+      <h4 class="text-muted mt-3">No bookings found</h4>
+      <p>Try adjusting your search filters or keywords</p>
+    </div>
+  </div>
+
+  <!-- Load More Button -->
+  <div class="row" *ngIf="hasMore && !isLoading">
+    <div class="col text-center py-3">
+      <button class="btn btn-outline-primary" (click)="loadMore()">
+        <i class="bi bi-arrow-down-circle"></i> Load More Results
+      </button>
+    </div>
+  </div>
+
+  <!-- Booking Details Modal -->
+  <div class="modal fade" [class.show]="showBookingDetails" [style.display]="showBookingDetails ? 'block' : 'none'" 
+       tabindex="-1" *ngIf="showBookingDetails">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Booking Details</h5>
+          <button type="button" class="btn-close" (click)="closeBookingDetails()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" *ngIf="selectedBooking">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Booking ID:</strong><br>
+              <code>{{ selectedBooking.bookingId }}</code>
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong><br>
+              <span class="badge bg-success">{{ selectedBooking.status || 'N/A' }}</span>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Collection ID:</strong><br>
+              {{ selectedBooking.collectionId }}
+            </div>
+            <div class="col-md-6">
+              <strong>Activity Type:</strong><br>
+              {{ selectedBooking.activityType }}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Activity ID:</strong><br>
+              {{ selectedBooking.activityId }}
+            </div>
+            <div class="col-md-6">
+              <strong>Number of Guests:</strong><br>
+              {{ selectedBooking.numberOfGuests || 'N/A' }}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Start Date:</strong><br>
+              {{ formatDate(selectedBooking.startDate) }}
+            </div>
+            <div class="col-md-6">
+              <strong>End Date:</strong><br>
+              {{ formatDate(selectedBooking.endDate) }}
+            </div>
+          </div>
+          <div class="row mb-3" *ngIf="selectedBooking.email">
+            <div class="col-md-6">
+              <strong>Email:</strong><br>
+              {{ selectedBooking.email }}
+            </div>
+            <div class="col-md-6" *ngIf="selectedBooking.firstName || selectedBooking.lastName">
+              <strong>Name:</strong><br>
+              {{ selectedBooking.firstName }} {{ selectedBooking.lastName }}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col">
+              <strong>Additional Details:</strong>
+              <pre class="bg-light p-3 mt-2">{{ selectedBooking | json }}</pre>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeBookingDetails()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showBookingDetails" *ngIf="showBookingDetails"></div>
 </div>
