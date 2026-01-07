@@ -171,6 +171,9 @@
       <h4 class="text-muted">Bookings Found</h4>
     </div>
     <div class="col-md-6 d-flex justify-content-end">
+      <button class="btn btn-outline-primary me-2" (click)="openQRScanner()">
+        <i class="fa-solid fa-qrcode"></i> Scan QR Code
+      </button>
       <button class="btn btn-outline-success me-2" (click)="exportResults()" [disabled]="isLoading || numberOfPermits === 0">
         <i class="bi bi-download"></i> Export CSV
       </button>
@@ -327,4 +330,129 @@
     </div>
   </div>
   <div class="modal-backdrop fade" [class.show]="showBookingDetails" *ngIf="showBookingDetails"></div>
+
+  <!-- QR Scanner Modal -->
+  <div class="modal fade" [class.show]="showQRScanner" [style.display]="showQRScanner ? 'block' : 'none'" tabindex="-1" role="dialog" *ngIf="showQRScanner">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <app-qr-scanner 
+          (scanSuccess)="onQRScanSuccess($event)"
+          (scanError)="onQRScanError($event)"
+          (closeScanner)="closeQRScanner()">
+        </app-qr-scanner>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showQRScanner" *ngIf="showQRScanner"></div>
+
+  <!-- Verification Result Modal -->
+  <div class="modal fade" [class.show]="showVerificationResult" [style.display]="showVerificationResult ? 'block' : 'none'" tabindex="-1" role="dialog" *ngIf="showVerificationResult">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-qrcode me-2"></i>
+            QR Code Verification Result
+          </h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeVerificationResult()"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Status Alert -->
+          <div class="alert" [ngClass]="getStatusClass()" role="alert">
+            <h4 class="alert-heading">
+              <i class="fa-solid" [ngClass]="getStatusIcon()" style="font-size: 2rem;"></i>
+            </h4>
+            <p class="mb-0"><strong>{{ getStatusMessage() }}</strong></p>
+          </div>
+
+          <!-- Booking Details -->
+          <div *ngIf="qrVerificationResult?.booking" class="booking-details-card p-3 border rounded">
+            <h5 class="mb-3">Booking Information</h5>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Booking ID:</strong><br>
+                <code>{{ qrVerificationResult.booking.bookingId }}</code>
+              </div>
+              <div class="col-md-6">
+                <strong>Park:</strong><br>
+                {{ qrVerificationResult.booking.displayName || 'N/A' }}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Guest Name:</strong><br>
+                {{ qrVerificationResult.booking.guestName || 'N/A' }}
+              </div>
+              <div class="col-md-6">
+                <strong>Party Size:</strong><br>
+                {{ qrVerificationResult.booking.partySize || 'N/A' }}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Check-in Date:</strong><br>
+                {{ formatDate(qrVerificationResult.booking.startDate) }}
+              </div>
+              <div class="col-md-6">
+                <strong>Check-out Date:</strong><br>
+                {{ formatDate(qrVerificationResult.booking.endDate) }}
+              </div>
+            </div>
+
+            <div class="row mb-3" *ngIf="qrVerificationResult.booking.entryPoint">
+              <div class="col-md-6">
+                <strong>Entry Point:</strong><br>
+                {{ qrVerificationResult.booking.entryPoint?.text || qrVerificationResult.booking.entryPoint?.sk || 'N/A' }}
+              </div>
+              <div class="col-md-6" *ngIf="qrVerificationResult.booking.exitPoint">
+                <strong>Exit Point:</strong><br>
+                {{ qrVerificationResult.booking.exitPoint?.text || qrVerificationResult.booking.exitPoint?.sk || 'N/A' }}
+              </div>
+            </div>
+
+            <div class="row" *ngIf="qrVerificationResult.booking.vehicleInformation && qrVerificationResult.booking.vehicleInformation.length > 0">
+              <div class="col">
+                <strong>Vehicle Information:</strong>
+                <div *ngFor="let vehicle of qrVerificationResult.booking.vehicleInformation" class="mt-2 p-2 bg-light rounded">
+                  <div><strong>Plate:</strong> {{ vehicle.licensePlate || 'N/A' }}</div>
+                  <div><strong>Make/Model:</strong> {{ vehicle.vehicleMake || 'N/A' }} {{ vehicle.vehicleModel || '' }}</div>
+                  <div><strong>Color:</strong> {{ vehicle.vehicleColour || 'N/A' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verification Status Details -->
+          <div class="mt-3">
+            <h5>Verification Details</h5>
+            <ul class="list-unstyled">
+              <li><i class="fa-solid fa-circle-check text-success me-2" *ngIf="qrVerificationResult?.verification?.isConfirmed"></i>
+                  <i class="fa-solid fa-circle-xmark text-danger me-2" *ngIf="!qrVerificationResult?.verification?.isConfirmed"></i>
+                  Confirmed: {{ qrVerificationResult?.verification?.isConfirmed ? 'Yes' : 'No' }}
+              </li>
+              <li><i class="fa-solid fa-circle-check text-success me-2" *ngIf="!qrVerificationResult?.verification?.isExpired"></i>
+                  <i class="fa-solid fa-circle-xmark text-danger me-2" *ngIf="qrVerificationResult?.verification?.isExpired"></i>
+                  Expired: {{ qrVerificationResult?.verification?.isExpired ? 'Yes' : 'No' }}
+              </li>
+              <li><i class="fa-solid fa-circle-check text-success me-2" *ngIf="!qrVerificationResult?.verification?.isCancelled"></i>
+                  <i class="fa-solid fa-circle-xmark text-danger me-2" *ngIf="qrVerificationResult?.verification?.isCancelled"></i>
+                  Cancelled: {{ qrVerificationResult?.verification?.isCancelled ? 'Yes' : 'No' }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeVerificationResult()">Close</button>
+          <button type="button" class="btn btn-primary" (click)="closeVerificationResult(); openQRScanner()">
+            <i class="fa-solid fa-qrcode me-2"></i>
+            Scan Another
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showVerificationResult" *ngIf="showVerificationResult"></div>
 </div>
