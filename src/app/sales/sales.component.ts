@@ -146,8 +146,6 @@ export class SalesComponent implements OnInit, OnDestroy {
       this.apiService.get('bookings/admin', queryParams)
     );
 
-    console.log('res2 >>>', res);
-
     return res['data'] as SearchResponse;
   }
 

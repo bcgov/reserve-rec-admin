@@ -21,6 +21,8 @@
             [loadWhile]="loadingService?.loading()"
             aria-label="Search for protected areas, facilities, activities, or other data"
             (keyup.enter)="search()"
+            (input)="onSearchInput($event)"
+            (blur)="hideSuggestions()"
           >
             <div ngdsInputAppend>
               <button
@@ -49,6 +51,27 @@
               </button>
             </div>
           </ngds-text-input>
+
+          <!-- Autocomplete Suggestions Dropdown -->
+          <div 
+            *ngIf="showSuggestions && suggestions.length > 0" 
+            class="suggestions-dropdown border rounded-3 mt-1 bg-white shadow-sm"
+            style="max-height: 300px; overflow-y: auto; z-index: 1000;"
+          >
+            <div
+              *ngFor="let suggestion of suggestions"
+              class="suggestion-item p-2 border-bottom"
+              style="cursor: pointer;"
+              (mousedown)="selectSuggestion(suggestion)"
+            >
+              <div class="d-flex align-items-center">
+                <i class="fa fa-search me-2 text-muted"></i>
+                <div class="flex-grow-1">
+                  <div class="fw-bold">{{ suggestion.text }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div *ngIf="searchFiltersOpen">
             <div class="border rounded-3 my-1 p-2 text-center">

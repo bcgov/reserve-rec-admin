@@ -59,6 +59,14 @@ export class GeozoneEditComponent {
         ]
       };
     }
+    // Convert searchTerms from comma-separated string to array
+    if (props?.['searchTerms']) {
+      const searchTermsString = props['searchTerms'];
+      props['searchTerms'] = searchTermsString
+        .split(',')
+        .map((term: string) => term.trim())
+        .filter((term: string) => term.length > 0);
+    }
     delete props['collectionId']; // Remove collectionId from the props
     delete props['enforceZoomVisibility']; // Remove enforceZoomVisibility from the props
     delete props['mandatoryFields']; // Remove location from the props

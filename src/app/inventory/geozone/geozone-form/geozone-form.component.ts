@@ -189,7 +189,7 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this.geozone?.imageUrl || ''
       ),
       searchTerms: new UntypedFormControl(
-        this.geozone?.searchTerms || ''
+        this.geozone?.searchTerms?.join(', ') || ''
       ),
       adminNotes: new UntypedFormControl(
         this.geozone?.adminNotes || ''
@@ -319,5 +319,17 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this._envelopeMarkers()[0].coordinates[0]
       ], { padding: 75 });
     }
+  }
+
+  /**
+   * Converts the comma-separated searchTerms string to an array
+   * Trims whitespace and filters out empty strings
+   */
+  getSearchTermsArray(): string[] {
+    const searchTermsString = this.form.get('searchTerms')?.value || '';
+    return searchTermsString
+      .split(',')
+      .map((term: string) => term.trim())
+      .filter((term: string) => term.length > 0);
   }
 }

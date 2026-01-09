@@ -118,7 +118,9 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
       geozones: new UntypedFormControl(this.activity?.geozones || ''),
       activitySubType: new UntypedFormControl(this.activity?.activitySubType || ''),
       imageUrl: new UntypedFormControl(this.activity?.imageUrl || ''),
-      searchTerms: new UntypedFormControl(this.activity?.searchTerms || ''),
+      searchTerms: new UntypedFormControl(
+        this.activity?.searchTerms?.join(', ') || ''
+      ),
       adminNotes: new UntypedFormControl(this.activity?.adminNotes || '')
     });
 
