@@ -47,6 +47,13 @@ export class GeozoneCreateComponent {
         [mandatoryFields.envelope.northwest.longitude, mandatoryFields.envelope.northwest.latitude],
         [mandatoryFields.envelope.southeast.longitude, mandatoryFields.envelope.southeast.latitude]]
     };
+    // Convert searchTerms from comma-separated string to array
+    if (props?.searchTerms) {
+      props.searchTerms = props.searchTerms
+        .split(',')
+        .map((term: string) => term.trim())
+        .filter((term: string) => term.length > 0);
+    }
     delete props.collectionId; // Remove collectionId from the props
     delete props.enforceZoomVisibility; // Remove enforceZoomVisibility from the props
     delete props.mandatoryFields; // Remove mandatoryFields from the props

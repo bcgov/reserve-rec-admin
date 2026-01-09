@@ -65,9 +65,12 @@ export class ActivityCreateComponent {
     delete props['allFacilities'];
     delete props['allGeozones'];
 
-    // Handle search terms to be a comma-separated string
-    if (this.activityForm.get('searchTerms')?.value) {
-      props['searchTerms'] = this.activityForm.get('searchTerms')?.value?.join(',') || '';
+    // Handle search terms
+    props['searchTerms'] = this.activityForm.get('searchTerms')?.value || [];
+
+    // Convert orcs to integer
+    if (props['orcs']) {
+      props['orcs'] = parseInt(props['orcs'], 10);
     }
 
     // Remove other form values that are not needed for submission

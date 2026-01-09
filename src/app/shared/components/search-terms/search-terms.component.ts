@@ -26,19 +26,29 @@ export class SearchTermsComponent {
 
   public utils = new Utils();
 
+  // Convert comma-separated string to array
+  getSearchTermsArray(input: string): string[] {
+    if (!input) return [];
+    console.log('Search term input', input);
+    return input
+      .replace(/\n/g, '')
+      .split(',')
+      .map(term => term.trim())
+      .filter(term => term.length > 0);
+  }
+
   // Add search terms
   onSearchTermAdd() {
     this.searchTermExists = false;
     this.searchTermSet = this.searchTermSet?.trim();
-    this.searchTermSet = this.searchTermSet?.replace(/\n/g, "");
 
     if (this.searchTermSet == '' || this.searchTermSet == null) return;
-    const strings = this.searchTermSet?.split(',');
+    
+    const strings = this.getSearchTermsArray(this.searchTermSet);
 
     if (strings.length > 1) {
       let duplicate = false;
       strings.forEach((string) => {
-        string = string.trim();
         if (string && !this.searchTerms.includes(string)) {
           this.searchTerms.push(string);
         } else if (string) {

@@ -141,7 +141,7 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
         this.facility?.imageUrl || ''
       ),
       searchTerms: new UntypedFormControl(
-        this.facility?.searchTerms || ''
+        this.facility?.searchTerms?.join(', ') || ''
       ),
       adminNotes: new UntypedFormControl(
         this.facility?.adminNotes || ''

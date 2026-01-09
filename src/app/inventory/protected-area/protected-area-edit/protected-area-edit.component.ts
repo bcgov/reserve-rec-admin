@@ -60,7 +60,9 @@ export class ProtectedAreaEditComponent implements AfterViewChecked, OnDestroy {
       protectedAreaOrcs: new UntypedFormControl(this.protectedArea?.orcs),
       protectedAreaIsVisible: new UntypedFormControl(false),
       protectedAreaAdminNotes: new UntypedFormControl(this.protectedArea?.adminNotes || ''),
-      protectedAreaSearchTerms: new UntypedFormControl(this.searchTerms),
+      protectedAreaSearchTerms: new UntypedFormControl(
+        this.protectedArea?.searchTerms?.join(', ') || ''
+      ),
     });
   }
 

@@ -55,7 +55,32 @@ export class SearchService {
     }
   }
 
-  getDocument
+  /**
+   * Performs an autocomplete/suggest search for typeahead functionality.
+   * @param query The text to get suggestions for
+   * @param options Additional options like field, size, fuzziness, and filters
+   * @returns Array of suggestion objects with text and source data
+   */
+  async getSuggestions(query: string, options: any = {}) {
+
+    const body = {
+      text: query,
+      suggest: true,
+      suggestField: options.field || 'searchTerms.suggest',
+      suggestSize: options.size || 10,
+      fuzzy: options.fuzzy || true,
+      fuzziness: options.fuzziness || 'AUTO',
+      ...options.filters || {} // Spread filter fields at top level
+    };
+
+    try {
+      const res: any[] = (await lastValueFrom(this.apiService.post(`search`, body)))['data'];
+      return res; // Returns array of suggestion objects
+    } catch (error) {
+      this.loggerService.error(error);
+      return [];
+    }
+  }
 
   clearSearchResults() {
     this.dataService.setItemValue(Constants.dataIds.SEARCH_RESULTS, []);

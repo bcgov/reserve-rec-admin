@@ -22,6 +22,9 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   @ViewChild('searchOverlay') searchOverlay!: ElementRef; // Adjust type as necessary
   public form;
   public searchResults = [];
+  public suggestions = [];
+  public showSuggestions = false;
+  private suggestionTimeout: any = null;
   public mapResults: Set<any> = new Set();
   public _markers: WritableSignal<any[]> = signal([]);
   public _resultsSignal: WritableSignal<any[]> = signal([]);
@@ -226,10 +229,72 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
     return Object.entries(Constants.activityTypes[activityType]?.subTypes || {}).map(([key, value]) => value);
   }
 
+  /**
+   * Handles input changes in the search box for autocomplete
+   * Debounced to avoid excessive API calls
+   */
+  async onSearchInput(event: any) {
+    const query = event?.target?.value || this.form.get('search').value;
+    
+    // Clear any existing timeout
+    if (this.suggestionTimeout) {
+      clearTimeout(this.suggestionTimeout);
+    }
+    
+    // Hide suggestions if query is too short
+    if (!query || query.length < 2) {
+      this.showSuggestions = false;
+      this.suggestions = [];
+      return;
+    }
+
+    // Wait 500ms after user stops typing before fetching suggestions
+    this.suggestionTimeout = setTimeout(async () => {
+      try {
+        const filters = this.formatFilters();
+
+        this.suggestions = await this.searchService.getSuggestions(query, {
+          field: 'searchTerms.suggest',
+          size: 8,
+          fuzzy: true,
+          fuzziness: 'AUTO',
+          filters: filters
+        });
+        this.showSuggestions = this.suggestions.length > 0;
+        console.log('Suggestions:', this.suggestions);
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error('Autocomplete error:', error);
+      }
+    }, 500); // 500ms delay
+  }
+
+  // Handles selecting a suggestion from the autocomplete dropdown
+  selectSuggestion(suggestion: any) {
+    // Set the search input to the selected suggestion
+    this.form.get('search').setValue(suggestion.text);
+    this.showSuggestions = false;
+    
+    // Optionally trigger a search immediately
+    this.search();
+  }
+
+  
+  // Hides suggestions dropdown (e.g., when clicking outside)
+  hideSuggestions() {
+    // Small delay to allow click events on suggestions to fire first
+    setTimeout(() => {
+      this.showSuggestions = false;
+    }, 200);
+  }
+
   async search() {
     const query = this.form.get('search').value;
     const filters = this.formatFilters();
-    const searchValue = this.form.get('search');
+    
+    // Hide suggestions when searching
+    this.showSuggestions = false;
+    
     const res = await this.searchService.searchByQuery(query, filters);
     this.cdr.detectChanges();
   }
@@ -370,6 +435,10 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   }
 
   ngOnDestroy(): void {
+    // Clean up the timeout to prevent memory leaks
+    if (this.suggestionTimeout) {
+      clearTimeout(this.suggestionTimeout);
+    }
     this.cdr.detectChanges();
     this.cdr.detach();
   };
