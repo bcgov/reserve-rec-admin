@@ -1,0 +1,93 @@
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>Daily Passes Report</h2>
+      <p class="text-muted">Export day-use pass data for a specific park and date.</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Report Filters</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Park Selection -->
+        <div class="col-md-4">
+          <label for="parkSelect" class="form-label">Park <span class="text-danger">*</span></label>
+          <select
+            id="parkSelect"
+            class="form-select"
+            [(ngModel)]="selectedCollectionId"
+            (ngModelChange)="onCollectionIdChange()"
+          >
+            <option value="">Select a park...</option>
+            <option *ngFor="let park of protectedAreas" [value]="park.orcs">
+              {{ park.displayName }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Facility Selection (Optional) -->
+        <div class="col-md-4">
+          <label for="facilitySelect" class="form-label">Facility (Optional)</label>
+          <select
+            id="facilitySelect"
+            class="form-select"
+            [(ngModel)]="selectedFacilityId"
+            [disabled]="!selectedCollectionId || facilitiesLoading"
+          >
+            <option value="">All facilities</option>
+            <option *ngFor="let facility of facilities" [value]="facility.facilityId">
+              {{ facility.displayName }}
+            </option>
+          </select>
+          <small *ngIf="facilitiesLoading" class="text-muted">Loading facilities...</small>
+        </div>
+
+        <!-- Date Selection -->
+        <div class="col-md-4">
+          <label for="dateSelect" class="form-label">Arrival Date <span class="text-danger">*</span></label>
+          <input
+            type="date"
+            id="dateSelect"
+            class="form-control"
+            [(ngModel)]="selectedDate"
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Button -->
+  <div class="row">
+    <div class="col">
+      <button
+        class="btn btn-primary"
+        [disabled]="!canExport() || isLoading"
+        (click)="exportReport()"
+      >
+        <span *ngIf="isLoading">
+          <i class="fa-solid fa-spinner fa-spin me-2"></i>
+          Generating...
+        </span>
+        <span *ngIf="!isLoading">
+          <i class="fa-solid fa-download me-2"></i>
+          Export CSV
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Info Box -->
+  <div class="row mt-4">
+    <div class="col">
+      <div class="alert alert-info">
+        <i class="fa-solid fa-circle-info me-2"></i>
+        <strong>Note:</strong> This report includes all day-use passes (vehicle parking and trail use) for the selected park and date.
+        The exported CSV contains contact information, reservation details, and pass counts.
+      </div>
+    </div>
+  </div>
+</div>
