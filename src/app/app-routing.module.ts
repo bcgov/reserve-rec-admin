@@ -142,6 +142,11 @@ export const routes: Routes = [
     canActivate: [UserGuard]
   },
   {
+    path: 'reports/daily-passes',
+    loadComponent: () => import('./reports/daily-passes/daily-passes-report.component').then(mod => mod.DailyPassesReportComponent),
+    canActivate: [UserGuard]
+  },
+  {
     path: 'customers',
     loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
     canActivate: [UserGuard]
