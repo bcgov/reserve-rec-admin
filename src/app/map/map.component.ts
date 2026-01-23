@@ -160,31 +160,37 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   createMap() {
     if (this.mapContainer) {
-      this.map = new Map({
-        container: this.mapContainer?.nativeElement,
-        style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-        center: [-123.19, 48.24],
-        zoom: 5,
-        maxBounds: [
-          [-141.06, 46.30], // Southwest coordinates of BC (approximate)
-          [-112.03, 62.00]  // Northeast coordinates of BC (approximate)
-        ],
-        attributionControl: false,
-        trackResize: true, // Automatically resize the map when the window is resized
-      });
-      this.map.addControl(new maplibregl.NavigationControl({
-        visualizePitch: true,
-      }));
-      this.map.addControl(new maplibregl.GeolocateControl({}));
-      this.map.addControl(new maplibregl.FullscreenControl({}));
+      try {
+        this.map = new Map({
+          container: this.mapContainer?.nativeElement,
+          style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+          center: [-123.19, 48.24],
+          zoom: 5,
+          maxBounds: [
+            [-141.06, 46.30], // Southwest coordinates of BC (approximate)
+            [-112.03, 62.00]  // Northeast coordinates of BC (approximate)
+          ],
+          attributionControl: false,
+          trackResize: true, // Automatically resize the map when the window is resized
+        });
+        this.map.addControl(new maplibregl.NavigationControl({
+          visualizePitch: true,
+        }));
+        this.map.addControl(new maplibregl.GeolocateControl({}));
+        this.map.addControl(new maplibregl.FullscreenControl({}));
+      } catch (e: unknown) {
+        // WebGL may not be available in headless test environments
+        console.warn('Failed to initialize map:', e instanceof Error ? e.message : e);
+        return;
+      }
     }
-    this.map.on('load', () => {
+    this.map?.on('load', () => {
       this.isMapLoaded = true;
       this.updateMap();
       this.setOverlayPadding();
       this.map.resize();
     });
-    this.map.on('moveend', () => {
+    this.map?.on('moveend', () => {
       if (this.map) {
         const bounds = this.map.getBounds();
         this.boundsChange.emit([bounds.getNorthWest().toArray(), bounds.getSouthEast().toArray()]);

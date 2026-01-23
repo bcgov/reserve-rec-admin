@@ -229,7 +229,7 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.zoomToEnvelopeLimits();
-    this.mapComponent?.map.on('zoomend', () => {
+    this.mapComponent?.map?.on('zoomend', () => {
       // Check if the enforceZoomVisibility is enabled
       if (this.form.get('enforceZoomVisibility').value) {
         // Update the visibility of markers and polygons based on the current zoom level
