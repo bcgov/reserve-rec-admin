@@ -32,7 +32,7 @@ export class ReportsService {
       }
       const res = await lastValueFrom(this.apiService.get('reports/daily-passes', params));
       this.loadingService.removeFromFetchList(dataTag);
-      return res['data'];
+      return res['data']?.items || [];
     } catch (error) {
       this.loadingService.removeFromFetchList(dataTag);
       this.loggerService.error(error);
