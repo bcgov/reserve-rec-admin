@@ -20,7 +20,13 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          apk add --no-cache chromium nss
+          yarn install --frozen-lockfile
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
 
       - name: Run tests
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
         run: yarn test --watch=false
