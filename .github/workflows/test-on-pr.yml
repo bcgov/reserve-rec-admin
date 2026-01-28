@@ -1,0 +1,32 @@
+name: Test on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: node:22-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use latest Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          apk add --no-cache chromium nss
+          yarn install --frozen-lockfile
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
+
+      - name: Run tests
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
+        run: yarn test --watch=false
