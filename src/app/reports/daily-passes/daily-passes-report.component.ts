@@ -217,7 +217,9 @@ export class DailyPassesReportComponent implements OnInit {
   }
 
   private getSelectedParkName(): string {
-    const park = this.protectedAreas.find(p => p.orcs === this.selectedCollectionId);
+    // Extract ORCS from collectionId (e.g., "bcparks_1" -> "1")
+    const orcs = this.selectedCollectionId.replace('bcparks_', '');
+    const park = this.protectedAreas.find(p => p.orcs === orcs);
     if (park) {
       return park.displayName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }

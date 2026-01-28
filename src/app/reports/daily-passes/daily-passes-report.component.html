@@ -23,7 +23,7 @@
             (ngModelChange)="onCollectionIdChange()"
           >
             <option value="">Select a park...</option>
-            <option *ngFor="let park of protectedAreas" [value]="park.orcs">
+            <option *ngFor="let park of protectedAreas" [value]="'bcparks_' + park.orcs">
               {{ park.displayName }}
             </option>
           </select>
