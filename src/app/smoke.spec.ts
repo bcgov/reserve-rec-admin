@@ -1,5 +1,5 @@
 describe('Smoke test suite', () => {
   it('runs', () => {
-    expect(true).toBeTrue();
+    expect(true).toBe(true);
   });
 });
