@@ -1,6 +1,8 @@
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { GeozoneService } from '../../../services/geozone.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationModalComponent, ModalRowSpec } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Constants } from '../../../app.constants';
 import { RelationshipService } from '../../../services/relationship.service';
@@ -11,7 +13,7 @@ import { ProductListItemComponent } from '../../product/product-list-item/produc
 @Component({
   selector: 'app-activity-details',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe, DatePipe, FacilityListItemComponent, GeozoneListItemComponent, ProductListItemComponent],
+  imports: [CommonModule, UpperCasePipe, DatePipe, FacilityListItemComponent],
   templateUrl: './activity-details.component.html',
   styleUrl: './activity-details.component.scss',
   providers: [BsModalService]

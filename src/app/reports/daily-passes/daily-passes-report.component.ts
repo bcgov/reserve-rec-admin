@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { ReportsService } from '../../services/reports.service';
 import { ProtectedAreaService } from '../../services/protected-area.service';
 import { FacilityService } from '../../services/facility.service';
@@ -31,15 +32,19 @@ interface DailyPassRecord {
 
 @Component({
   selector: 'app-daily-passes-report',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgdsFormsModule],
   templateUrl: './daily-passes-report.component.html',
   styleUrl: './daily-passes-report.component.scss'
 })
 export class DailyPassesReportComponent implements OnInit {
-  // Filter values
-  selectedCollectionId: string = '';
-  selectedFacilityId: string = '';
-  selectedDate: string = '';
+  form = this.fb.group({
+    collectionId: ['', Validators.required],
+    facilityId: [''],
+    arrivalDate: ['', Validators.required]
+  });
+
+  parkOptions: { display: string; value: string }[] = [];
+  facilityOptions: { display: string; value: string }[] = [];
 
   // Dropdown options
   protectedAreas: any[] = [];
@@ -51,6 +56,7 @@ export class DailyPassesReportComponent implements OnInit {
   reportData: DailyPassRecord[] = [];
 
   constructor(
+    private fb: FormBuilder,
     private reportsService: ReportsService,
     private protectedAreaService: ProtectedAreaService,
     private facilityService: FacilityService,
@@ -62,30 +68,45 @@ export class DailyPassesReportComponent implements OnInit {
   ngOnInit() {
     this.loadProtectedAreas();
     // Set default date to today
-    this.selectedDate = this.formatDateForInput(new Date());
+    this.form.patchValue({ arrivalDate: this.formatDateForInput(new Date()) });
+
+    this.form.get('collectionId')?.valueChanges.subscribe(() => {
+      this.form.patchValue({ facilityId: '' }, { emitEvent: false });
+      this.facilityOptions = [];
+      this.onCollectionIdChange();
+    });
   }
 
   async loadProtectedAreas() {
     try {
       const res: any = await this.protectedAreaService.getProtectedAreas();
       this.protectedAreas = res?.data?.items || [];
+      this.parkOptions = this.protectedAreas.map(park => ({
+        display: park.displayName,
+        value: `bcparks_${park.orcs}`
+      }));
     } catch (error) {
       this.loggerService.error(error);
     }
   }
 
   async onCollectionIdChange() {
-    this.selectedFacilityId = '';
-    this.facilities = [];
-
-    if (!this.selectedCollectionId) {
+    const collectionId = this.form.get('collectionId')?.value;
+    if (!collectionId) {
       return;
     }
 
     try {
       this.facilitiesLoading = true;
-      const res = await this.facilityService.getFacilitiesByCollectionId(this.selectedCollectionId);
+      const res = await this.facilityService.getFacilitiesByCollectionId(collectionId);
       this.facilities = res?.items || [];
+      this.facilityOptions = [
+        { display: 'All facilities', value: '' },
+        ...this.facilities.map(facility => ({
+          display: facility.displayName,
+          value: facility.facilityId
+        }))
+      ];
     } catch (error) {
       this.loggerService.error(error);
     } finally {
@@ -94,7 +115,7 @@ export class DailyPassesReportComponent implements OnInit {
   }
 
   canExport(): boolean {
-    return !!this.selectedCollectionId && !!this.selectedDate;
+    return this.form.valid;
   }
 
   async exportReport() {
@@ -107,12 +128,14 @@ export class DailyPassesReportComponent implements OnInit {
       return;
     }
 
+    const { collectionId, arrivalDate, facilityId } = this.form.value;
+
     try {
       this.isLoading = true;
       const data = await this.reportsService.getDailyPasses(
-        this.selectedCollectionId,
-        this.selectedDate,
-        this.selectedFacilityId || undefined
+        collectionId!,
+        arrivalDate!,
+        facilityId || undefined
       );
 
       this.reportData = data || [];
@@ -212,18 +235,19 @@ export class DailyPassesReportComponent implements OnInit {
 
   private generateFilename(): string {
     const parkName = this.getSelectedParkName();
-    const dateStr = this.selectedDate.replace(/-/g, '');
+    const dateStr = this.form.get('arrivalDate')?.value?.replace(/-/g, '') || '';
     return `daily-passes-${parkName}-${dateStr}.csv`;
   }
 
   private getSelectedParkName(): string {
     // Extract ORCS from collectionId (e.g., "bcparks_1" -> "1")
-    const orcs = this.selectedCollectionId.replace('bcparks_', '');
+    const collectionId = this.form.get('collectionId')?.value || '';
+    const orcs = collectionId.replace('bcparks_', '');
     const park = this.protectedAreas.find(p => p.orcs === orcs);
     if (park) {
       return park.displayName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
-    return this.selectedCollectionId;
+    return collectionId;
   }
 
   private formatDateForInput(date: Date): string {
