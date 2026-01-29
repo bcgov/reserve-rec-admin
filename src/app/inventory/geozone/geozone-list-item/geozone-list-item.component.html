@@ -1,0 +1,48 @@
+<div class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between">
+  <div class="p-3">
+    <div class="mb-1">
+      {{geozone.displayName}}
+    </div>
+    <div class="d-flex">
+      <div class="badge bg-primary">
+        <i class="fa fa-location-dot"></i>
+        Geozone
+      </div>
+      <div class="badge bg-secondary ms-1">
+        {{geozone?.collectionId}}
+      </div>
+      <div class="badge bg-secondary ms-1">
+        #{{geozone?.geozoneId || 'N/A'}}
+      </div>
+      <div class="badge bg-light text-muted  border border-1 ms-1">
+        v{{geozone?.version || 'N/A'}}
+      </div>
+    </div>
+  </div>
+  <div class="p-1">
+    <div class="d-flex align-items-center justify-content-center">
+      <div class="border border-1 rounded-3">
+        <div *ngIf="geozone?.imageUrl">
+          <img
+            [src]="geozone?.imageUrl"
+            alt="image"
+            width="100%"
+            height="80px"
+            style="object-fit: cover;"
+          />
+        </div>
+        <div
+          *ngIf="!geozone?.imageUrl"
+          class="text-muted d-flex justify-content-center m-4"
+        >
+          No image
+        </div>
+      </div>
+      <div *ngIf="showDetailsButton" class="ms-1 p-1 border border-1 rounded-3">
+        <button class="btn btn-outline-light text-dark p-0" (click)= "navigateToGeozone(geozone)" title="Open Geozone Details in New Tab">
+          <i class="bi bi-arrow-up-right-square"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

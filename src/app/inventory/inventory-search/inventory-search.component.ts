@@ -71,19 +71,20 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   public facilitySubTypeOptions = {
     campground: [],
     naturalFeature: [
-      { display: 'Waterfall', value: 'waterfall', icon: 'fa-solid fa-water' },
-      { display: 'Lake', value: 'lake', icon: 'fa-solid fa-water' },
-      { display: 'River', value: 'river', icon: 'fa-solid fa-water' },
-      { display: 'Summit', value: 'summit', icon: 'fa-solid fa-mountain' },
-      { display: 'Bay', value: 'bay', icon: 'fa-solid fa-water' },
-      { display: 'Point of Interest', value: 'pointofInterest', icon: 'fa-solid fa-map-marker-alt' },
+      { display: 'Lake', value: 'lake', iconClass: 'fa-solid fa-water' },
+      { display: 'Summit', value: 'summit', iconClass: 'fa-solid fa-mountain' },
+      { display: 'Point of Interest', value: 'pointOfInterest', iconClass: 'fa-solid fa-map-marker-alt' },
+      { display: 'Bay', value: 'bay', iconClass: 'fa-solid fa-water' },
+      { display: 'River', value: 'river', iconClass: 'fa-solid fa-water' },
+      { display: 'Beach', value: 'beach', iconClass: 'fa-solid fa-umbrella-beach' }
     ],
     accessPoint: [],
     structure: [
-      { display: 'Building', value: 'building' },
-      { display: 'Parking Lot', value: 'parkingLot' },
-      { display: 'Boat Launch', value: 'boatLaunch' },
-      { display: 'Yurt', value: 'yurt' },
+      { display: 'Parking Lot', value: 'parkingLot', iconClass: 'fa-solid fa-square-parking' },
+      { display: 'Boat Launch', value: 'boatLaunch', iconClass: 'fa-solid fa-sailboat' },
+      { display: 'Yurt', value: 'yurt', iconClass: 'fa-solid fa-tent' },
+      { display: 'Building', value: 'building', iconClass: 'fa-solid fa-building' },
+      { display: 'Cabin', value: 'cabin', iconClass: 'fa-solid fa-house' }
     ],
     trail: []
   };

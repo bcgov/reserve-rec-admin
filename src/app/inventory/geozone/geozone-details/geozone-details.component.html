@@ -78,9 +78,7 @@
             <strong class="me-1">Location: </strong>
           </div>
           <div class="col">
-            <span>{{geozone?.location?.coordinates[1] || 'Invalid latitude.'}}, {{geozone?.location?.coordinates[0] ||
-              'Invalid
-              longitude'}}</span>
+            <span>{{geozone?.location?.coordinates[1] || 'Invalid latitude.'}}, {{geozone?.location?.coordinates[0] || 'Invalid longitude'}}</span>
           </div>
         </div>
       </div>
@@ -140,6 +138,65 @@
 <section class="container">
   <div class="row">
     <div class="col-md-6">
+      <h4 class="mb-3">Facilities Details</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related facilities...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedFacilities.length === 0" class="text-muted my-3">
+        No facilities are currently associated with this activity.
+      </div>
+      
+      <!-- Facilities list -->
+      <div *ngIf="!loadingRelationships && relatedFacilities.length > 0" class="mb-3">
+        This activity is associated with {{ relatedFacilities.length }} {{ relatedFacilities.length === 1 ? 'facility' : 'facilities' }}:
+      </div>
+      <div class="mb-2">
+        <div class="row">
+          <app-facility-list-item
+            *ngFor="let facility of relatedFacilities"
+            [facility]="facility"
+          ></app-facility-list-item>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Activities Details</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related activities...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedActivities.length === 0" class="text-muted my-3">
+        No activities are currently associated with this activity.
+      </div>
+      
+      <!-- Activities list -->
+      <div *ngIf="!loadingRelationships && relatedActivities.length > 0" class="mb-3">
+        This activity is associated with {{ relatedActivities.length }} {{ relatedActivities.length === 1 ? 'activity' : 'activities' }}:
+      </div>
+      <div class="mb-2">
+        <div class="row">
+          <app-activity-list-item
+            *ngFor="let activity of relatedActivities"
+            [activity]="activity"
+          ></app-activity-list-item>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr />
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
       <h4 class="mb-3">Metadata</h4>
       <div class="row">
         <div class="col-3">
@@ -149,17 +206,6 @@
           <div class="badge bg-warning text-dark d-flex align-items-center rounded-pill px-2">
             <i class="fa-solid fa-map-location-dot me-1"></i>
             <div class="mb-0">{{geozone?.schema | uppercase}}</div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-3">
-          <strong class="me-1">ORCS: </strong>
-        </div>
-        <div class="col-auto">
-          <div class="badge bg-light text-dark border d-flex align-items-center rounded-pill px-2">
-            <div *ngIf="geozone?.orcs" class="mb-0">{{geozone?.orcs}}</div>
-            <div *ngIf="!geozone?.orcs" class="mb-0">&lt;No ORCS&gt;</div>
           </div>
         </div>
       </div>

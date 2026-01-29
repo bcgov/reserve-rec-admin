@@ -1,0 +1,369 @@
+<app-loadal #loadal></app-loadal>
+<section #collectionIdSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 1: Select partition information</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#product-collections"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Enter the <strong>Collection ID</strong> of the product.
+    </div>
+    <div class="mb-2">
+      A <strong>Product Type</strong> is the structural and semantic backbone of the system. It defines the offering, group ProductDates, support search, and enables administrators to manage rules and seasons efficiently.
+    </div>
+
+    <div class="mb-2">
+      Make sure the <strong>Collection ID</strong> is correct, as they cannot be
+      changed later.
+    </div>
+    <div class="row">
+      <div class="col">
+        <ngds-text-input
+          [control]="form.get('collectionId')"
+          [label]="'Collection ID'"
+          [placeholder]="'Enter Collection ID'"
+          [resetButton]="true"
+          [disabled]="product?.collectionId"
+        >
+        </ngds-text-input>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section #mandatoryFieldsSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 2: Complete mandatory fields</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#product-properties"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Complete the mandatory fields for the product. These fields are required to ensure that the
+      product is properly defined and can be used within the system.
+    </div>
+    <div class="row w-100">
+      <div class="col-lg-6 flex-column d-flex justify-content-left mb-2">
+        <ngds-text-input
+          class="mb-4"
+          [control]="form.get('displayName')"
+          [label]="'Display name'"
+          [placeholder]="'Type a display name for the product'"
+          [resetButton]="true"
+        >
+        </ngds-text-input>
+        <ngds-picklist-input
+          [control]="form.get('timezone')"
+          [label]="'Timezone'"
+          [selectionListItems]="timezones"
+          [autoSelectFirstItem]="true"
+          [placeholder]="'Select timezone'"
+          [resetButton]="true"
+        >
+        </ngds-picklist-input>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section #attachActivitiesSection>
+  <div class="d-flex flex-column text-center align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 3: Select activity</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activities"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <p>
+      Products are tied to a single <strong>activity</strong>. Select the activity this product will be associated with.
+      The activity determines the product's partition key (activityType and activityId).
+    </p>
+  </div>
+  <div class="row text-center">
+    <div class="col-lg-12 d-flex flex-column justify-content-center mb-2">
+      <!-- Entity Relationship Selector for Activities -->
+      <app-entity-relationship-selector
+        #activityRelationshipSelector
+        *ngIf="activityRelationshipConfig"
+        [config]="activityRelationshipConfig"
+        [sourceEntity]="product"
+        [selectedEntities]="selectedActivity ? [selectedActivity] : []"
+        (relationshipsChanged)="onActivitiesChanged($event)"
+        (relationshipsLoaded)="onActivityRelationshipsLoaded($event)"
+      ></app-entity-relationship-selector>
+
+      <!-- Fallback message if config not ready -->
+      <div *ngIf="!activityRelationshipConfig" class="text-center text-muted my-3">
+        <i class="fa fa-spinner fa-spin"></i> Initializing activity selector...
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section #rangeSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5 p-3">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 4: Set availability window and minimum/maximum stay duration</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#product-properties"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="col-lg-6 d-flex justify-content-center gap-5">
+      <ngds-date-input
+        [control]="form.get('rangeStart')"
+        [label]="'Range Start Date'"
+        [placeholder]="'Select start date'"
+        [inline]="true"
+        [resetButton]="true"
+      >
+      </ngds-date-input>
+      
+      <ngds-date-input
+        [control]="form.get('rangeEnd')"
+        [label]="'Range End Date'"
+        [placeholder]="'Select end date'"
+        [inline]="true"
+        [resetButton]="true"
+      >
+      </ngds-date-input>
+    </div>
+    <!-- Date range validation error -->
+    <div *ngIf="form.hasError('dateRangeInvalid') && (form.get('rangeStart')?.touched || form.get('rangeEnd')?.touched)" class="alert alert-danger mt-3 w-50 mx-auto text-center">
+      <i class="fa-solid fa-exclamation-triangle me-2"></i>
+      <strong>Invalid Date Range:</strong> End date must be after start date.
+    </div>
+  </div>
+  <div class="d-flex align-items-center justify-content-center p-3">
+    <div class="d-flex align-items-center mb-5">
+      <div class="col-lg-6 d-flex flex-column align-items-center justify-content-center mb-2">
+        <h6>Minimum stay</h6>
+        <div class="col-4">
+          <ngds-text-input
+          [control]="form.get('minStay.days')"
+          [label]="'Days'"
+          [placeholder]="'0'"
+          >
+          </ngds-text-input>
+        </div>
+        <div class="col-4">
+          <ngds-text-input
+          [control]="form.get('minStay.hours')"
+          [label]="'Hours'"
+          [placeholder]="'0'"
+          >
+        </ngds-text-input>
+        </div>
+        <div class="col-4">
+          <ngds-text-input
+          [control]="form.get('minStay.minutes')"
+          [label]="'Minutes'"
+          [placeholder]="'0'"
+          >
+          </ngds-text-input>
+        </div>
+      </div>
+
+      <div class="col-lg-6 d-flex flex-column align-items-center justify-content-center mb-2">
+        <h6>Maximum stay</h6>
+          <div class="col-4">
+            <ngds-text-input
+              [control]="form.get('maxStay.days')"
+              [label]="'Days'"
+              [placeholder]="'0'"
+            >
+            </ngds-text-input>
+          </div>
+          <div class="col-4">
+            <ngds-text-input
+              [control]="form.get('maxStay.hours')"
+              [label]="'Hours'"
+              [placeholder]="'0'"
+            >
+            </ngds-text-input>
+          </div>
+          <div class="col-4">
+            <ngds-text-input
+              [control]="form.get('maxStay.minutes')"
+              [label]="'Minutes'"
+              [placeholder]="'0'"
+            >
+            </ngds-text-input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Duration validation error -->
+    <div *ngIf="form.hasError('stayDurationInvalid') && (form.get('minStay')?.touched || form.get('maxStay')?.touched)" class="alert alert-danger mt-3 w-50 mx-auto text-center">
+      <i class="fa-solid fa-exclamation-triangle me-2"></i>
+      <strong>Invalid Stay Duration:</strong> Maximum stay must be greater than minimum stay.
+    </div>
+<hr>
+<section #attachActivitiesSection>
+  <div class="d-flex flex-column text-center align-items-center justify-content-center my-3">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 5: Select policies (coming soon)</h5>
+    </div>
+    <p>
+      Products require policies to define rules and guidelines for their use. Select the policies that will be associated with this product.
+    </p>
+  </div>
+  <div class="row text-center">
+    <div class="col-lg-12 d-flex flex-column align-items-center justify-content-center mb-5">
+      <div class="col-6">
+        <ngds-picklist-input
+        [control]="form.get('policies')"
+        [label]="'Booking Policy'"
+        [selectionListItems]=""
+        [placeholder]="'Select policies'"
+        [resetButton]="true"
+        [disabled]="true"
+        ></ngds-picklist-input>
+        <ngds-picklist-input
+          [control]="form.get('policies')"
+          [label]="'Party Policy'"
+          [selectionListItems]=""
+          [placeholder]="'Select policies'"
+          [resetButton]="true"
+          [disabled]="true"
+        ></ngds-picklist-input>
+        <ngds-picklist-input
+          [control]="form.get('policies')"
+          [label]="'Fee Policy'"
+          [selectionListItems]=""
+          [placeholder]="'Select policies'"
+          [resetButton]="true"
+          [disabled]="true"
+        ></ngds-picklist-input>
+        <ngds-picklist-input
+          [control]="form.get('policies')"
+          [label]="'Change Policy'"
+          [selectionListItems]=""
+          [placeholder]="'Select policies'"
+          [resetButton]="true"
+          [disabled]="true"
+        ></ngds-picklist-input>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section #optionalFieldsSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 6: Complete optional fields</h5>
+      <a
+        class="p-0"
+        href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#product-properties"
+        target="_blank"
+        noreferrer
+        noopener
+      >
+        <button class="btn btn-outline-secondary py-0 px-2">
+          <i class="fa-solid fa-question fa-xs"></i>
+        </button>
+      </a>
+    </div>
+    <div class="text-center mb-2">
+      Complete the optional fields for the product.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
+      <ngds-toggle-input
+        [control]="form.get('isVisible')"
+        [switch]="true"
+        [label]="'Toggle public visibility of the product. If unchecked, the product will not be visible to public users.'"
+      ></ngds-toggle-input>
+      <ngds-text-input
+        [control]="form.get('description')"
+        [label]="'Description'"
+        [multiline]="true"
+        [placeholder]="'Enter a description for the product'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+      <!-- Search terms component -->
+      <app-search-terms
+        #searchTerms
+        [searchTerms]="form.get('searchTerms')?.value || []"
+        (searchTermsChange)="onSearchTermsChange($event)"
+        (searchTermDirty)="onSearchTermDirty()"
+      ></app-search-terms>
+      
+      <ngds-text-input
+        [control]="form.get('adminNotes')"
+        [label]="'Administrative Notes'"
+        [multiline]="true"
+        [placeholder]="'Enter administrative notes'"
+        [resetButton]="true"
+      >
+      </ngds-text-input>
+    </div>
+  </div>
+</section>
+
+<!-- Custom template for activity selection display -->
+<ng-template #activityItemTemplate let-activity>
+  <app-entity-selection-dropdown-item
+    [entity]="activity"
+    [entityType]="'activity'"
+    [isSelected]="true"
+  ></app-entity-selection-dropdown-item>
+</ng-template>
+
+<!-- Custom template for activity selection list (dropdown) -->
+<ng-template
+  #activitySelectionTemplate
+  let-matches="matches"
+  let-query="query"
+  let-control="control"
+>
+  <div
+    *ngIf="matches.length === 0"
+    class="text-center text-muted my-3"
+  >
+    No <strong>{{ form.get('collectionId')?.value || 'activities' }}</strong> activities found matching "{{ query }}".
+  </div>
+  <div *ngFor="let match of matches">
+    <app-entity-selection-dropdown-item
+      [entity]="match.value"
+      [entityType]="'activity'"
+      [isSelected]="isEntitySelected(match.value)"
+    ></app-entity-selection-dropdown-item>
+  </div>
+</ng-template>

@@ -3,12 +3,9 @@ import {
   Component,
   OnInit,
   ViewChild,
-  WritableSignal,
-  signal,
   AfterViewChecked,
   Output,
-  EventEmitter,
-  TemplateRef
+  EventEmitter
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -20,8 +17,6 @@ import { FacilityService } from '../../../services/facility.service';
 import { GeozoneService } from '../../../services/geozone.service';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
-import { ProtectedAreaService } from '../../../services/protected-area.service';
-import { FacilityListItemComponent } from '../../facility/facility-list-item/facility-list-item.component';
 
 @Component({
   selector: 'app-activity-form',
@@ -32,8 +27,6 @@ import { FacilityListItemComponent } from '../../facility/facility-list-item/fac
 export class ActivityFormComponent implements OnInit, AfterViewChecked {
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
-  @ViewChild('facilitySelectTemplate') facilitySelectTemplate: TemplateRef<any>;
-  @ViewChild('geozoneSelectTemplate') geozoneSelectTemplate: TemplateRef<any>;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
 
@@ -43,24 +36,10 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
   public activityTypes = Object.values(Constants.activityTypes);
   public activitySubTypes: any[] = [];
 
-  public protectedAreas: any[] = [];
-  public _facilities: WritableSignal<any[]> = signal([]);
-  public linkedFacilities: any[] = [];
-  public unlinkedFacilities: any[] = [];
-  public _geozones: WritableSignal<any[]> = signal([]);
-  public linkedGeozones: any[] = [];
-  public unlinkedGeozones: any[] = [];
-  public facilitiesLoading: boolean = false;
-  public geozonesLoading: boolean = false;
-  public currentMapMarker: any[] = [];
-  private protectedAreasData: any[] = [];
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private protectedAreaService: ProtectedAreaService,
     public loadingService: LoadingService,
-    private facilityService: FacilityService,
-    private geozoneService: GeozoneService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -73,12 +52,7 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
     this.activityTypes = this.activityTypes.filter(type => type.value !== 'noType');
     this.activitySubTypes = [];
 
-    // Initialize form first to prevent template errors
     this.initializeForm();
-
-    if (this.activity) {
-      this.getFacilitiesByCollectionId();
-    }
 
     this.form.valueChanges.subscribe(() => {
       this.formValue.emit(this.form);
@@ -98,14 +72,9 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      orcs: new UntypedFormControl(this.activity?.orcs || '', {
-        nonNullable: true,
+      facilities: new UntypedFormControl(this.mapEntityPkSk(this.activity?.facilities) || '', {
       }),
-      facilities: new UntypedFormControl(this.mapFacilityPkSk(this.activity?.facilities) || '', {
-      }),
-      allFacilities: new UntypedFormControl([], {
-      }),
-      allGeozones: new UntypedFormControl([], {
+      geozones: new UntypedFormControl(this.mapEntityPkSk(this.activity?.geozones) || '', {
       }),
       displayName: new UntypedFormControl(this.activity?.displayName || this.defaultActivityName, {
         nonNullable: true,
@@ -113,11 +82,10 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
       }),
       isVisible: new UntypedFormControl(this.activity?.isVisible || false),
       description: new UntypedFormControl(this.activity?.description || ''),
-      geozones: new UntypedFormControl(this.activity?.geozones || ''),
       activitySubType: new UntypedFormControl(this.activity?.activitySubType || ''),
       imageUrl: new UntypedFormControl(this.activity?.imageUrl || ''),
       searchTerms: new UntypedFormControl(
-        this.activity?.searchTerms?.join(', ') || ''
+        this.activity?.searchTerms || []
       ),
       adminNotes: new UntypedFormControl(this.activity?.adminNotes || '')
     });
@@ -130,84 +98,25 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
       this.cdr.detectChanges();
     });
 
-    this.form.get('collectionId').valueChanges.subscribe(() => {
-      this._facilities.set([]);
-      this.form.get('allFacilities')?.setValue([]);
-      this.getFacilitiesByCollectionId();
-    });
 
     this.form.get('activityType').valueChanges.subscribe(() => {
       this.updateFilteredActivitySubTypes();
     });
-
-    this.form.get('allFacilities').valueChanges.subscribe((facilities) => {
-      // convert existing linkedFacilities to a Set for easier management
-      if (!facilities) {
-        facilities = [];
-      }
-      const formValue = facilities.map(f => {
-        return {
-          pk: f.pk,
-          sk: f.sk
-        };
-      });
-      this.form.get('facilities')?.setValue(formValue);
-      this.form.get('facilities')?.markAsDirty();
-    });
   }
 
-  mapFacilityPkSk(facilities) {
-    if (!facilities?.length) {
+
+  // Generic utility method to map entities to pk/sk objects
+  mapEntityPkSk(entities: any[]): { pk: string; sk: string }[] {
+    if (!entities?.length) {
       return [];
     }
-    return facilities.map(f => {
-      return {
-        pk: f.pk,
-        sk: f.sk
-      };
-    });
+    return entities.map(entity => ({
+      pk: entity.pk,
+      sk: entity.sk
+    }));
   }
 
   ngAfterViewChecked() {
-    this.cdr.detectChanges();
-  }
-
-  // Update ORCS based on selected protected area
-  async updateOrcs() {
-    const selectedAreaName = this.form.get('protectedArea')?.value;
-
-    // Only continue if value matches one of the known protected areas
-    const matchedPA = this.protectedAreasData.find(pa => pa.displayName === selectedAreaName);
-    if (!matchedPA) {
-      return;
-    }
-    // Find the selected protected area and set ORCS
-    const orcs = matchedPA.orcs;
-    const orcsControl = this.form.get('orcs');
-    orcsControl?.setValue(`${orcs}`);
-    orcsControl?.markAsDirty();
-
-    this.cdr.detectChanges();
-  }
-
-  selectFacility(match, control) {
-    let value = [];
-    value = value.concat(match.value);
-    if (control?.value) {
-      value = value.concat(control.value);
-    }
-    control.setValue(value);
-  }
-
-  selectGeozone(match, control) {
-    control.setValue(match.value);
-  }
-
-  removeLinkedFacility(facility) {
-    this.linkedFacilities = this.linkedFacilities.filter(f => f !== facility);
-    const formValue = this.form.get('allFacilities')?.value;
-    const newValue = formValue.filter(f => f !== facility);
-    this.form.get('allFacilities')?.setValue(newValue);
     this.cdr.detectChanges();
   }
 
@@ -252,59 +161,18 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
     this.router.navigate([`/inventory/geozone/create/${collectionId}/${orcs}`]);
   }
 
-  async getGeozonesByCollectionId() {
-    this.geozonesLoading = true;
+  navigateToEntityRelationships() {
     const collectionId = this.form.get('collectionId')?.value;
-    const geozoneRes = await this.geozoneService.getGeozoneByCollectionId(collectionId);
-    if (!geozoneRes) {
-      this._geozones.set([]);
-      this.geozonesLoading = false;
-      return;
-    } else {
-      this._geozones.set(geozoneRes.items.map(g => {
-        return {
-          value: g,
-          display: g.displayName,
-        };
-      }));
-      this.geozonesLoading = false;
-      return;
-    }
-  }
-
-  async getFacilitiesByCollectionId() {
-    this.facilitiesLoading = true;
-    this._facilities.set([]);
-    const collectionId = this.form.get('collectionId')?.value;
-    const facilityRes = await this.facilityService.getFacilitiesByCollectionId(collectionId);
-    if (facilityRes?.items?.length) {
-      this._facilities.set(facilityRes.items.map(f => {
-        return {
-          value: f,
-          display: f.displayName,
-        };
-      }));
-      setTimeout(() => {
-        this.updateFacilitiesList();
-      }, 0);
-      this.facilitiesLoading = false;
-      return;
-    }
-    this.facilitiesLoading = false;
-  }
-
-  updateFacilitiesList() {
-    if (this.activity?.facilities?.length > 0) {
-      const linkedFacilitiesSet = new Set();
-      for (const facility of this.activity.facilities) {
-        const fullFacility = this._facilities().find(f => f.value.pk === facility.pk && f.value.sk === facility.sk);
-        if (fullFacility) {
-          linkedFacilitiesSet.add(fullFacility.value);
-        }
+    const activityType = this.form.get('activityType')?.value;
+    const activityId = this.activity?.activityId;
+    // Navigate to the entity relationships page for this activity
+    // Format: activity::collectionId::activityType::activityId
+    this.router.navigate(['/inventory/create/relationships'], {
+      queryParams: {
+        collectionId: collectionId,
+        sourceEntityType: 'activity',
+        sourceEntity: `activity::${collectionId}::${activityType}::${activityId}`
       }
-      this.form.get('allFacilities')?.setValue(Array.from(linkedFacilitiesSet));
-    }
+    });
   }
-
-
 }

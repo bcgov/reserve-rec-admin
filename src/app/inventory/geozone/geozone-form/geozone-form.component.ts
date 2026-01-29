@@ -8,16 +8,18 @@ import { LoadalComponent } from '../../../shared/components/loadal/loadal.compon
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { Constants } from '../../../app.constants';
+import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
 
 @Component({
   selector: 'app-geozone-form',
-  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule],
+  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule, SearchTermsComponent],
   templateUrl: './geozone-form.component.html',
   styleUrl: './geozone-form.component.scss'
 })
 export class GeozoneFormComponent implements OnInit, AfterViewInit {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
+  @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
 
@@ -85,12 +87,49 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.initializeForm();
+
+    this.form.valueChanges.subscribe(() => {
+      this.formValue.emit(this.form);
+      this.cdr.detectChanges();
+    });
+
+    this.form.get('mandatoryFields.displayName').valueChanges.subscribe((value) => {
+      this.markerOptions['displayName'] = value;
+      this.updateLocationMarkers();
+    });
+    this.form.get('mandatoryFields.location').valueChanges.subscribe((value) => {
+      this.updateLocationMarkers();
+    });
+    this.form.get('mandatoryFields.envelope').valueChanges.subscribe((value) => {
+      this.updateEnvelopeMarkers();
+    });
+    this.form.get('mandatoryFields.minMapZoom').valueChanges.subscribe((value) => {
+      this._minMapZoom.set(value);
+      this.updateLocationMarkers();
+      this.updateEnvelopeMarkers();
+      if (this.form.get('enforceZoomVisibility').value) {
+        this.mapComponent?.updateMap();
+      }
+    });
+    this.form.get('mandatoryFields.maxMapZoom').valueChanges.subscribe((value) => {
+      this._maxMapZoom.set(value);
+      this.updateLocationMarkers();
+      this.updateEnvelopeMarkers();
+      if (this.form.get('enforceZoomVisibility').value) {
+        this.mapComponent?.updateMap();
+      }
+    });
+  }
+
+  private initializeForm() {
     this.form = new UntypedFormGroup({
       collectionId: new UntypedFormControl(
         this.geozone?.collectionId || '',
         {
           nonNullable: true,
-          validators: [Validators.required]
+          validators: [Validators.required],
+          updateOn: 'blur'
         }
       ),
       mandatoryFields: new UntypedFormGroup({
@@ -182,47 +221,15 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
       isVisible: new UntypedFormControl(
         this.geozone?.isVisible || true
       ),
-      orcs: new UntypedFormControl(
-        this.geozone?.orcs || ''
-      ),
       imageUrl: new UntypedFormControl(
         this.geozone?.imageUrl || ''
       ),
       searchTerms: new UntypedFormControl(
-        this.geozone?.searchTerms?.join(', ') || ''
+        this.geozone?.searchTerms || []
       ),
       adminNotes: new UntypedFormControl(
         this.geozone?.adminNotes || ''
       ),
-    });
-    this.form.valueChanges.subscribe(() => {
-      this.formValue.emit(this.form);
-    });
-    this.form.get('mandatoryFields.displayName').valueChanges.subscribe((value) => {
-      this.markerOptions['displayName'] = value;
-      this.updateLocationMarkers();
-    });
-    this.form.get('mandatoryFields.location').valueChanges.subscribe((value) => {
-      this.updateLocationMarkers();
-    });
-    this.form.get('mandatoryFields.envelope').valueChanges.subscribe((value) => {
-      this.updateEnvelopeMarkers();
-    });
-    this.form.get('mandatoryFields.minMapZoom').valueChanges.subscribe((value) => {
-      this._minMapZoom.set(value);
-      this.updateLocationMarkers();
-      this.updateEnvelopeMarkers();
-      if (this.form.get('enforceZoomVisibility').value) {
-        this.mapComponent?.updateMap();
-      }
-    });
-    this.form.get('mandatoryFields.maxMapZoom').valueChanges.subscribe((value) => {
-      this._maxMapZoom.set(value);
-      this.updateLocationMarkers();
-      this.updateEnvelopeMarkers();
-      if (this.form.get('enforceZoomVisibility').value) {
-        this.mapComponent?.updateMap();
-      }
     });
   }
 
@@ -321,15 +328,39 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
     }
   }
 
-  /**
-   * Converts the comma-separated searchTerms string to an array
-   * Trims whitespace and filters out empty strings
-   */
-  getSearchTermsArray(): string[] {
-    const searchTermsString = this.form.get('searchTerms')?.value || '';
-    return searchTermsString
-      .split(',')
-      .map((term: string) => term.trim())
-      .filter((term: string) => term.length > 0);
+  onSearchTermsChange(searchTerms: string[]) {
+    this.form.get('searchTerms')?.setValue(searchTerms);
+    this.cdr.detectChanges();
+  }
+
+  // Mark the search terms form control as dirty when a term is added
+  onSearchTermDirty() {
+    this.form.get('searchTerms')?.markAsDirty();
+  }
+
+
+  // Generic utility method to map entities to pk/sk objects
+  mapEntityPkSk(entities: any[]): { pk: string; sk: string }[] {
+    if (!entities?.length) {
+      return [];
+    }
+    return entities.map(entity => ({
+      pk: entity.pk,
+      sk: entity.sk
+    }));
+  }
+
+  navigateToEntityRelationships() {
+    const collectionId = this.form.get('collectionId')?.value;
+    const geozoneId = this.geozone?.geozoneId;
+    // Navigate to the entity relationships page for this geozone
+    // Format: geozone::collectionId::geozoneId
+    this.router.navigate(['/inventory/create/relationships'], {
+      queryParams: {
+        collectionId: collectionId,
+        sourceEntityType: 'geozone',
+        sourceEntity: `geozone::${collectionId}::${geozoneId}`
+      }
+    });
   }
 }

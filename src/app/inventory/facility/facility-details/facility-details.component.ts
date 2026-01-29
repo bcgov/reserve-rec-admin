@@ -3,11 +3,13 @@ import { MapComponent } from '../../../map/map.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { Constants } from '../../../app.constants';
-import { SearchResultComponent } from '../../search-results-table/search-result/search-result.component';
+import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
+import { GeozoneListItemComponent } from '../../geozone/geozone-list-item/geozone-list-item.component';
+import { RelationshipService } from '../../../services/relationship.service';
 
 @Component({
   selector: 'app-facility-details',
-  imports: [UpperCasePipe, MapComponent, DatePipe, CommonModule, SearchResultComponent],
+  imports: [UpperCasePipe, MapComponent, DatePipe, CommonModule, ActivityListItemComponent, GeozoneListItemComponent],
   templateUrl: './facility-details.component.html',
   styleUrl: './facility-details.component.scss'
 })
@@ -19,14 +21,24 @@ export class FacilityDetailsComponent implements AfterViewInit {
     color: '#003366',
   };
 
+  // Relationship data
+  public relatedActivities: any[] = [];
+  public relatedGeozones: any[] = [];
+  public loadingRelationships: boolean = false;
+
   constructor(
     protected router: Router,
     protected cdr: ChangeDetectorRef,
-    protected route: ActivatedRoute
+    protected route: ActivatedRoute,
+    private relationshipService: RelationshipService,
   ) {
-    if (this.route.snapshot.data['facility']) {
-      this.facility = this.route.snapshot.data['facility'];
-    }
+    // Subscribe to route data changes to handle updates
+    this.route.data.subscribe(async (data) => {
+      if (data?.['facility']) {
+        this.facility = data['facility'];
+        await this.loadRelationships();
+      }
+    });
   }
 
   getFacilityTypeOption() {
@@ -57,6 +69,97 @@ export class FacilityDetailsComponent implements AfterViewInit {
       }
       this.mapComponent?.flyToFitBounds(
         [{coordinates: coordinates}],);
+    }
+  }
+
+  /**
+   * Load relationships for the current facility
+   * Fetches activity and geozone relationships from the relationships endpoint
+   */
+  async loadRelationships() {
+    if (!this.facility?.pk || !this.facility?.sk) {
+      console.warn('Cannot load relationships: Facility missing pk or sk');
+      return;
+    }
+
+    this.loadingRelationships = true;
+
+    try {
+      // Fetch activity relationships
+      await this.loadActivityRelationships();
+      
+      // Fetch geozone relationships
+      await this.loadGeozoneRelationships();
+    } catch (error) {
+      console.error('Error loading relationships:', error);
+    } finally {
+      this.loadingRelationships = false;
+    }
+  }
+
+  /**
+   * Load and fetch activity entities that are related to this facility
+   */
+  async loadActivityRelationships() {
+    try {
+      // Get activity relationships for this facility with entity data expanded
+      const relationshipsResponse = await this.relationshipService.getRelationshipsFrom(
+        this.facility.pk,
+        this.facility.sk,
+        'activity', // target schema filter
+        true, // expand entities
+        true  // bidirectional
+      );
+
+      if (relationshipsResponse?.length > 0) {
+        console.log(`Found ${relationshipsResponse.length} activity relationships`);
+        
+        // Extract the entity data directly from expanded relationships
+        this.relatedActivities = relationshipsResponse
+          .map((rel: any) => rel.entity)
+          .filter((entity: any) => entity !== null);
+        
+        console.log(`Loaded ${this.relatedActivities.length} activities`);
+      } else {
+        console.log('No activity relationships found');
+        this.relatedActivities = [];
+      }
+    } catch (error) {
+      console.error('Error loading activity relationships:', error);
+      this.relatedActivities = [];
+    }
+  }
+
+  /**
+   * Load and fetch geozone entities that are related to this activity
+   */
+  async loadGeozoneRelationships() {
+    try {
+      // Get geozone relationships for this activity with entity data expanded
+      const relationshipsResponse = await this.relationshipService.getRelationshipsFrom(
+        this.facility.pk,
+        this.facility.sk,
+        'geozone', // target schema filter
+        true, // expand entities
+        true  // bidirectional
+      );
+
+      if (relationshipsResponse?.length > 0) {
+        console.log(`Found ${relationshipsResponse.length} geozone relationships`);
+        
+        // Extract the entity data directly from expanded relationships
+        this.relatedGeozones = relationshipsResponse
+          .map((rel: any) => rel.entity)
+          .filter((entity: any) => entity !== null);
+        
+        console.log(`Loaded ${this.relatedGeozones.length} geozones`);
+      } else {
+        console.log('No geozone relationships found');
+        this.relatedGeozones = [];
+      }
+    } catch (error) {
+      console.error('Error loading geozone relationships:', error);
+      this.relatedGeozones = [];
     }
   }
 

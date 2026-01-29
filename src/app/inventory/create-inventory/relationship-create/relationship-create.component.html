@@ -1,0 +1,131 @@
+<app-loadal #loadal></app-loadal>
+
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-3">
+      <i class="fa-solid fa-circle-nodes me-2"></i>
+      Create Entity Relationships
+    </h4>
+    <div class="text-center mb-3">
+      Link entities together by creating relationships. Select a source entity and then choose which entities to link it to.
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- STEP 1: Select Collection and Source Entity Type -->
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h5 class="text-center mb-4">Step 1: Select Source Entity</h5>
+    
+    <div class="row w-100">
+      <!-- Collection ID -->
+      <div class="col-md-6 mb-3">
+        <ngds-text-input
+          [control]="form.get('collectionId')"
+          [label]="'Collection ID'"
+          [placeholder]="'Enter Collection ID'"
+          [resetButton]="true"
+        ></ngds-text-input>
+      </div>
+
+      <!-- Entity Type -->
+      <div class="col-md-6 mb-3">
+        <ngds-picklist-input
+          [control]="form.get('sourceEntityType')"
+          [label]="'Entity Type'"
+          [placeholder]="'Select entity type'"
+          [selectionListItems]="entityTypes"
+          [resetButton]="true"
+        ></ngds-picklist-input>
+      </div>
+    </div>
+
+    <!-- Source Entity Selection -->
+    <div class="row w-100" *ngIf="form.get('sourceEntityType')?.value && sourceEntities.length > 0">
+      <div class="col-6 mb-3">
+        <ngds-picklist-input
+          [control]="form.get('sourceEntity')"
+          [label]="'Select Specific Entity'"
+          [placeholder]="'Choose the entity to Entity Relationships from'"
+          [selectionListItems]="sourceEntityListItems"
+          [resetButton]="true"
+        ></ngds-picklist-input>
+      </div>
+    </div>
+
+    <!-- No entities message -->
+    <div *ngIf="form.get('sourceEntityType')?.value && form.get('collectionId')?.value && sourceEntities.length === 0 && !loading" 
+         class="alert alert-warning">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>
+      No {{ form.get('sourceEntityType')?.value }}s found for collection "{{ form.get('collectionId')?.value }}". 
+      Please create one first.
+    </div>
+  </div>
+</section>
+
+<hr *ngIf="selectedSourceEntity">
+
+<!-- STEP 2: Select Target Relationships -->
+<section *ngIf="selectedSourceEntity">
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h5 class="text-center mb-4">Step 2: Link Related Entities</h5>
+    
+    <!-- Selected Source Entity Display -->
+    <div class="alert alert-info mb-4 w-100">
+      <div class="d-flex align-items-center">
+        <i class="fa-solid {{ getEntityIcon(form.get('sourceEntityType')?.value) }} fa-2x me-3"></i>
+        <div>
+          <strong>Creating relationships from:</strong><br>
+          <span class="text-capitalize">{{ form.get('sourceEntityType')?.value }}</span>: 
+          <strong>{{ selectedSourceEntity.displayName || selectedSourceEntity.name }}</strong>
+          <span class="text-muted ms-2">({{ selectedSourceEntity.collectionId }})</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target Entity Selectors -->
+    <div class="row w-100">
+      <div 
+        *ngFor="let targetType of targetEntityTypes" 
+        class="col-lg-6 mb-4"
+      >
+        <app-entity-relationship-selector
+          *ngIf="relationshipConfigs.get(targetType.value)"
+          [config]="relationshipConfigs.get(targetType.value)"
+          [sourceEntity]="null"
+          [selectedEntities]="selectedRelationships.get(targetType.value) || []"
+          (relationshipsChanged)="onRelationshipsChanged(targetType.value, $event)"
+          (relationshipRemoved)="onRelationshipsRemoved(targetType.value, $event)"
+        ></app-entity-relationship-selector>
+      </div>
+    </div>
+
+    <!-- No target types available -->
+    <div *ngIf="targetEntityTypes.length === 0" class="alert alert-warning">
+      <i class="fa-solid fa-info-circle me-2"></i>
+      This entity type has no available relationship targets.
+    </div>
+  </div>
+</section>
+
+<hr *ngIf="selectedSourceEntity">
+
+<!-- STEP 3: Submit -->
+<section *ngIf="selectedSourceEntity">
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <button 
+      class="btn btn-success btn-lg" 
+      [disabled]="loading"
+      (click)="submit()"
+    >
+      <i class="fa-solid fa-link me-2"></i>
+      <span *ngIf="!loading">Entity Relationships</span>
+      <span *ngIf="loading">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Creating...
+      </span>
+    </button>
+  </div>
+</section>

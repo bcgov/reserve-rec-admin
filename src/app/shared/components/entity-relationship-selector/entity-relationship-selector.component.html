@@ -1,0 +1,119 @@
+<div class="entity-relationship-selector">
+  <!-- Entity Search/Selection -->
+  <ngds-typeahead-input
+    [control]="searchControl"
+    [label]="config.label"
+    [selectionListItems]="availableEntities()"
+    [displaySelectionItems]="'false'"
+    [resetButton]="true"
+    [multiselect]="false"
+    [placeholder]="config.placeholder"
+    [selectionListTemplate]="config.selectionListTemplate || defaultSelectionTemplate"
+    [loadWhile]="loading"
+    [disabled]="!isSelectionEditable()"
+  >
+  </ngds-typeahead-input>
+
+  <!-- Immutability Notice -->
+  <div 
+    *ngIf="!isSelectionEditable() && config.sourceSchema"  
+    class="alert alert-info mt-2 mb-0 d-flex align-items-center"
+    role="alert"
+  >
+    <i class="fa-solid fa-lock me-2"></i>
+    <small>This selection cannot be changed after creation. To delete a product from an activity, you must delete the product on its product page.</small>
+  </div>
+
+  <!-- Default Selection Template (if none provided) -->
+  <ng-template #defaultSelectionTemplate let-matches="matches" let-query="query" let-control="control">
+    <!-- Show "locked" message if not editable -->
+    <div *ngIf="!isSelectionEditable()" class="text-center text-muted my-3">
+      <i class="fa-solid fa-lock me-2"></i>
+      Selection is locked and cannot be changed.
+    </div>
+    
+    <!-- Show normal dropdown only if editable -->
+    <ng-container *ngIf="isSelectionEditable()">
+      <div *ngIf="matches.length === 0" class="text-center text-muted my-3">
+        No {{ config.targetSchema }}s found matching "{{ query }}".
+      </div>
+      <div *ngFor="let match of matches">
+        <div
+          class="card-body m-1 border border-2 rounded-3 entity-select-item"
+          (click)="selectEntity(match)"
+          (keydown.enter)="selectEntity(match)"
+          tabindex="0"
+        >
+          <div class="p-3">
+            <div class="mb-1">{{ match.display }}</div>
+            <div class="d-flex">
+              <div class="badge bg-primary">{{ config.targetSchema | titlecase }}</div>
+              <div class="badge bg-secondary ms-1">{{ match?.value?.collectionId }}</div>
+              <!-- this could probably be cleaner for showing different pills for subtypes -->
+              <div *ngIf="match?.value?.activityType ||  match?.value?.facilityType"  class="badge bg-secondary ms-1">{{ match?.value?.activityType ||  match?.value?.facilityType || ''}}</div>
+              <div class="badge bg-secondary ms-1">#{{ match?.value?.identifier || 'N/A' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
+
+  <!-- Selected Entities List -->
+  <div class="selected-entities mt-3">
+    <div class="text-center">
+      <strong>Selected Items</strong>
+    </div>
+
+    <!-- No selection message -->
+    <div
+      *ngIf="selectedEntities.length === 0"
+      class="border rounded-3 m-4 p-4 text-center text-muted my-2"
+    >
+      No {{ config.targetSchema }} linked.
+    </div>
+
+    <!-- Selected items with default or custom template -->
+    <div *ngFor="let entity of selectedEntities">
+      <div class="border rounded-3 d-flex justify-content-between my-2">
+        <!-- Custom template if provided -->
+        <div class="w-100" *ngIf="config.selectedItemTemplate">
+          <ng-container
+            *ngTemplateOutlet="config.selectedItemTemplate; context: { $implicit: entity }"
+          ></ng-container>
+        </div>
+
+        <!-- Default template -->
+        <div class="w-100 p-3" *ngIf="!config.selectedItemTemplate">
+          <div class="mb-1">{{ entity.displayName || entity.name }}</div>
+          <div class="d-flex">
+            <div class="badge bg-primary">{{ config.targetSchema | titlecase }}</div>
+            <div class="badge bg-secondary ms-1">{{ entity.collectionId }}</div>
+            <!-- this could probably be cleaner for showing different pills for subtypes -->
+            <div *ngIf="entity?.activityType ||  entity?.facilityType" class="badge bg-secondary ms-1">{{ entity?.activityType ||  entity?.facilityType || ''}}</div>
+            <div class="badge bg-secondary ms-1">#{{ entity.identifier }}</div>
+          </div>
+        </div>
+
+        <!-- Remove button (only shown when editable) -->
+        <button
+          *ngIf="isSelectionEditable()"
+          class="btn btn-outline-danger my-1 me-1"
+          [title]="'Remove ' + config.targetSchema + ' from this ' + config.sourceSchema"
+          (click)="removeEntity(entity)"
+        >
+          <i class="fs-5 fa-solid fa-trash me-1"></i>
+        </button>
+
+        <!-- Locked indicator (shown when not editable) -->
+        <div
+          *ngIf="!isSelectionEditable()"
+          class="d-flex align-items-center px-3 text-muted"
+          [title]="'This ' + config.targetSchema + ' selection is locked'"
+        >
+          <i class="fa-solid fa-lock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

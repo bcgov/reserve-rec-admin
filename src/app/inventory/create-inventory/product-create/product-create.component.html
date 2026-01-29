@@ -1,0 +1,28 @@
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Product</h4>
+    <div class="text-center mb-3">
+      Products are bookable items or passes associated with activities at BC Parks locations.
+    </div>
+  </div>
+</section>
+<hr>
+<app-product-form
+  (formValue)="updateProductForm($event)"
+  (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)"
+  >
+</app-product-form>
+<hr>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Create New Product</h4>
+    <button 
+      class="btn btn-success btn-lg"
+      (click)="submit()"
+      [disabled]="!productForm?.valid || !productForm?.dirty"
+    >
+      <i class="fa-solid fa-plus me-2"></i>
+      <span>Create Product</span>
+    </button>
+  </div>
+</section>
