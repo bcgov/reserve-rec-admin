@@ -13,14 +13,12 @@ import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../services/loading.service';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilityService } from '../../../services/facility.service';
-import { GeozoneService } from '../../../services/geozone.service';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
 
 @Component({
   selector: 'app-activity-form',
-  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent, FacilityListItemComponent],
+  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent],
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })

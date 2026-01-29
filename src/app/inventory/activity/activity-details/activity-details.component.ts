@@ -13,7 +13,7 @@ import { ProductListItemComponent } from '../../product/product-list-item/produc
 @Component({
   selector: 'app-activity-details',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe, DatePipe, FacilityListItemComponent],
+  imports: [CommonModule, UpperCasePipe, DatePipe, FacilityListItemComponent, GeozoneListItemComponent, ProductListItemComponent],
   templateUrl: './activity-details.component.html',
   styleUrl: './activity-details.component.scss',
   providers: [BsModalService]
