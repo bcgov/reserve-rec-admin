@@ -18,7 +18,6 @@ import { LoadalComponent } from '../../../shared/components/loadal/loadal.compon
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilityService } from '../../../services/facility.service';
 import { GeozoneService } from '../../../services/geozone.service';
-import { MapComponent } from '../../../map/map.component';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
 import { ProtectedAreaService } from '../../../services/protected-area.service';
@@ -26,13 +25,12 @@ import { FacilityListItemComponent } from '../../facility/facility-list-item/fac
 
 @Component({
   selector: 'app-activity-form',
-  imports: [NgdsFormsModule, CommonModule, MapComponent, LoadalComponent, SearchTermsComponent, FacilityListItemComponent],
+  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent, FacilityListItemComponent],
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })
 export class ActivityFormComponent implements OnInit, AfterViewChecked {
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
-  @ViewChild('mapComponent', { static: false }) mapComponent!: MapComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
   @ViewChild('facilitySelectTemplate') facilitySelectTemplate: TemplateRef<any>;
   @ViewChild('geozoneSelectTemplate') geozoneSelectTemplate: TemplateRef<any>;

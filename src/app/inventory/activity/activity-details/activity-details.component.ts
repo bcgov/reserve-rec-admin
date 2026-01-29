@@ -1,6 +1,5 @@
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
-import { Component, signal, ViewChild, WritableSignal } from '@angular/core';
-import { MapComponent } from '../../../map/map.component';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { GeozoneService } from '../../../services/geozone.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationModalComponent, ModalRowSpec } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -13,13 +12,12 @@ import { FacilityListItemComponent } from '../../facility/facility-list-item/fac
 @Component({
   selector: 'app-activity-details',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe, DatePipe, MapComponent, FacilityListItemComponent],
+  imports: [CommonModule, UpperCasePipe, DatePipe, FacilityListItemComponent],
   templateUrl: './activity-details.component.html',
   styleUrl: './activity-details.component.scss',
   providers: [BsModalService]
 })
 export class ActivityDetailsComponent {
-  @ViewChild('mapComponent') mapComponent!: MapComponent;
   public activity: any = null;
   public facility: any = null;
   public location: any = null;
@@ -89,12 +87,6 @@ export class ActivityDetailsComponent {
           options: this.markerOptions
         }]);
       }
-      if (this._envelope()?.[0]?.coordinates?.length > 2) {
-        this.mapComponent?.map?.fitBounds([
-          this._envelope()[0].coordinates[0],
-          this._envelope()[0].coordinates[2]
-        ], { padding: 75 });
-      }
     }
   }
 
@@ -113,12 +105,6 @@ export class ActivityDetailsComponent {
           options: this.envelopeOptions
         }]);
       }
-    }
-    if (this._envelope()?.[0]?.coordinates?.length > 1) {
-      this.mapComponent?.map?.fitBounds([
-        this._envelope()[0]?.coordinates[0],
-        this._envelope()[0]?.coordinates[2]
-      ], { padding: 75 });
     }
   }
 }
