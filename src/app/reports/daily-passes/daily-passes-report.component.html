@@ -12,51 +12,42 @@
       <h5 class="mb-0">Report Filters</h5>
     </div>
     <div class="card-body">
-      <div class="row g-3">
+      <form [formGroup]="form" class="row g-3" (ngSubmit)="exportReport()">
         <!-- Park Selection -->
         <div class="col-md-4">
-          <label for="parkSelect" class="form-label">Park <span class="text-danger">*</span></label>
-          <select
-            id="parkSelect"
-            class="form-select"
-            [(ngModel)]="selectedCollectionId"
-            (ngModelChange)="onCollectionIdChange()"
-          >
-            <option value="">Select a park...</option>
-            <option *ngFor="let park of protectedAreas" [value]="'bcparks_' + park.orcs">
-              {{ park.displayName }}
-            </option>
-          </select>
+          <ngds-picklist-input
+            [control]="form.get('collectionId')"
+            [label]="'Park'"
+            [placeholder]="'Select a park...'"
+            [selectionListItems]="parkOptions"
+            [resetButton]="true"
+          ></ngds-picklist-input>
         </div>
 
         <!-- Facility Selection (Optional) -->
         <div class="col-md-4">
-          <label for="facilitySelect" class="form-label">Facility (Optional)</label>
-          <select
-            id="facilitySelect"
-            class="form-select"
-            [(ngModel)]="selectedFacilityId"
-            [disabled]="!selectedCollectionId || facilitiesLoading"
-          >
-            <option value="">All facilities</option>
-            <option *ngFor="let facility of facilities" [value]="facility.facilityId">
-              {{ facility.displayName }}
-            </option>
-          </select>
+          <ngds-picklist-input
+            [control]="form.get('facilityId')"
+            [label]="'Facility (Optional)'"
+            [placeholder]="'All facilities'"
+            [selectionListItems]="facilityOptions"
+            [resetButton]="true"
+            [disabled]="!form.get('collectionId')?.value || facilitiesLoading"
+          ></ngds-picklist-input>
           <small *ngIf="facilitiesLoading" class="text-muted">Loading facilities...</small>
         </div>
 
         <!-- Date Selection -->
         <div class="col-md-4">
-          <label for="dateSelect" class="form-label">Arrival Date <span class="text-danger">*</span></label>
-          <input
-            type="date"
-            id="dateSelect"
-            class="form-control"
-            [(ngModel)]="selectedDate"
-          >
+          <ngds-date-input
+            [control]="form.get('arrivalDate')"
+            [label]="'Arrival Date'"
+            [placeholder]="'Select a date'"
+            [dateFormat]="'yyyy-LL-dd'"
+            [dateDisplayFormat]="'yyyy-LL-dd'"
+          ></ngds-date-input>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -64,18 +55,19 @@
   <div class="row">
     <div class="col">
       <button
+        type="button"
         class="btn btn-primary"
         [disabled]="!canExport() || isLoading"
         (click)="exportReport()"
       >
-        <span *ngIf="isLoading">
+        <ng-container *ngIf="isLoading; else exportLabel">
           <i class="fa-solid fa-spinner fa-spin me-2"></i>
           Generating...
-        </span>
-        <span *ngIf="!isLoading">
+        </ng-container>
+        <ng-template #exportLabel>
           <i class="fa-solid fa-download me-2"></i>
           Export CSV
-        </span>
+        </ng-template>
       </button>
     </div>
   </div>
