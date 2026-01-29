@@ -44,9 +44,10 @@ export class ActivityService {
     }
   }
 
-  async createActivity(collectionId, activityType, props) {
+  async createActivity(collectionId, props) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.ACTIVITY_RESULT);
+
       const res = (await lastValueFrom(this.apiService.post(`activities/${collectionId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.ACTIVITY_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
@@ -87,6 +88,19 @@ export class ActivityService {
         `Activity failed to create`,
         ToastTypes.ERROR
       );
+    }
+  }
+
+  async getActivitiesByCollectionId(collectionId) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.ACTIVITIES_RESULT);
+      const res = (await lastValueFrom(this.apiService.get(`activities/${collectionId}`)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.ACTIVITIES_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITIES_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITIES_RESULT);
+      this.loggerService.error(error);
     }
   }
 

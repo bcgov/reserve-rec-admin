@@ -37,7 +37,7 @@ export class GeozoneService {
     }
   }
   
-  async getGeozoneByCollectionId(collectionId) {
+  async getGeozonesByCollectionId(collectionId) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.GEOZONES_RESULT);
       const res = (await lastValueFrom(this.apiService.get(`geozones/${collectionId}`)))['data'];

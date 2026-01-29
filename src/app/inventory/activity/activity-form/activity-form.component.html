@@ -104,155 +104,20 @@
         </div>
       </div>
 
-      <!-- Facilities Field -->
-      <p class="text-center">
-        The activitity must be linked to a geospatial entity within its <strong>Collection ID</strong>, either a
-        facility or a geozone. Select at least one entity from the lists below. If no facilities or geozones are
-        available for the selected <strong>Collection ID</strong>, please create them first.
-      </p>
-      <div class="row w-100">
-        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <ngds-typeahead-input
-            [control]="form.get('allFacilities')"
-            [label]="'Add facilities to this activity'"
-            [selectionListItems]="_facilities()"
-            [displaySelectionItems]="'false'"
-            [resetButton]="true"
-            [multiselect]="true"
-            [placeholder]="'Start typing to search facilities...'"
-            [selectionListTemplate]="facilitySelectTemplate"
-            [loadWhile]="facilitiesLoading"
-          >
-          </ngds-typeahead-input>
-
-          <!-- Selected facilites list -->
-          <div class="text-center mt-2">
-            <strong>Selected Facilities</strong>
-          </div>
-          <div
-            *ngIf="!form.get('allFacilities')?.value"
-            class=" border rounded-3 m-4 p-4 text-center text-muted my-2"
-          >
-            No facilities linked to this activity.
-          </div>
-          <div *ngFor="let facility of this.form.get('allFacilities')?.value">
-            <div class="border rounded-3 d-flex justify-content-between">
-              <div class="w-100">
-                <app-facility-list-item [facility]="facility">
-                </app-facility-list-item>
-              </div>
-              <button class="btn btn-outline-danger my-1 me-1" title="Remove facility from this activity" (click)="removeLinkedFacility(facility)">
-                <i
-                  class="fs-5 fa-solid fa-trash me-1"
-                ></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-          <!-- Dont add geozones for now -->
-          <ngds-typeahead-input
-            [control]="form.get('allGeozones')"
-            [label]="'Add geozones to this activity (coming soon)'"
-            [selectionListItems]="_geozones()"
-            [resetButton]="true"
-            [placeholder]="'Start typing to search geozones...'"
-            [selectionListTemplate]="geozoneSelectTemplate"
-            [disabled]="true"
-          >
-          </ngds-typeahead-input>
-
-          <!-- Selected geozone list -->
-          <div class="mt-2">
-            <div class="text-center">
-              <strong>
-                Selected Geozones:
-              </strong>
-            </div>
-          </div>
-        </div>
+      <div class="alert alert-info text-center">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        To link this activity to facilities, geozones, or products, use the 
+        <strong>Entity Relationships</strong> tool.
       </div>
+      <button 
+        *ngIf="activity?.activityId"
+        class="btn btn-primary mt-3" (click)="navigateToEntityRelationships()"
+      >
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span> Go to Entity Relationships</span>
+      </button>
     </div>
   </section>
-
-  <ng-template
-    #geozoneSelectTemplate
-    let-matches="matches"
-    let-query="query"
-    let-item="item"
-    let-control="control"
-  >
-  </ng-template>
-
-  <ng-template
-    #facilitySelectTemplate
-    let-matches="matches"
-    let-query="query"
-    let-item="item"
-    let-control="control"
-  >
-    <div
-      *ngIf="matches.length === 0"
-      class="text-center text-muted my-3"
-    >
-      No <strong>{{activity?.collectionId}}</strong> facilities found matching "{{query}}".
-    </div>
-    <div *ngFor="let match of matches">
-      <div
-        class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between facility-select"
-        (click)="selectFacility(match, control)"
-        (keydown.enter)="selectFacility(match, control)"
-        tabindex="0"
-      >
-        <div class="p-3">
-          <div class="mb-1">
-            {{match.display}}
-          </div>
-          <div class="d-flex">
-            <div class="badge bg-primary">
-              Facility
-            </div>
-            <div class="badge bg-secondary ms-1">
-              {{match?.value?.collectionId}}
-            </div>
-            <div class="badge bg-primary ms-1">
-              {{match?.value?.facilityType | titlecase}}
-            </div>
-            <div class="badge bg-secondary ms-1">
-              #{{match?.value?.facilityId || 'N/A'}}
-            </div>
-            <div class="badge bg-light text-muted  border border-1 ms-1">
-              v{{match?.value?.version || 'N/A'}}
-            </div>
-          </div>
-        </div>
-        <div class="p-1">
-
-          <div class="d-flex align-items-center justify-content-center">
-            <div class="border border-1 rounded-3">
-              <div *ngIf="match?.value?.imageUrl">
-                <img
-                  [src]="match?.value?.imageUrl"
-                  alt="image"
-                  width="100%"
-                  height="80px"
-                  style="object-fit: cover;"
-                />
-              </div>
-              <div
-                *ngIf="!match?.value?.imageUrl"
-                class="text-muted d-flex justify-content-center m-4"
-              >
-                No image
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-template>
-
 
   <hr>
 
@@ -302,15 +167,6 @@
           [switch]="true"
           [label]="'Toggle public visibility of the activity. If unchecked, the activity will not be visible to public users.'"
         ></ngds-toggle-input>
-
-        <!-- ORCS -->
-        <ngds-text-input
-          [control]="form.get('orcs')"
-          [label]="'ORCS'"
-          [placeholder]="'Enter ORCS of the parent protected area'"
-          [resetButton]="true"
-        >
-        </ngds-text-input>
 
         <!-- Activity description -->
         <ngds-text-input
@@ -371,3 +227,5 @@
   </section>
   <hr>
 </div>
+
+

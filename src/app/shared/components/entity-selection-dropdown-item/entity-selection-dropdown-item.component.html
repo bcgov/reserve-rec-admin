@@ -1,0 +1,67 @@
+<div
+  class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between entity-select"
+  [class.selected]="isSelected"
+  [attr.data-entity-type]="entityType"
+  tabindex="0"
+>
+  <!-- Entity information section -->
+  <div class="p-3 w-100">
+    <!-- Display name -->
+    <div class="mb-1">
+      {{ displayName }}
+    </div>
+    
+    <!-- Badges -->
+    <div class="d-flex flex-wrap">
+      <!-- Entity type badge (primary) -->
+      <div class="badge bg-primary">
+        {{ entityType | titlecase }}
+      </div>
+      
+      <!-- Collection ID badge -->
+      <div class="badge bg-secondary ms-1">
+        {{ collectionId }}
+      </div>
+      
+      <!-- Specific type badge (e.g., facilityType, geozoneType) -->
+      <div class="badge bg-primary ms-1" *ngIf="specificType">
+        {{ specificType | titlecase }}
+      </div>
+      
+      <!-- Identifier badge (e.g., facilityId, geozoneId) -->
+      <div class="badge bg-secondary ms-1">
+        #{{ identifier }}
+      </div>
+      
+      <!-- Version badge -->
+      <div class="badge bg-light text-muted border border-1 ms-1" *ngIf="version">
+        v{{ version }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Image thumbnail section -->
+  <div class="p-1">
+    <div class="d-flex align-items-center justify-content-center">
+      <div class="border border-1 rounded-3" style="width: 100px; height: 80px; overflow: hidden;">
+        <!-- Show image if available -->
+        <img
+          *ngIf="imageUrl"
+          [src]="imageUrl"
+          [alt]="displayName"
+          width="100%"
+          height="80px"
+          style="object-fit: cover;"
+        />
+        
+        <!-- Placeholder if no image -->
+        <div
+          *ngIf="!imageUrl"
+          class="text-muted d-flex justify-content-center align-items-center h-100"
+        >
+          <small>No image</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -74,6 +74,7 @@ export class SearchTermsComponent {
 
   removeSearchTerm(index: any) {
     this.searchTerms.splice(index, 1);
+    this.searchTermDirty.emit();
     this.searchTermsChange.emit([...this.searchTerms]);
   }
 }

@@ -1,0 +1,290 @@
+<section class="container pt-5 pb-4">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Summary</h4>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Display Name: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{product?.displayName}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Activity Type: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getActivityTypeOption(), isSubtype: false }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">SubType: </strong>
+        </div>
+        <div class="col-auto">
+          <span *ngTemplateOutlet="typeBadge; context: { type: getActivitySubTypeOption(), isSubtype: true }"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Latest version: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{product?.version || 'No version available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Collection ID: </strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-secondary">{{product?.collectionId || 'No ID available.'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Visible: </strong>
+        </div>
+        <div class="col-auto">
+          <div
+            class="mb-0"
+            [ngClass]="{'text-primary': product?.isVisible, 'text-secondary': !product?.isVisible}"
+          >
+            <span *ngIf="product?.isVisible; else notVisible"><i class="fa-solid fa-eye me-1"></i> {{product?.isVisible }}</span>
+            <ng-template #notVisible><i class="fa-solid fa-eye-slash me-1"></i> {{product?.isVisible || false}}</ng-template>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Created at: </strong>
+        </div>
+        <div class="col-auto">
+          <span>{{product?.creationDate | date:'medium'}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong class="me-1">Last Updated: </strong>
+        </div>
+        <div class="col-auto">
+
+          <span>{{product?.lastUpdated | date:'medium'}}</span>
+        </div>
+      </div>
+      <h6 class="mt-3">Description</h6>
+      <p>{{product?.description || 'No description available.'}}</p>
+      
+      <h6 class="mt-3">Booking Details</h6>
+      <div class="row mb-2" *ngIf="product?.minStay">
+        <div class="col-4">
+          <strong>Minimum Stay:</strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-primary text-dark me-1">
+            {{ product?.minStay?.days }} {{ product?.minStay?.days === 1 ? 'day' : 'days' }}
+          </span>
+          <span class="badge bg-secondary text-dark badge text-dark me-1">
+            {{ product?.minStay?.hours }} {{ product?.minStay?.hours === 1 ? 'hour' : 'hours' }}
+          </span>
+          <span class="badge bg-primary text-dark badge text-dark me-1">
+            {{ product?.minStay?.minutes }} {{ product?.minStay?.minutes === 1 ? 'minute' : 'minutes' }}
+          </span>
+        </div>
+      </div>
+      <div class="row mb-2" *ngIf="product?.maxStay">
+        <div class="col-4">
+          <strong>Maximum Stay:</strong>
+        </div>
+        <div class="col-auto">
+          <span class="badge bg-primary text-dark me-1">
+            {{ product?.maxStay?.days }} {{ product?.maxStay?.days === 1 ? 'day' : 'days' }}
+          </span>
+          <span class="badge bg-secondary text-dark badge text-dark me-1">
+            {{ product?.maxStay?.hours }} {{ product?.maxStay?.hours === 1 ? 'hour' : 'hours' }}
+          </span>
+          <span class="badge bg-primary text-dark badge text-dark me-1">
+            {{ product?.maxStay?.minutes }} {{ product?.maxStay?.minutes === 1 ? 'minute' : 'minutes' }}
+          </span>
+        </div>
+      </div>
+      <div class="row mb-2" *ngIf="product?.rangeStart && product?.rangeEnd">
+        <div class="col-4">
+          <strong>Available Dates:</strong>
+        </div>
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <span class="badge bg-success me-2">
+              <i class="fa-regular fa-calendar me-1"></i>
+              {{ product.rangeStart | date:'mediumDate' }}
+            </span>
+            <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
+            <span class="badge bg-success">
+              <i class="fa-regular fa-calendar me-1"></i>
+              {{ product.rangeEnd | date:'mediumDate' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <h6 class="mt-3">Search Terms</h6>
+      <p>{{product?.searchTerms || 'No search terms available.'}}</p>
+      <h6 class="mt-3">Admin Notes</h6>
+      <p>{{product?.adminNotes || 'No adminNotes available.'}}</p>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Images</h4>
+      <img
+        *ngIf="product?.imageUrl"
+        [src]="product?.imageUrl"
+        alt="{{product?.displayName}} image"
+        class="img-fluid rounded"
+      />
+    </div>
+  </div>
+</section>
+
+<hr>
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Product Details</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related activities...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedActivities.length === 0" class="text-muted my-3">
+        This product has been orphaned - if no relationship exists, the activity has been deleted.
+      </div>
+      
+      <!-- Activities list -->
+      <div *ngIf="!loadingRelationships && relatedActivities.length > 0" class="mb-3">
+        This product is associated with {{ relatedActivities.length }} {{ relatedActivities.length === 1 ? 'activity' : 'activities' }}:
+      </div>
+      <div class="mb-2">
+        <div class="row">
+          <app-activity-list-item
+            *ngFor="let activity of relatedActivities"
+            [activity]="activity"
+          ></app-activity-list-item>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Policy Details (coming soon)</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related policies...
+      </div>
+      
+      <!-- Empty state -->
+      <!-- <div *ngIf="!loadingRelationships && relatedPolicies.length === 0" class="text-muted my-3">
+        No policies are currently associated with this product.
+      </div> -->
+      
+      <!-- Policies list -->
+      <!-- <div *ngIf="!loadingRelationships && relatedPolicies.length > 0" class="mb-3">
+        This product is associated with {{ relatedPolicies.length }} {{ relatedPolicies.length === 1 ? 'policy' : 'policies' }}:
+      </div> -->
+      <div class="mb-2">
+        <div class="row">
+          <!-- <app-policy-list-item
+            *ngFor="let policy of relatedPolicies"
+            [policy]="policy"
+          ></app-policy-list-item> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Asset Details (coming soon)</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related assets...
+      </div>
+      
+      <!-- Empty state -->
+      <!-- <div *ngIf="!loadingRelationships && relatedAssets.length === 0" class="text-muted my-3">
+        No assets are currently associated with this product.
+      </div> -->
+      
+      <!-- Assets list -->
+      <!-- <div *ngIf="!loadingRelationships && relatedAssets.length > 0" class="mb-3">
+        This product is associated with {{ relatedAssets.length }} {{ relatedAssets.length === 1 ? 'asset' : 'assets' }}:
+      </div> -->
+      <div class="mb-2">
+        <div class="row">
+          <!-- <app-asset-list-item
+            *ngFor="let asset of relatedAssets"
+            [asset]="asset"
+          ></app-asset-list-item> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr>
+
+<section class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="mb-3">Meta product</h4>
+      <div class="row">
+        <div class="col-3"><strong>Schema:</strong></div>
+        <div class="col-auto">
+          <div class="badge bg-primary d-flex align-items-center rounded-pill px-2">
+            <i class="fa-solid fa-map-location-dot me-1"></i>
+            <div class="mb-0">{{product?.schema | uppercase}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3"><strong>Activity ID:</strong></div>
+        <div class="col">
+          <div class="badge bg-info text-dark rounded-pill px-2">{{ product?.productId }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 class="mb-3">Raw Data</h4>
+      <pre>{{ stringifyData(product) }}</pre>
+    </div>
+  </div>
+</section>
+
+<ng-template
+  #typeBadge
+  let-type="type"
+  let-isSubtype="isSubtype"
+>
+  <div
+    class="badge d-flex align-items-center rounded-pill px-2"
+    [class.bg-danger]="!isSubtype"
+    [class.bg-red-300]="isSubtype"
+    [class.text-dark]="isSubtype"
+  >
+    <i
+      [ngClass]="type?.iconClass"
+      class="me-1"
+    ></i>
+    <span>{{type?.display}}</span>
+  </div>
+</ng-template>

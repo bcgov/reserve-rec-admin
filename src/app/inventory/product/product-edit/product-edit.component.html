@@ -1,0 +1,21 @@
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center">Update {{ product?.displayName }}</h4>
+  </div>
+</section>
+<hr>
+<app-product-form
+  (formValue)="updateProductForm($event)"
+  (relationshipsLoaded)="onRelationshipsLoaded($event.type, $event.relationships)"
+  (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)">
+</app-product-form>
+<hr>
+<section>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <h4 class="text-center mb-5">Update Product</h4>
+<button class="btn btn-secondary btn-lg" (click)="submit()" [disabled]="!productForm?.valid || !productForm?.dirty">
+  <i class="fa-solid fa-pen-to-square me-2"></i>
+  <span>Update {{product?.displayName}}</span>
+</button>
+  </div>
+</section>

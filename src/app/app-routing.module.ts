@@ -5,6 +5,7 @@ import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
 import { ActivityResolver } from './resolvers/activity.resolver';
 import { policyResolver } from './resolvers/policy.resolver';
+import { ProductResolver } from './resolvers/product.resolver';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,18 @@ export const routes: Routes = [
         path: 'activity',
         loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent),
         // resolve: { protectedAreas: ProtectedAreasResolver }
+      },
+      {
+        path: 'product',
+        loadComponent: () => import('./inventory/create-inventory/product-create/product-create.component').then(mod => mod.ProductCreateComponent)
+      },
+      {
+        path: 'policy',
+        loadComponent: () => import('./inventory/create-inventory/policy-create/policy-create.component').then(mod => mod.PolicyCreateComponent)
+      },
+      {
+        path: 'relationships',
+        loadComponent: () => import('./inventory/create-inventory/relationship-create/relationship-create.component').then(mod => mod.RelationshipCreateComponent)
       },
     ],
   },
@@ -133,6 +146,25 @@ export const routes: Routes = [
         canActivate: [UserGuard],
         children: [
         ]
+      }
+    ]
+  },
+  {
+    path: 'inventory/product/:collectionId/:activityType/:activityId/:productId',
+    loadComponent: () => import('./inventory/product/product.component').then(mod => mod.ProductComponent),
+    canActivate: [UserGuard],
+    resolve: { product: ProductResolver },
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./inventory/product/product-details/product-details.component').then(mod => mod.ProductDetailsComponent),
+        canActivate: [UserGuard],
+      },
+      {
+        path: 'edit',
+        loadComponent: () => import('./inventory/product/product-edit/product-edit.component').then(mod => mod.ProductEditComponent),
+        canActivate: [UserGuard],
       }
     ]
   },

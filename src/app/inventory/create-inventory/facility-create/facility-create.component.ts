@@ -29,6 +29,18 @@ export class FacilityCreateComponent {
     this.facilityForm = event;
   }
 
+  onRelationshipsChanged(type: string, relationships: any[]) {
+    console.log(`Relationships changed for ${type}:`, relationships);
+    // Update form controls directly - the form already tracks these
+    if (type === 'activities') {
+      this.facilityForm?.get('activities')?.setValue(relationships);
+      this.facilityForm?.get('activities')?.markAsDirty();
+    } else if (type === 'geozones') {
+      this.facilityForm?.get('geozones')?.setValue(relationships);
+      this.facilityForm?.get('geozones')?.markAsDirty();
+    }
+  }
+
   async submit() {
     const collectionId = this.facilityForm.get('collectionId').value || this.facility?.collectionId;
     const facilityType = this.facilityForm.get('facilityType').value || this.facility?.facilityType;
@@ -65,8 +77,11 @@ export class FacilityCreateComponent {
         coordinates: [location.longitude, location.latitude]
       };
     };
+    delete props['activities'];
+    delete props['geozones'];
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
+
     return props;
   }
 
