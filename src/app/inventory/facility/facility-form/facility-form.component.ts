@@ -1,23 +1,24 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
 import { MapComponent } from '../../../map/map.component';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { Constants } from '../../../app.constants';
-import { GeozoneService } from '../../../services/geozone.service';
 import { LoadingService } from '../../../services/loading.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
+import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
 
 @Component({
   selector: 'app-facility-form',
-  imports: [NgdsFormsModule, MapComponent, LoadalComponent, CommonModule],
+  imports: [NgdsFormsModule, MapComponent, LoadalComponent, CommonModule, SearchTermsComponent],
   templateUrl: './facility-form.component.html',
   styleUrl: './facility-form.component.scss'
 })
 export class FacilityFormComponent implements OnInit, AfterViewChecked {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
+  @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
 
@@ -41,10 +42,8 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
   public timezones = Constants.timezones;
   public facilityTypes = Object.entries(Constants.facilityTypes).map(([key, value]) => value);
 
-
   constructor(
     protected cdr: ChangeDetectorRef,
-    protected geozoneService: GeozoneService,
     protected loadingService: LoadingService,
     protected router: Router,
     protected route: ActivatedRoute
@@ -65,7 +64,8 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
         this.facility?.collectionId || '',
         {
           nonNullable: true,
-          validators: [Validators.required]
+          validators: [Validators.required],
+          updateOn: 'blur'
         }
       ),
       facilityType: new UntypedFormControl(
@@ -125,23 +125,23 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
       address: new UntypedFormControl(
         this.facility?.address || null,
       ),
-      activities: new UntypedFormControl([
-        this.formatActivities(this.facility?.activities || []),
-      ]),
+      activities: new UntypedFormControl(
+        this.facility?.activities || []
+      ),
+      geozones: new UntypedFormControl(
+        this.facility?.geozones || []
+      ),
       description: new UntypedFormControl(
         this.facility?.description || '',
       ),
       isVisible: new UntypedFormControl(
         this.facility?.isVisible || true
       ),
-      orcs: new UntypedFormControl(
-        this.facility?.orcs || ''
-      ),
       imageUrl: new UntypedFormControl(
         this.facility?.imageUrl || ''
       ),
       searchTerms: new UntypedFormControl(
-        this.facility?.searchTerms?.join(', ') || ''
+        this.facility?.searchTerms || []
       ),
       adminNotes: new UntypedFormControl(
         this.facility?.adminNotes || ''
@@ -225,20 +225,30 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
     this.facilitySubtypes = Object.entries(Constants.facilityTypes?.[type]?.subTypes || {}).map(([key, value]) => value);
   }
 
-  formatActivities(activities: any[]) {
-    // When activityService is available, this should format the activities associated
-    // with the facility. On its own, a facility object in the database only has an array
-    // of activity pk/sks, but if 'fetchActivites' is passed to the API with GET facility,
-    // the API also looks up the activity objects based on those pk/sks and staples them
-    // onto the retuned facility object.
-    // This function should check to see whether the current facility has activities, and
-    // whether or not they are represented as full objects or just pk/sks.
-    // If they are full objects, it should return them as is to be used in a FormArray.
-    // If they are just pk/sks, activityService should be used to fetch the full objects
-    // and then return them as a FormArray.
-    // When submitting the form, the activities will be converted back to just pk/sks, but
-    // the page will need the information of the full objects to display in the form.
-    return null;
+  // Handle search terms updates from the component
+  onSearchTermsChange(searchTerms: string[]) {
+    this.form.get('searchTerms')?.setValue(searchTerms);
+    this.cdr.detectChanges();
+  }
+
+  // Mark the search terms form control as dirty when a term is added
+  onSearchTermDirty() {
+    this.form.get('searchTerms')?.markAsDirty();
+  }
+
+  navigateToEntityRelationships() {
+    const collectionId = this.form.get('collectionId')?.value;
+    const facilityType = this.form.get('facilityType')?.value;
+    const facilityId = this.facility?.facilityId;
+    // Navigate to the entity relationships page for this facility
+    // Format: facility::collectionId::facilityType::facilityId
+    this.router.navigate(['/inventory/create/relationships'], {
+      queryParams: {
+        collectionId: collectionId,
+        sourceEntityType: 'facility',
+        sourceEntity: `facility::${collectionId}::${facilityType}::${facilityId}`
+      }
+    });
   }
 
 }

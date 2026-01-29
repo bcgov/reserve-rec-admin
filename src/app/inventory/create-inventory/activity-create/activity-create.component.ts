@@ -29,9 +29,21 @@ export class ActivityCreateComponent {
     this.activityForm = event;
   }
 
+  onRelationshipsChanged(type: string, relationships: any[]) {
+    console.log(`Relationships changed for ${type}:`, relationships);
+    // Update form controls directly - the form already tracks these
+    if (type === 'facilities') {
+      this.activityForm?.get('facilities')?.setValue(relationships);
+      this.activityForm?.get('facilities')?.markAsDirty();
+    } else if (type === 'geozones') {
+      this.activityForm?.get('geozones')?.setValue(relationships);
+      this.activityForm?.get('geozones')?.markAsDirty();
+    }
+  }
+
   // Submit new activity
   async submit(): Promise<void> {
-    // For creating new activities, get the values from the form instead of route data
+    // For creating new activities, use .get to get the values from the form instead of route data
     const collectionId = this.activity?.collectionId || this.activityForm?.get('collectionId')?.value;
     const activityType = this.activity?.activityType || this.activityForm?.get('activityType')?.value;
 
@@ -41,8 +53,8 @@ export class ActivityCreateComponent {
     }
 
     const payload = this.formatFormForSubmission();
+    const res = await this.activityService.createActivity(collectionId, payload);
 
-    const res = await this.activityService.createActivity(collectionId, activityType, payload);
     // get newly created activityId from response
     const activityId = res[0]?.data?.activityId;
     if (activityId) {
@@ -61,19 +73,7 @@ export class ActivityCreateComponent {
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-    // Delete facility and geozone form values that aren't a {pk, sk} pair
-    delete props['allFacilities'];
-    delete props['allGeozones'];
-
-    // Handle search terms
-    props['searchTerms'] = this.activityForm.get('searchTerms')?.value || [];
-
-    // Convert orcs to integer
-    if (props['orcs']) {
-      props['orcs'] = parseInt(props['orcs'], 10);
-    }
-
-    // Remove other form values that are not needed for submission
+    // Remove form values that are not needed for submission
     delete props['collectionId'];
 
     return props;

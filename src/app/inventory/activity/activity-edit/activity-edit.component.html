@@ -4,15 +4,13 @@
   </div>
 </section>
 <hr>
-<app-activity-form
-  (formValue)="updateActivityForm($event)"
-  >
+<app-activity-form (formValue)="updateActivityForm($event)">
 </app-activity-form>
 <hr>
 <section>
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <h4 class="text-center mb-5">Update Activity</h4>
-<button class="btn btn-secondary btn-lg" (click)="submit()" [disabled]="!activityForm?.valid || !activityForm?.dirty">
+<button class="btn btn-secondary btn-lg" (click)="submit()">
   <i class="fa-solid fa-pen-to-square me-2"></i>
   <span>Update {{activity?.displayName}}</span>
 </button>

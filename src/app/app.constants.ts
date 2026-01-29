@@ -12,9 +12,43 @@ export class Constants {
     PROTECTED_AREA_RESULT: 'protectedAreaResult',
     PROTECTED_AREAS_RESULT: 'protectedAreasResult',
     POLICY_RESULT: 'policyResult',
+    PRODUCT_RESULT: 'productResult',
+    PRODUCT_LIST: 'productList',
+
+    // Relationships
+    GEOZONE_RELATIONSHIP_RESULT: 'geozoneRelationshipResult',
+    GEOZONE_LIST_RELATIONSHIP: 'geozoneListRelationship',
+    FACILITY_RELATIONSHIP_RESULT: 'facilityRelationshipResult',
+    FACILITY_LIST_RELATIONSHIP: 'facilityListRelationship',
+    ACTIVITY_RELATIONSHIP_RESULT: 'activityRelationshipResult',
+    ACTIVITY_LIST_RELATIONSHIP: 'activityListRelationship'
   };
 
   public static readonly timeZoneIANA = 'America/Vancouver';
+
+  public static readonly entityTypes = [
+    { 
+      value: 'geozone', 
+      display: 'Geozone', 
+      icon: 'fa-map-location-dot', 
+      allowedTargets: ['facility', 'activity'], 
+      multiselect: true 
+    },
+    { 
+      value: 'facility', 
+      display: 'Facility', 
+      icon: 'fa-location-dot', 
+      allowedTargets: ['activity', 'geozone'], 
+      multiselect: true 
+    },
+    { 
+      value: 'activity', 
+      display: 'Activity', 
+      icon: 'fa-campground', 
+      allowedTargets: ['geozone', 'facility'], 
+      multiselect: true 
+    }
+  ];
 
   public static readonly facilityTypes = {
     noType: {
@@ -34,12 +68,12 @@ export class Constants {
       value: 'naturalFeature',
       iconClass: 'fa-solid fa-mountain',
       subTypes: {
-        waterfall: { display: 'Waterfall', value: 'waterfall', iconClass: 'fa-solid fa-water' },
         lake: { display: 'Lake', value: 'lake', iconClass: 'fa-solid fa-water' },
-        river: { display: 'River', value: 'river', iconClass: 'fa-solid fa-water' },
         summit: { display: 'Summit', value: 'summit', iconClass: 'fa-solid fa-mountain' },
+        pointOfInterest: { display: 'Point of Interest', value: 'pointOfInterest', iconClass: 'fa-solid fa-map-marker-alt' },
         bay: { display: 'Bay', value: 'bay', iconClass: 'fa-solid fa-water' },
-        pointofInterest: { display: 'Point of Interest', value: 'pointofInterest', iconClass: 'fa-solid fa-map-marker-alt' },
+        river: { display: 'River', value: 'river', iconClass: 'fa-solid fa-water' },
+        beach: { display: 'Beach', value: 'beach', iconClass: 'fa-solid fa-umbrella-beach' },
       }
     },
     accessPoint: {
@@ -53,10 +87,11 @@ export class Constants {
       value: 'structure',
       iconClass: 'fa-solid fa-building',
       subTypes: {
-        bridge: { display: 'Building', value: 'building', iconClass: 'fa-solid fa-building' },
         parkingLot: { display: 'Parking Lot', value: 'parkingLot', iconClass: 'fa-solid fa-square-parking' },
         boatLaunch: { display: 'Boat Launch', value: 'boatLaunch', iconClass: 'fa-solid fa-sailboat' },
         yurt: { display: 'Yurt', value: 'yurt', iconClass: 'fa-solid fa-tent' },
+        building: { display: 'Building', value: 'building', iconClass: 'fa-solid fa-building' },
+        cabin: { display: 'Cabin', value: 'cabin', iconClass: 'fa-solid fa-house' },
       }
     },
     trail: {

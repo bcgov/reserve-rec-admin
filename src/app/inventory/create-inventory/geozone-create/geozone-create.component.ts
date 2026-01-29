@@ -13,6 +13,10 @@ import { GeozoneFormComponent } from '../../geozone/geozone-form/geozone-form.co
 export class GeozoneCreateComponent {
   public geozoneForm: UntypedFormGroup;
 
+  // Track relationships for creation
+  public existingFacilities: any[] = [];
+  public existingActivities: any[] = [];
+
   constructor(
     protected geozoneService: GeozoneService,
     protected router: Router,
@@ -20,6 +24,22 @@ export class GeozoneCreateComponent {
 
   updateGeozoneForm(event) {
     this.geozoneForm = event;
+  }
+
+  /**
+   * Called when relationships change (user adds/removes entities)
+   * For create, we just track what's selected
+   */
+  onRelationshipsChanged(type: string, relationships: any[]) {
+    if (type === 'facilities') {
+      this.existingFacilities = [...relationships];
+      // Update form control to include relationship data
+      this.geozoneForm.get('facilities')?.setValue(relationships.map(f => ({ pk: f.pk, sk: f.sk })));
+    } else if (type === 'activities') {
+      this.existingActivities = [...relationships];
+      // Update form control to include relationship data
+      this.geozoneForm.get('activities')?.setValue(relationships.map(a => ({ pk: a.pk, sk: a.sk })));
+    }
   }
 
   async submit() {
@@ -47,16 +67,16 @@ export class GeozoneCreateComponent {
         [mandatoryFields.envelope.northwest.longitude, mandatoryFields.envelope.northwest.latitude],
         [mandatoryFields.envelope.southeast.longitude, mandatoryFields.envelope.southeast.latitude]]
     };
-    // Convert searchTerms from comma-separated string to array
-    if (props?.searchTerms) {
-      props.searchTerms = props.searchTerms
-        .split(',')
-        .map((term: string) => term.trim())
-        .filter((term: string) => term.length > 0);
-    }
+
+    // Handle search terms
+    props['searchTerms'] = this.geozoneForm.get('searchTerms')?.value || [];
+
     delete props.collectionId; // Remove collectionId from the props
     delete props.enforceZoomVisibility; // Remove enforceZoomVisibility from the props
     delete props.mandatoryFields; // Remove mandatoryFields from the props
+    
+    // Include relationships for POST handler
+    // The form controls already have the right format from onRelationshipsChanged
     return props;
   }
 
