@@ -179,6 +179,11 @@ export const routes: Routes = [
     canActivate: [UserGuard]
   },
   {
+    path: 'admin/feature-flags',
+    loadComponent: () => import('./admin/feature-flags/feature-flags.component').then(mod => mod.FeatureFlagsComponent),
+    canActivate: [UserGuard]
+  },
+  {
     path: 'customers',
     loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
     canActivate: [UserGuard]
