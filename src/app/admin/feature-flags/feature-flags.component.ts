@@ -23,7 +23,6 @@ interface FlagDefinition {
   styleUrls: ['./feature-flags.component.scss']
 })
 export class FeatureFlagsComponent implements OnInit {
-  isAdmin = signal<boolean>(false);
   loading = signal<boolean>(true);
   saving = signal<boolean>(false);
   
@@ -42,20 +41,13 @@ export class FeatureFlagsComponent implements OnInit {
 
   constructor(
     private featureFlagService: FeatureFlagService,
-    private authService: AuthService,
     private toastService: ToastService,
     private loadingService: LoadingService,
     private modalService: BsModalService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // Check superadmin access
-    this.isAdmin.set(await this.authService.userIsAdmin());
-    
-    if (this.isAdmin()) {
-      await this.loadFlags();
-    }
-    
+    await this.loadFlags();
     this.loading.set(false);
   }
 

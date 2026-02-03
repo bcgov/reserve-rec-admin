@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
+import { AdminGuard } from './guards/admin.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
@@ -24,6 +25,10 @@ export const routes: Routes = [
   {
     path: 'logout',
     loadComponent: () => import('./logout/logout.component').then(mod => mod.LogoutComponent), canActivate: [UserGuard]
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./unauthorized/unauthorized.component').then(mod => mod.UnauthorizedComponent)
   },
   {
     path: 'sales',
@@ -181,7 +186,7 @@ export const routes: Routes = [
   {
     path: 'admin/feature-flags',
     loadComponent: () => import('./admin/feature-flags/feature-flags.component').then(mod => mod.FeatureFlagsComponent),
-    canActivate: [UserGuard]
+    canActivate: [UserGuard, AdminGuard]
   },
   {
     path: 'customers',
