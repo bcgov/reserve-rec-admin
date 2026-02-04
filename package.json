@@ -15,7 +15,12 @@
     "deploy:test": "cdk deploy -c @context=test --all",
     "lint": "ng lint",
     "test": "jest",
-    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadless"
+    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadless",
+    "sandbox:setup": "./scripts/sandbox-setup.sh",
+    "sandbox:teardown": "./scripts/sandbox-teardown.sh",
+    "sandbox:synth": "cdk synth -c @context=dev -c sandboxName=${SANDBOX_NAME} --all",
+    "sandbox:deploy": "cdk deploy -c @context=dev -c sandboxName=${SANDBOX_NAME} --all --require-approval never",
+    "sandbox:destroy": "cdk destroy -c @context=dev -c sandboxName=${SANDBOX_NAME} --all --force"
   },
   "private": true,
   "dependencies": {
