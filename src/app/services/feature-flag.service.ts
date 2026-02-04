@@ -41,11 +41,11 @@ export class FeatureFlagService {
     try {
       this.loggerService.debug('Initializing feature flags...');
       const response = await lastValueFrom(this.apiService.get('featureFlags'));
-      this._flags.set(response || this.defaultFlags);
+      this._flags.set((response as Record<string, boolean>) || this.defaultFlags);
       this._initialized.set(true);
-      this.loggerService.debug('Feature flags initialized:', this._flags());
+      this.loggerService.debug(`Feature flags initialized: ${JSON.stringify(this._flags())}`);
     } catch (error) {
-      this.loggerService.error('Failed to load feature flags, using defaults:', error);
+      this.loggerService.error(`Failed to load feature flags, using defaults: ${error}`);
       this._flags.set(this.defaultFlags);
       this._initialized.set(true);
     }
@@ -66,7 +66,7 @@ export class FeatureFlagService {
     const response = await lastValueFrom(
       this.apiService.get('featureFlags', { admin: true })
     );
-    return response;
+    return response as FeatureFlagAdminResponse;
   }
 
   /**
