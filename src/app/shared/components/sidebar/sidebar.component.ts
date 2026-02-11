@@ -1,6 +1,7 @@
-import { Component, HostBinding } from '@angular/core';
+import { Component, HostBinding, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,7 +10,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @HostBinding('class.is-toggled')
   public hide = false;
 
@@ -21,11 +22,18 @@ export class SidebarComponent {
     { path: 'customers', data: { label: 'Customers' } }
   ];
   public currentRoute: any;
+  public isAdmin = signal<boolean>(false);
 
   constructor(
-    protected router: RouterModule
+    protected router: RouterModule,
+    private authService: AuthService
   ) {
     
+  }
+
+  async ngOnInit(): Promise<void> {
+    const isAdmin = await this.authService.userIsAdmin();
+    this.isAdmin.set(isAdmin);
   }
 
   onNavigate(route) {
