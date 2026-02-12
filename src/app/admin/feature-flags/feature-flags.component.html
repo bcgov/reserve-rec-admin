@@ -41,14 +41,20 @@
 
     <div class="row mt-4">
       <div class="col">
-        <button 
-          class="btn btn-primary me-2" 
+        <button
+          type="button"
+          class="btn btn-primary me-2"
           [disabled]="!form.dirty || saving()"
           (click)="saveFlags()"
         >
-          <span *ngIf="saving()" class="spinner-border spinner-border-sm me-2"></span>
-          <i *ngIf="!saving()" class="fa-solid fa-save me-2"></i>
-          {{ saving() ? 'Saving...' : 'Save Changes' }}
+          <ng-container *ngIf="saving(); else saveLabel">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>
+            Saving...
+          </ng-container>
+          <ng-template #saveLabel>
+            <i class="fa-solid fa-floppy-disk me-2"></i>
+            Save Changes
+          </ng-template>
         </button>
         <button 
           class="btn btn-outline-secondary" 
