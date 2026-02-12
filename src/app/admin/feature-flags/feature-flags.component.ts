@@ -2,9 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { BsModalService } from 'ngx-bootstrap/modal';
+import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 
 import { FeatureFlagService, FeatureFlagAdminResponse } from '../../services/feature-flag.service';
-import { AuthService } from '../../services/auth.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoadingService } from '../../services/loading.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -18,7 +18,7 @@ interface FlagDefinition {
 @Component({
   selector: 'app-feature-flags',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgdsFormsModule],
   providers: [BsModalService],
   templateUrl: './feature-flags.component.html',
   styleUrls: ['./feature-flags.component.scss']
@@ -58,6 +58,8 @@ export class FeatureFlagsComponent implements OnInit {
       this.flagData.set(data);
       this.buildForm(data.flags);
     } catch (error) {
+      // Build form with defaults on error
+      this.buildForm(undefined);
       this.toastService.addMessage(
         'Failed to load feature flags',
         'Error',
@@ -106,6 +108,9 @@ export class FeatureFlagsComponent implements OnInit {
       const response = await this.featureFlagService.updateFeatureFlags(flags);
       this.flagData.set(response);
       
+      // Reset form dirty state after successful save
+      this.form.markAsPristine();
+      
       this.toastService.addMessage(
         'Feature flags updated successfully',
         'Success',
@@ -122,15 +127,11 @@ export class FeatureFlagsComponent implements OnInit {
     }
   }
 
-  get hasChanges(): boolean {
+  cancelChanges(): void {
+    // Reload flags to reset form to original values
     const data = this.flagData();
-    if (!data?.flags) return false;
-    
-    for (const def of this.flagDefinitions) {
-      if (this.form.get(def.key)?.value !== data.flags[def.key]) {
-        return true;
-      }
+    if (data?.flags) {
+      this.buildForm(data.flags);
     }
-    return false;
   }
 }
