@@ -66,11 +66,11 @@ export class FeatureFlagsComponent implements OnInit {
     }
   }
 
-  buildForm(flags: Record<string, boolean>): void {
+  buildForm(flags: Record<string, boolean> | undefined): void {
     const controls: Record<string, UntypedFormControl> = {};
     
     for (const def of this.flagDefinitions) {
-      controls[def.key] = new UntypedFormControl(flags[def.key] ?? false);
+      controls[def.key] = new UntypedFormControl(flags?.[def.key] ?? false);
     }
     
     this.form = new UntypedFormGroup(controls);
@@ -123,11 +123,11 @@ export class FeatureFlagsComponent implements OnInit {
   }
 
   get hasChanges(): boolean {
-    if (!this.flagData()) return false;
+    const data = this.flagData();
+    if (!data?.flags) return false;
     
-    const currentFlags = this.flagData()!.flags;
     for (const def of this.flagDefinitions) {
-      if (this.form.get(def.key)?.value !== currentFlags[def.key]) {
+      if (this.form.get(def.key)?.value !== data.flags[def.key]) {
         return true;
       }
     }

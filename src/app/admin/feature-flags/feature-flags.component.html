@@ -1,13 +1,18 @@
-<div class="container mt-4">
-  <div *ngIf="loading()" class="text-center">
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>Feature Flags</h2>
+      <p class="text-muted">Manage application feature toggles.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="text-center py-5">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
   <div *ngIf="!loading()">
-    <h2 class="mb-4">Feature Flags</h2>
-
     <div *ngIf="flagData()?.metadata" class="alert alert-light mb-4">
       <small>
         <strong>Last updated:</strong> {{ flagData()?.metadata?.lastUpdated | date:'medium' }}
@@ -15,46 +20,53 @@
       </small>
     </div>
 
-    <form [formGroup]="form">
-      <div class="card mb-3" *ngFor="let flag of flagDefinitions">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <strong>{{ flag.displayName }}</strong>
-              <p class="text-muted mb-0 mt-1">{{ flag.description }}</p>
-            </div>
-            <div class="form-check form-switch">
-              <input 
-                class="form-check-input" 
-                type="checkbox" 
-                [formControlName]="flag.key"
-                [id]="flag.key"
-              >
-              <label class="form-check-label" [for]="flag.key">
-                {{ form.get(flag.key)?.value ? 'Enabled' : 'Disabled' }}
-              </label>
-            </div>
+    <div class="row">
+      <div class="col-md-6 mb-3" *ngFor="let flag of flagDefinitions">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="fa-solid fa-toggle-on me-2"></i>
+              {{ flag.displayName }}
+            </h5>
+            <p class="card-text">{{ flag.description }}</p>
+            <form [formGroup]="form">
+              <div class="form-check form-switch">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  [formControlName]="flag.key"
+                  [id]="flag.key"
+                  role="switch"
+                >
+                <label class="form-check-label" [for]="flag.key">
+                  {{ form.get(flag.key)?.value ? 'Enabled' : 'Disabled' }}
+                </label>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </form>
+    </div>
 
-    <div class="mt-4">
-      <button 
-        class="btn btn-primary me-2" 
-        [disabled]="!hasChanges || saving()"
-        (click)="saveFlags()"
-      >
-        <span *ngIf="saving()" class="spinner-border spinner-border-sm me-2"></span>
-        {{ saving() ? 'Saving...' : 'Save Changes' }}
-      </button>
-      <button 
-        class="btn btn-outline-secondary" 
-        [disabled]="!hasChanges || saving()"
-        (click)="loadFlags()"
-      >
-        Cancel
-      </button>
+    <div class="row mt-4">
+      <div class="col">
+        <button 
+          class="btn btn-primary me-2" 
+          [disabled]="!hasChanges || saving()"
+          (click)="saveFlags()"
+        >
+          <span *ngIf="saving()" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!saving()" class="fa-solid fa-save me-2"></i>
+          {{ saving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+        <button 
+          class="btn btn-outline-secondary" 
+          [disabled]="!hasChanges || saving()"
+          (click)="loadFlags()"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 </div>
