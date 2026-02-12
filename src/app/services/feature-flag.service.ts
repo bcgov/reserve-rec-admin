@@ -63,21 +63,21 @@ export class FeatureFlagService {
    * Get feature flags with admin metadata
    */
   async getFeatureFlagsAdmin(): Promise<FeatureFlagAdminResponse> {
-    const response = await lastValueFrom(
+    const response: any = await lastValueFrom(
       this.apiService.get('featureFlags', { admin: true })
     );
-    return response as FeatureFlagAdminResponse;
+    return response.data as FeatureFlagAdminResponse;
   }
 
   /**
    * Update feature flags (superadmin only)
    */
   async updateFeatureFlags(flags: Record<string, boolean>): Promise<FeatureFlagAdminResponse> {
-    const response = await lastValueFrom(
+    const response: any = await lastValueFrom(
       this.apiService.put('featureFlags', { flags })
     );
     // Update local state
-    this._flags.set(response.flags);
-    return response;
+    this._flags.set(response.data.flags);
+    return response.data as FeatureFlagAdminResponse;
   }
 }
