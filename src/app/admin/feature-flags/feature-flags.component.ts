@@ -19,6 +19,7 @@ interface FlagDefinition {
   selector: 'app-feature-flags',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  providers: [BsModalService],
   templateUrl: './feature-flags.component.html',
   styleUrls: ['./feature-flags.component.scss']
 })
