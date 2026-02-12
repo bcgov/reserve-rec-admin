@@ -47,14 +47,7 @@
           [disabled]="!form.dirty || saving()"
           (click)="saveFlags()"
         >
-          <ng-container *ngIf="saving(); else saveLabel">
-            <i class="fa-solid fa-spinner fa-spin me-2"></i>
-            Saving...
-          </ng-container>
-          <ng-template #saveLabel>
-            <i class="fa-solid fa-floppy-disk me-2"></i>
-            Save Changes
-          </ng-template>
+<ng-container *ngIf="saving(); else saveLabel"><i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...</ng-container><ng-template #saveLabel><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</ng-template>
         </button>
         <button 
           class="btn btn-outline-secondary" 
