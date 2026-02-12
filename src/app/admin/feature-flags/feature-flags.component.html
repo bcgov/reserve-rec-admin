@@ -6,17 +6,17 @@
     </div>
   </div>
 
-  <div *ngIf="loading()" class="text-center py-5">
+  <div *ngIf="loading" class="text-center py-5">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <div *ngIf="!loading()">
-    <div *ngIf="flagData()?.metadata" class="alert alert-light mb-4">
+  <div *ngIf="!loading">
+    <div *ngIf="flagData?.metadata" class="alert alert-light mb-4">
       <small>
-        <strong>Last updated:</strong> {{ flagData()?.metadata?.lastUpdated | date:'medium' }}
-        by {{ flagData()?.metadata?.updatedByEmail || flagData()?.metadata?.updatedBy }}
+        <strong>Last updated:</strong> {{ flagData?.metadata?.lastUpdated | date:'medium' }}
+        by {{ flagData?.metadata?.updatedByEmail || flagData?.metadata?.updatedBy }}
       </small>
     </div>
 
@@ -44,14 +44,14 @@
         <button
           type="button"
           class="btn btn-primary me-2"
-          [disabled]="!form.dirty || saving()"
+          [disabled]="!form.dirty || saving"
           (click)="saveFlags()"
         >
-<ng-container *ngIf="saving(); else saveLabel"><i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...</ng-container><ng-template #saveLabel><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</ng-template>
+<ng-container *ngIf="saving; else saveLabel"><i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...</ng-container><ng-template #saveLabel><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</ng-template>
         </button>
         <button 
           class="btn btn-outline-secondary" 
-          [disabled]="!form.dirty || saving()"
+          [disabled]="!form.dirty || saving"
           (click)="cancelChanges()"
         >
           Cancel

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -24,10 +24,10 @@ interface FlagDefinition {
   styleUrls: ['./feature-flags.component.scss']
 })
 export class FeatureFlagsComponent implements OnInit {
-  loading = signal<boolean>(true);
-  saving = signal<boolean>(false);
+  loading = true;
+  saving = false;
   
-  flagData = signal<FeatureFlagAdminResponse | null>(null);
+  flagData: FeatureFlagAdminResponse | null = null;
   form: UntypedFormGroup = new UntypedFormGroup({});
   
   // Define available flags with metadata
@@ -49,13 +49,13 @@ export class FeatureFlagsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadFlags();
-    this.loading.set(false);
+    this.loading = false;
   }
 
   async loadFlags(): Promise<void> {
     try {
       const data = await this.featureFlagService.getFeatureFlagsAdmin();
-      this.flagData.set(data);
+      this.flagData = data;
       this.buildForm(data.flags);
     } catch (error) {
       // Build form with defaults on error
@@ -96,7 +96,7 @@ export class FeatureFlagsComponent implements OnInit {
   }
 
   private async performSave(): Promise<void> {
-    this.saving.set(true);
+    this.saving = true;
     
     try {
       const flags: Record<string, boolean> = {};
@@ -106,7 +106,7 @@ export class FeatureFlagsComponent implements OnInit {
       }
       
       const response = await this.featureFlagService.updateFeatureFlags(flags);
-      this.flagData.set(response);
+      this.flagData = response;
       
       // Reset form dirty state after successful save
       this.form.markAsPristine();
@@ -123,15 +123,14 @@ export class FeatureFlagsComponent implements OnInit {
         ToastTypes.ERROR
       );
     } finally {
-      this.saving.set(false);
+      this.saving = false;
     }
   }
 
   cancelChanges(): void {
     // Reload flags to reset form to original values
-    const data = this.flagData();
-    if (data?.flags) {
-      this.buildForm(data.flags);
+    if (this.flagData?.flags) {
+      this.buildForm(this.flagData.flags);
     }
   }
 }
