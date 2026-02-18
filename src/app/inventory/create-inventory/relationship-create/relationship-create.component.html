@@ -26,7 +26,7 @@
           [control]="form.get('collectionId')"
           [label]="'Collection ID'"
           [placeholder]="'Enter Collection ID'"
-          [resetButton]="true"
+          [resetButton]="false"
         ></ngds-text-input>
       </div>
 
@@ -37,7 +37,7 @@
           [label]="'Entity Type'"
           [placeholder]="'Select entity type'"
           [selectionListItems]="entityTypes"
-          [resetButton]="true"
+          [resetButton]="false"
         ></ngds-picklist-input>
       </div>
     </div>
@@ -50,16 +50,26 @@
           [label]="'Select Specific Entity'"
           [placeholder]="'Choose the entity to Entity Relationships from'"
           [selectionListItems]="sourceEntityListItems"
-          [resetButton]="true"
+          [resetButton]="false"
         ></ngds-picklist-input>
       </div>
     </div>
 
     <!-- No entities message -->
-    <div *ngIf="form.get('sourceEntityType')?.value && form.get('collectionId')?.value && sourceEntities.length === 0 && !loading" 
-         class="alert alert-warning">
+    <div
+      *ngIf="form.get('sourceEntityType')?.value && form.get('collectionId')?.value && sourceEntities.length === 0">
+      <div *ngIf="loading" class="mb-4 w-100">
+        <div class="d-flex align-items-center justify-content-center">
+          <i class="fa fa-spinner fa-spin fa-2x me-3"></i>
+          <span>Loading specific entities...</span>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="form.get('sourceEntityType')?.value && form.get('collectionId')?.value && sourceEntities.length === 0 && !loading"
+      class="alert alert-warning">
       <i class="fa-solid fa-triangle-exclamation me-2"></i>
-      No {{ form.get('sourceEntityType')?.value }}s found for collection "{{ form.get('collectionId')?.value }}". 
+      No {{ form.get('sourceEntityType')?.value }}s found for collection "{{ form.get('collectionId')?.value }}".
       Please create one first.
     </div>
   </div>
@@ -69,7 +79,16 @@
 
 <!-- STEP 2: Select Target Relationships -->
 <section *ngIf="selectedSourceEntity">
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+  <!-- Loading spin icon -->
+  <div *ngIf="loading" class="mb-4 w-100">
+    <div class="d-flex align-items-center justify-content-center">
+      <i class="fa fa-spinner fa-spin fa-2x me-3"></i>
+      <span>Loading related entities...</span>
+    </div>
+  </div>
+  
+  <!-- Target Entity Template -->
+  <div *ngIf="selectedSourceEntity && !loading" class="d-flex flex-column align-items-center justify-content-center my-5">
     <h5 class="text-center mb-4">Step 2: Link Related Entities</h5>
     
     <!-- Selected Source Entity Display -->
@@ -84,13 +103,9 @@
         </div>
       </div>
     </div>
-
     <!-- Target Entity Selectors -->
     <div class="row w-100">
-      <div 
-        *ngFor="let targetType of targetEntityTypes" 
-        class="col-lg-6 mb-4"
-      >
+      <div *ngFor="let targetType of targetEntityTypes" class="col-lg-6 mb-4">
         <app-entity-relationship-selector
           *ngIf="relationshipConfigs.get(targetType.value)"
           [config]="relationshipConfigs.get(targetType.value)"
@@ -113,7 +128,7 @@
 <hr *ngIf="selectedSourceEntity">
 
 <!-- STEP 3: Submit -->
-<section *ngIf="selectedSourceEntity">
+<section *ngIf="selectedSourceEntity && !loading">
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <button 
       class="btn btn-success btn-lg" 

@@ -171,7 +171,6 @@ export class GeozoneEditComponent {
     this.router.navigate([`/inventory/geozone/${collectionId}/${geozoneId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
-      window.location.reload();
     });
   }
 }

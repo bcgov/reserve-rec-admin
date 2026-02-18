@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, effect, signal, untracked, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -18,10 +19,16 @@ import { Constants } from '../../../app.constants';
   templateUrl: './relationship-create.component.html',
   styleUrls: ['./relationship-create.component.scss']
 })
-export class RelationshipCreateComponent implements OnInit {
+export class RelationshipCreateComponent {
   @ViewChild('loadal') loadal!: LoadalComponent;
 
   public form: UntypedFormGroup;
+
+  // Use signals to track and subscribe to changes
+  private queryParams = toSignal(this.route.queryParams, { initialValue: {} });
+  public collectionId$: any;
+  public sourceEntityType$: any;
+  public sourceEntity$: any;
 
   // Pull entity types from constants
   public entityTypes = Constants.entityTypes;
@@ -35,6 +42,7 @@ export class RelationshipCreateComponent implements OnInit {
   public initialRelationships = new Map();
 
   public loading = false;
+  private initialLoad = true;
 
   constructor(
     private relationshipService: RelationshipService,
@@ -45,6 +53,97 @@ export class RelationshipCreateComponent implements OnInit {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
+
+    this.initializeForm();
+
+    // Effect to update form values based on query params on component init
+    effect(() => {
+      this.loading = true;
+      const params = this.queryParams();
+      const collectionId = params['collectionId'];
+      const sourceEntityType = params['sourceEntityType'];
+      const sourceEntity = params['sourceEntity'];
+
+      // Set form values if query params exist
+      if (collectionId) {
+        this.form.get('collectionId')?.setValue(collectionId);
+      }
+      if (sourceEntityType) {
+        this.form.get('sourceEntityType')?.setValue(sourceEntityType);
+      }
+      if (sourceEntity) {
+        this.form.get('sourceEntity')?.setValue(sourceEntity);
+      }
+
+      untracked(async() => {
+        if (collectionId && sourceEntityType) {
+          this.initialLoad = true;
+          await this.onSourceEntityTypeChange(sourceEntityType);
+          
+          if (sourceEntity) {
+            this.onSourceEntitySelected(sourceEntity);
+            this.initializeRelationshipConfigs();
+            await this.loadExistingRelationships();
+          }
+          
+          this.loading = false;
+          this.initialLoad = false;
+          this.cdr.detectChanges();
+        }
+      });
+    });
+
+    // Effect to react to collection ID changes
+    effect(() => {
+      const collectionId = this.collectionId$();
+
+      if (collectionId) {
+        untracked(() => {
+          this.loading = true;
+          this.cleanForm();
+          this.onCollectionIdChange().then(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        });
+      }
+    });
+
+    // Effect to react to source entity type changes
+    effect(() => {
+      const sourceEntityType = this.sourceEntityType$();
+      
+      if (sourceEntityType) {
+        untracked(async () => {
+          this.loading = true;
+          this.cleanForm();
+          this.onSourceEntityTypeChange(sourceEntityType).then(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        });
+      }
+    });
+
+    // Effect to react to source entity selection changes
+    effect(() => {
+      const sourceEntity = this.sourceEntity$();
+      
+      if (sourceEntity) {
+        untracked(() => {
+          this.loading = true;
+          this.onSourceEntitySelected(sourceEntity);
+          this.initializeRelationshipConfigs();
+          this.loadExistingRelationships().then(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          });
+        });
+      }
+    });
+  }
+
+  initializeForm() {
     this.form = new UntypedFormGroup({
       collectionId: new UntypedFormControl('', {
         validators: [Validators.required],
@@ -59,47 +158,27 @@ export class RelationshipCreateComponent implements OnInit {
         updateOn: 'blur'
       })
     });
+    
+    // Convert form value changes to signals for some tasty reactive updates
+    this.collectionId$ = toSignal(this.form.get('collectionId')!.valueChanges, { initialValue: '' });
+    this.sourceEntityType$ = toSignal(this.form.get('sourceEntityType')!.valueChanges, { initialValue: '' });
+    this.sourceEntity$ = toSignal(this.form.get('sourceEntity')!.valueChanges, { initialValue: '' });
+  };
+  
+  cleanForm() {
+    if (!this.initialLoad) {
+      // Reset everything when collection changes
+      this.form.get('sourceEntity')?.reset('');
+      this.sourceEntityListItems = [];
+      this.sourceEntities = [];
+      this.selectedSourceEntity = null;
+      this.relationshipConfigs.clear();
+      this.selectedRelationships.clear();
+    }
   }
 
-  ngOnInit() {
-    // Watch for entity type changes to update allowed targets
-    this.form.get('sourceEntityType')?.valueChanges.subscribe(entityType => {
-      this.onSourceEntityTypeChange(entityType);
-    });
-
-    // Watch for collection ID changes to reload source entities
-    this.form.get('collectionId')?.valueChanges.subscribe(collectionId => {
-      this.onCollectionIdChange();
-    });
-
-    // Only process when an entity is actually selected
-    this.form.get('sourceEntity')?.valueChanges.subscribe(entity => {
-      if (entity) {
-        this.onSourceEntitySelected(entity);
-        this.loadExistingRelationships();
-      }
-    });
-
-    // Read query params to pre-populate form (e.g., when navigating from entity detail page)
-    this.route.queryParams.subscribe(params => {
-      if (params['collectionId']) {
-        this.form.get('collectionId')?.setValue(params['collectionId'], { emitEvent: true });
-      }
-      if (params['sourceEntityType']) {
-        this.form.get('sourceEntityType')?.setValue(params['sourceEntityType'], { emitEvent: true });
-      }
-      // Wait for entities to load before setting sourceEntity
-      if (params['sourceEntity']) {
-        // Use setTimeout to ensure entities are loaded first
-        setTimeout(() => {
-          this.form.get('sourceEntity')?.setValue(params['sourceEntity'], { emitEvent: true });
-        }, 500);
-      }
-    });
-  }
-
-  onSourceEntityTypeChange(entityType: string) {
-    // Find the config for this entity type
+  async onSourceEntityTypeChange(entityType: string) {
+    // Find the config for this entity type from allowed source types
     const config = this.entityTypes.find(entity => entity.value === entityType);
     if (!config) {
       this.targetEntityTypes = [];
@@ -111,35 +190,17 @@ export class RelationshipCreateComponent implements OnInit {
       config.allowedTargets.includes(entity.value)
     );
 
-    // Reset sourceEntity selection and related data on change
-    this.form.get('sourceEntity')?.reset('');
-    this.sourceEntities = [];
-    this.sourceEntityListItems = [];
-    this.selectedSourceEntity = null;
-    this.relationshipConfigs.clear();
-    this.selectedRelationships.clear();
-
     // Load source entities if collection ID is set
     if (this.form.get('collectionId')?.value) {
-      this.loadSourceEntities();
+      await this.loadSourceEntities();
     }
-
-    // Update
-    this.cdr.detectChanges();
   }
 
-  onCollectionIdChange() {
-    // Reset everything when collection changes
-    this.form.get('sourceEntity')?.reset('');
-    this.sourceEntityListItems = [];
-    this.sourceEntities = [];
-    this.selectedSourceEntity = null;
-    this.relationshipConfigs.clear();
-    this.selectedRelationships.clear();
+  async onCollectionIdChange() {
 
     // Reload if entity type is selected
     if (this.form.get('sourceEntityType')?.value) {
-      this.loadSourceEntities();
+      await this.loadSourceEntities();
     }
   }
 
@@ -147,11 +208,6 @@ export class RelationshipCreateComponent implements OnInit {
   async loadSourceEntities() {
     const collectionId = this.form.get('collectionId')?.value;
     const entityType = this.form.get('sourceEntityType')?.value;
-
-
-    if (!collectionId || !entityType) return;
-
-    this.loading = true;
 
     // Retrieve entities based on type that matches the collection ID and entity type
     try {
@@ -174,14 +230,11 @@ export class RelationshipCreateComponent implements OnInit {
         value: `${e.pk}::${e.sk}`,
         display: e.displayName || e.name || `${e.pk} - ${e.sk}`
       }));
-
+      
     } catch (error) {
       console.error('Error loading source entities:', error);
       this.sourceEntities = [];
       this.sourceEntityListItems = [];
-    } finally {
-      this.loading = false;
-      this.cdr.detectChanges();
     }
   }
 
@@ -195,10 +248,6 @@ export class RelationshipCreateComponent implements OnInit {
 
     // Find the actual entity from the ID string (format: "pk::sk")
     this.selectedSourceEntity = this.sourceEntities.find(e => `${e.pk}::${e.sk}` === entityId);
-
-    if (this.selectedSourceEntity) {
-      this.initializeRelationshipConfigs();
-    }
   }
 
   initializeRelationshipConfigs() {
@@ -228,8 +277,6 @@ export class RelationshipCreateComponent implements OnInit {
       this.relationshipConfigs.set(targetType.value, config);
       this.selectedRelationships.set(targetType.value, []);
     });
-
-    this.cdr.detectChanges();
   }
 
   // Load existing relationships for the selected source entity
@@ -239,7 +286,6 @@ export class RelationshipCreateComponent implements OnInit {
       return;
     }
 
-    const sourceType = this.form.get('sourceEntityType')?.value;
     const sourcePk = this.selectedSourceEntity.pk;
     const sourceSk = this.selectedSourceEntity.sk;
 
@@ -288,7 +334,6 @@ export class RelationshipCreateComponent implements OnInit {
         console.error(`Error loading ${targetType} relationships:`, error);
       }
     }
-    this.cdr.detectChanges();
   }
 
   async fetchTargetEntities(targetType, collectionId) {
@@ -324,7 +369,6 @@ export class RelationshipCreateComponent implements OnInit {
     const errors: string[] = [];
     
     this.loading = true;
-
 
     // See if there are differences between initial and current selections
     for (const [targetType, initialRels] of this.initialRelationships.entries()) {

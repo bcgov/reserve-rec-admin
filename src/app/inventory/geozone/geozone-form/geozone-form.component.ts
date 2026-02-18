@@ -219,7 +219,7 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this.geozone?.description || '',
       ),
       isVisible: new UntypedFormControl(
-        this.geozone?.isVisible || true
+        this.geozone?.isVisible || false
       ),
       imageUrl: new UntypedFormControl(
         this.geozone?.imageUrl || ''

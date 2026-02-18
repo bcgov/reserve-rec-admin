@@ -84,7 +84,6 @@ export class ProductCreateComponent {
     this.router.navigate([`/inventory/product/${collectionId}/${activityType}/${activityId}/${productId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
-      window.location.reload();
     });
   }
 

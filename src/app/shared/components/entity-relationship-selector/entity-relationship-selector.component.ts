@@ -1,15 +1,14 @@
 import {
   Component,
-  Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
   TemplateRef,
   WritableSignal,
   signal,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  input,
+  effect,
+  untracked
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -21,40 +20,17 @@ import { RelationshipService } from '../../../services/relationship.service';
  */
 
 export interface EntityRelationshipConfig {
-  // The schema/type of the source entity (e.g., 'activity', 'facility')
   sourceSchema: string;
-
-  // The schema/type of entities to link to (e.g., 'facility', 'geozone')
   targetSchema: string;
-
-  // Display label for the selector
   label: string;
-
-  // Placeholder text for the search input
   placeholder: string;
-
-  // Template for displaying search results in the dropdown
   selectionListTemplate?: TemplateRef<any>;
-
-  // Template for displaying selected items
   selectedItemTemplate?: TemplateRef<any>;
-
-  // Allow multiple selections
   multiselect?: boolean;
-
-  // Prevent changes to selection
   immutableSelection?: boolean;
-
-  // Fields to search on (e.g., ['collectionId', 'activityType'])
   searchFields?: Record<string, any>;
-
-  // Custom filter function for search results
   filterFn?: (item: any, searchFields: any) => boolean;
-
-  // Service method to fetch target entities
   fetchFn?: (searchFields: any) => Promise<any>;
-
-  // Whether to automatically load existing relationships on init (default: true)
   loadExisting?: boolean;
 }
 
@@ -68,87 +44,69 @@ export interface EntityRelationshipConfig {
   templateUrl: './entity-relationship-selector.component.html',
   styleUrls: ['./entity-relationship-selector.component.scss']
 })
-export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
-  // Configuration for the selector 
-  @Input() config!: EntityRelationshipConfig;
 
-  // The source entity that relationships are being created from 
-  @Input() sourceEntity: any;
-
-  // Currently selected/linked entities 
-  @Input() selectedEntities: any[] = [];
-
-  // Emits when relationships change 
+export class EntityRelationshipSelectorComponent {
+  config = input.required<EntityRelationshipConfig>();
+  sourceEntity = input<any>();
+  selectedEntities = input<any[]>([]);
+  
   @Output() relationshipsChanged = new EventEmitter<any[]>();
-
-  // Emits when a relationship is added 
   @Output() relationshipAdded = new EventEmitter<any>();
-
-  // Emits when a relationship is removed 
   @Output() relationshipRemoved = new EventEmitter<any>();
-
-  // Emits when existing relationships are initially loaded (for tracking initial state) 
   @Output() relationshipsLoaded = new EventEmitter<any[]>();
 
-  // Component state
   public searchControl = new UntypedFormControl('');
   public availableEntities: WritableSignal<any[]> = signal([]);
   public loading: boolean = false;
+  
+  private internalSelectedEntities: WritableSignal<any[]> = signal([]);
 
   constructor(
     private relationshipService: RelationshipService,
     private cdr: ChangeDetectorRef
-  ) { }
-
-  ngOnInit() {
-    // Validate config
-    if (!this.config) {
-      throw new Error('EntityRelationshipSelectorComponent requires a config input');
-    }
-
-    if (!this.config.sourceSchema || !this.config.targetSchema) {
-      throw new Error('Config must specify sourceSchema and targetSchema');
-    }
-
-    // Load existing relationships if editing an existing entity
-    const shouldLoadExisting = this.config.loadExisting !== false; // default true
-    if (shouldLoadExisting && this.sourceEntity?.pk && this.sourceEntity?.sk) {
-      this.loadExistingRelationships();
-    }
-
-    // Initial load of available entities
-    if (this.config.searchFields) {
-      this.loadAvailableEntities();
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    // Reload entities when config changes (especially searchFields)
-    if (changes['config'] && !changes['config'].firstChange) {
-      console.log('Config changed, reloading entities');
-      if (this.config?.searchFields) {
-        this.loadAvailableEntities();
+  ) {
+    // Effect to track config changes
+    effect(() => {
+      const config = this.config();
+      
+      if (config) {
+        untracked(() => {
+          // Load available entities when config changes
+          this.loadAvailableEntities();
+        });
       }
-    }
+    });
 
-    // Load existing relationships when sourceEntity changes
-    if (changes['sourceEntity'] && !changes['sourceEntity'].firstChange) {
-      const shouldLoadExisting = this.config?.loadExisting !== false;
-      if (shouldLoadExisting && this.sourceEntity?.pk && this.sourceEntity?.sk) {
-        this.loadExistingRelationships();
+    // Effect to track source entity changes
+    effect(() => {
+      const sourceEntity = this.sourceEntity();
+      const config = this.config();
+      
+      if (sourceEntity && config && config.loadExisting !== false) {
+        untracked(() => {
+          // Load existing relationships when source entity changes
+          this.loadExistingRelationships();
+        });
       }
-    }
+    });
 
-    // Update internal state when selectedEntities input changes
-    if (changes['selectedEntities']) {
-      // Trigger change detection to update the view
-      this.cdr.detectChanges();
-    }
+    // Effect to sync input selectedEntities with internal state
+    effect(() => {
+      const selectedEntities = this.selectedEntities();
+      
+      untracked(() => {
+        this.internalSelectedEntities.set(selectedEntities);
+        this.cdr.detectChanges();
+      });
+    });
   }
 
   // Uses the relationship service to fetch related entities with expand=true
   async loadExistingRelationships() {
-    if (!this.sourceEntity?.pk || !this.sourceEntity?.sk) {
+    const sourceEntity = this.sourceEntity();
+    const config = this.config();
+    
+    if (!sourceEntity?.pk || !sourceEntity?.sk) {
       console.warn('Cannot load relationships: source entity missing pk or sk');
       return;
     }
@@ -158,27 +116,22 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
     try {
       // Fetch relationships with entity data expanded
       const relationshipsResponse = await this.relationshipService.getRelationshipsFrom(
-        this.sourceEntity.pk,
-        this.sourceEntity.sk,
-        this.config.targetSchema, // target schema filter
+        sourceEntity.pk,
+        sourceEntity.sk,
+        config.targetSchema, // target schema filter
         true, // expand entities
         true  // bidirectional
       );
 
       if (relationshipsResponse?.length > 0) {
         // Extract entity data from expanded relationships
-        // Also mark whether each was retrieved via reverse lookup
-        const sourcePk = this.sourceEntity.pk;
-        const sourceSk = this.sourceEntity.sk;
+        const sourcePk = sourceEntity.pk;
+        const sourceSk = sourceEntity.sk;
         const expectedRelPk = `rel::${sourcePk}::${sourceSk}`;
 
         const existingEntities = relationshipsResponse
           .map((rel: any) => {
-            // Check if this is a reverse relationship
-            // If rel.pk matches our source, it's forward; otherwise it's a reverse lookup
             const isReverse = rel.pk !== expectedRelPk;
-
-            // This is useful in deleting relationships using the correct direction
             return {
               ...rel.entity,
               _relationshipMeta: {
@@ -189,21 +142,20 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
             };
           })
           .filter((entity: any) => entity !== null && entity.pk !== undefined)
-          // Filter by target schema to ensure we only show the correct entity type
-          .filter((entity: any) => entity.schema === this.config.targetSchema);
+          .filter((entity: any) => entity.schema === config.targetSchema);
 
-        this.selectedEntities = existingEntities;
-        this.relationshipsChanged.emit(this.selectedEntities);
-        this.relationshipsLoaded.emit(this.selectedEntities);
+        this.internalSelectedEntities.set(existingEntities);
+        this.relationshipsChanged.emit(existingEntities);
+        this.relationshipsLoaded.emit(existingEntities);
 
-        console.log(`Loaded ${existingEntities.length} existing ${this.config.targetSchema} relationships`);
+        console.log(`Loaded ${existingEntities.length} existing ${config.targetSchema} relationships`);
       } else {
-        this.selectedEntities = [];
+        this.internalSelectedEntities.set([]);
         this.relationshipsLoaded.emit([]);
       }
     } catch (error) {
       console.error('Error loading existing relationships:', error);
-      this.selectedEntities = [];
+      this.internalSelectedEntities.set([]);
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
@@ -212,7 +164,9 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
 
   // Can be called manually to refresh the entity list
   async loadAvailableEntities() {
-    if (!this.config.fetchFn) {
+    const config = this.config();
+    
+    if (!config.fetchFn) {
       console.warn('No fetchFn provided in config, cannot load entities');
       return;
     }
@@ -220,15 +174,15 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
     this.loading = true;
 
     try {
-      const response = await this.config.fetchFn(this.config.searchFields);
+      const response = await config.fetchFn(config.searchFields);
 
       if (response?.items?.length) {
         let entities = response.items;
 
         // Apply custom filter if provided
-        if (this.config.filterFn) {
+        if (config.filterFn) {
           entities = entities.filter(item =>
-            this.config.filterFn!(item, this.config.searchFields)
+            config.filterFn!(item, config.searchFields)
           );
         }
 
@@ -250,7 +204,6 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
   }
 
   // Handle entity selection from typeahead
-
   selectEntity(match: any) {
     // Prevent selection if not editable (immutable and already has selections)
     if (!this.isSelectionEditable()) {
@@ -258,13 +211,13 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
     }
 
     const entity = match.value;
+    const currentSelected = this.internalSelectedEntities();
 
     // Check if already selected
-    const isAlreadySelected = this.selectedEntities.some(
+    const isAlreadySelected = currentSelected.some(
       selected => this.isSameEntity(selected, entity)
     );
 
-    // Don't add duplicates
     if (isAlreadySelected) {
       return;
     }
@@ -272,32 +225,28 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
     // Add to selected entities
     let updatedSelection: any[];
 
-    // If multiselect is true we append, otherwise we replace
-    if (this.config.multiselect) {
-      updatedSelection = [...this.selectedEntities, entity];
+    if (this.config().multiselect) {
+      updatedSelection = [...currentSelected, entity];
     } else {
       updatedSelection = [entity];
     }
 
-    // Don't mutate the input - just emit the change
+    this.internalSelectedEntities.set(updatedSelection);
     this.relationshipsChanged.emit(updatedSelection);
     this.relationshipAdded.emit(entity);
 
-    // Clear search value to allow new selections
-    // Use setValue instead of reset to avoid touching form state
-    setTimeout(() => {
-      this.searchControl.setValue('', { emitEvent: false });
-      this.cdr.detectChanges();
-    }, 0);
+    this.searchControl.setValue('');
+    this.cdr.detectChanges();
   }
 
   // Remove an entity from selection
   removeEntity(entity: any) {
-    const updatedSelection = this.selectedEntities.filter(
+    const currentSelected = this.internalSelectedEntities();
+    const updatedSelection = currentSelected.filter(
       selected => !this.isSameEntity(selected, entity)
     );
 
-    // Don't mutate the input - just emit the change
+    this.internalSelectedEntities.set(updatedSelection);
     this.relationshipsChanged.emit(updatedSelection);
     this.relationshipRemoved.emit(entity);
     this.cdr.detectChanges();
@@ -312,7 +261,6 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
   getFilteredEntities(): any[] {
     const searchTerm = this.searchControl.value?.toLowerCase() || '';
 
-    // If no search term, return all available entities
     if (!searchTerm) {
       return this.availableEntities();
     }
@@ -323,18 +271,29 @@ export class EntityRelationshipSelectorComponent implements OnInit, OnChanges {
   }
 
   // Check if selection is editable
-  // Returns false when immutableSelection is true AND sourceEntity exists (edit mode)
   isSelectionEditable(): boolean {
-    if (!this.config.immutableSelection) {
-      return true; // Always editable if not configured as immutable
+    const config = this.config();
+    const sourceEntity = this.sourceEntity();
+    
+    if (!config.immutableSelection) {
+      return true;
     }
 
-    // If immutable, check if we're in creation or edit mode
-    // Creation mode: sourceEntity is null/undefined or doesn't have pk/sk (not saved yet)
-    // Edit mode: sourceEntity has pk/sk (loaded from database)
-    const isEditMode = this.sourceEntity?.pk && this.sourceEntity?.sk;
-    
-    // Only lock in edit mode; always allow changes during creation
+    const isEditMode = sourceEntity?.pk && sourceEntity?.sk;
     return !isEditMode;
+  }
+
+  // Update methods to use internal signal
+  getSelectedEntities(): any[] {
+    return this.internalSelectedEntities();
+  }
+
+  // Add trackBy function for the ngFor loops
+  trackByEntity(index, entity) {
+    return `${entity.value.pk}::${entity.value.sk}`
+  }
+
+  trackBySelectedEntity(index, entity) {
+    return `${entity.pk}::${entity.sk}`
   }
 }
