@@ -1,0 +1,46 @@
+<div class="container-fluid p-4">
+  <!-- Back Button -->
+  <div class="mb-3">
+    <button class="btn btn-outline-secondary" (click)="backToCustomerList()">
+      <i class="bi bi-arrow-left"></i> Back to Customer List
+    </button>
+  </div>
+
+  <!-- Customer Edit Form -->
+  <div *ngIf="customer">
+    <!-- Header Section -->
+    <div class="mb-4">
+      <h2>Edit Customer: {{ customer.givenName || '-' }} {{ customer.familyName || '-' }}</h2>
+      <div class="alert alert-info border-start border-info border-4 mt-3">
+        <h4 class="alert-heading">EDIT COMING SOON</h4>
+        <p class="mb-0">THIS WHOLE PAGE IS TBD LEAVING BLANK FOR NOW. CUSTOMER DATA IS AVAILABLE AT THIS POINT</p>
+      </div>
+    </div>
+
+    <!-- Edit Form Section -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Customer Information</h5>
+      </div>
+      <div class="card-body">
+        <!-- Personal Details -->
+        <h6 class="text-muted mb-3">Personal Details</h6>
+        <form>
+          <!-- Waiting for customer Edit designs. Leave blank for now. -->
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 mt-4">
+            <button type="button" class="btn btn-primary" (click)="saveCustomer()" disabled>
+              <i class="bi bi-save"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="!customer" class="alert alert-warning">
+    Customer not found.
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<div class="container-fluid p-4">
+  <!-- Back Button -->
+  <div class="mb-3">
+    <button class="btn btn-outline-secondary" (click)="backToCustomerList()">
+      <i class="bi bi-arrow-left"></i> Back to Customer List
+    </button>
+  </div>
+
+  <!-- Customer Details -->
+  <div *ngIf="customer">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>{{ customer.givenName || '-' }} {{ customer.familyName || '-' }}</h2>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" (click)="printCustomer()">
+          <i class="bi bi-printer"></i> Print
+        </button>
+        <button class="btn btn-success" (click)="addSale()">
+          <i class="bi bi-plus-circle"></i> Add Sale
+        </button>
+      </div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Details</h5>
+      </div>
+      <div class="card-body">
+        <h6 class="text-muted mb-3">Personal Details</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>Email:</strong>
+            <p class="mb-0">{{ customer.email || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Phone Number:</strong>
+            <p class="mb-0">{{ customer.phoneNumber || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Mobile Phone:</strong>
+            <p class="mb-0">{{ customer.mobilePhone || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Street Address:</strong>
+            <p class="mb-0">{{ customer.streetAddress || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Postal Code:</strong>
+            <p class="mb-0">{{ customer.postalCode || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Province:</strong>
+            <p class="mb-0">{{ customer.province || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>License Plate:</strong>
+            <p class="mb-0">{{ customer.licensePlate || '-' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Vehicle Registration Locale:</strong>
+            <p class="mb-0">{{ customer.vehicleRegLocale || '-' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookings in here! -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Current Bookings</h5>
+      </div>
+      <!-- Need to make logic for bookings in here-->
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Past Bookings</h5>
+      </div>
+      <!-- Need to make logic for bookings in here-->
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="!customer" class="alert alert-warning">
+    Customer not found.
+  </div>
+</div>

@@ -33,6 +33,16 @@ export const routes: Routes = [
     loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
     canActivate: [UserGuard]
   },
+  {
+    path: 'customers/:id',
+    loadComponent: () => import('./customers/customer-detail/customer-detail.component').then(mod => mod.CustomerDetailComponent),
+    canActivate: [UserGuard]
+  },
+  {
+    path: 'customers/:id/edit',
+    loadComponent: () => import('./customers/customer-edit/customer-edit.component').then(mod => mod.CustomerEditComponent),
+    canActivate: [UserGuard]
+  },
   // Inventory
   {
     path: 'inventory',
