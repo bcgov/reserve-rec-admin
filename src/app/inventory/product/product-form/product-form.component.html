@@ -71,6 +71,11 @@
           [resetButton]="true"
         >
         </ngds-text-input>
+        <!-- Display name validation error -->
+        <div *ngIf="form.hasError('invalidDisplayName') && (form.get('displayName')?.touched)"
+          class="alert alert-danger small p-2">
+          <strong>Invalid display name:</strong> Display name is required and cannot be the default value.
+        </div>
         <ngds-picklist-input
           [control]="form.get('timezone')"
           [label]="'Timezone'"
@@ -110,6 +115,7 @@
     <div class="col-lg-12 d-flex flex-column justify-content-center mb-2">
       <!-- Entity Relationship Selector for Activities -->
       <app-entity-relationship-selector
+        class="d-flex flex-column align-content-center m-auto w-50"
         #activityRelationshipSelector
         *ngIf="activityRelationshipConfig"
         [config]="activityRelationshipConfig"
@@ -163,8 +169,8 @@
       </ngds-date-input>
     </div>
     <!-- Date range validation error -->
-    <div *ngIf="form.hasError('dateRangeInvalid') && (form.get('rangeStart')?.touched || form.get('rangeEnd')?.touched)" class="alert alert-danger mt-3 w-50 mx-auto text-center">
-      <i class="fa-solid fa-exclamation-triangle me-2"></i>
+    <div *ngIf="form.hasError('dateRangeInvalid') && (form.get('rangeStart')?.touched || form.get('rangeEnd')?.touched)"
+      class="alert alert-danger small text-center p-2 w-50">
       <strong>Invalid Date Range:</strong> End date must be after start date.
     </div>
   </div>
@@ -228,8 +234,8 @@
       </div>
     </div>
     <!-- Duration validation error -->
-    <div *ngIf="form.hasError('stayDurationInvalid') && (form.get('minStay')?.touched || form.get('maxStay')?.touched)" class="alert alert-danger mt-3 w-50 mx-auto text-center">
-      <i class="fa-solid fa-exclamation-triangle me-2"></i>
+    <div *ngIf="form.hasError('stayDurationInvalid') && (form.get('minStay')?.touched || form.get('maxStay')?.touched)"
+      class="alert alert-danger small text-center p-2 w-50 m-auto">
       <strong>Invalid Stay Duration:</strong> Maximum stay must be greater than minimum stay.
     </div>
 <hr>

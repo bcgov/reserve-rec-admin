@@ -155,7 +155,6 @@ export class FacilityEditComponent {
     this.router.navigate([`/inventory/facility/${collectionId}/${facilityType}/${facilityId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
-      window.location.reload();
     });
   }
 }

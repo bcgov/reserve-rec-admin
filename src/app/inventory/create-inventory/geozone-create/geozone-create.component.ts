@@ -83,7 +83,6 @@ export class GeozoneCreateComponent {
   navigateToGeozone(collectionId, geozoneId) {
     this.router.navigate([`/inventory/geozone/${collectionId}/${geozoneId}`]).then(() => {
       window.scrollTo(0, 0);
-      window.location.reload();
     });
   }
 }

@@ -84,7 +84,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   }
 
   private initializeForm() {
-     this.form = new UntypedFormGroup({
+    this.form = new UntypedFormGroup({
       collectionId: new UntypedFormControl(
         this.product?.collectionId || '',
         {
@@ -154,7 +154,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.product?.description || '',
       ),
       isVisible: new UntypedFormControl(
-        this.product?.isVisible || true
+        this.product?.isVisible || false
       ),
       searchTerms: new UntypedFormControl(
         this.product?.searchTerms || []
@@ -163,10 +163,14 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.product?.adminNotes || ''
       )
     }, {
-      validators: [this.dateRangeValidator, this.stayDurationValidator]
+      validators: [
+        this.displayNameValidator,
+        this.dateRangeValidator,
+        this.stayDurationValidator
+      ]
     });
 
-    this.form.get('displayName').markAsDirty();
+    // this.form.get('displayName').markAsDirty();
     this.form.updateValueAndValidity();
 
     this.form.valueChanges.subscribe(() => {
@@ -294,6 +298,17 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   // Check if an entity is currently selected
   isEntitySelected(entity: any): boolean {
     return this.selectedActivity?.pk === entity.pk && this.selectedActivity?.sk === entity.sk;
+  }
+
+  private displayNameValidator(control: AbstractControl) {
+    const group = control as UntypedFormGroup;
+    const displayName = group.get('displayName')?.value;
+
+    // Check that the value is a string, not empty, and not the default placeholder
+    if (typeof displayName === 'string' && displayName.trim().length > 0 && displayName !== 'New Product') {
+      return null;
+    }
+    return { invalidDisplayName: true };
   }
 
   // Custom validator: rangeStart must be less than rangeEnd

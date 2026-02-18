@@ -116,14 +116,6 @@ export class ProductEditComponent {
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-    if (props?.['location']) {
-      const location = this.productForm?.get('location').value;
-      props['location'] = {
-        type: 'point',
-        coordinates: [location.longitude, location.latitude]
-      };
-    };
-
     // Handle search terms
     props['searchTerms'] = this.productForm.get('searchTerms')?.value || [];
 
@@ -139,7 +131,6 @@ export class ProductEditComponent {
     this.router.navigate([`/inventory/product/${collectionId}/${activityType}/${activityId}/${productId}`]).then(() => {
       window.scrollTo(0, 0);
       this.cdr.detectChanges();
-      window.location.reload();
     });
   }
 }

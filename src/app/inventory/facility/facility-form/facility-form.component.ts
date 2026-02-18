@@ -135,7 +135,7 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
         this.facility?.description || '',
       ),
       isVisible: new UntypedFormControl(
-        this.facility?.isVisible || true
+        this.facility?.isVisible || false
       ),
       imageUrl: new UntypedFormControl(
         this.facility?.imageUrl || ''

@@ -90,11 +90,13 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
+      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Product failed to create`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 
@@ -113,11 +115,13 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
+      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Product failed to update`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 
@@ -136,11 +140,13 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
+      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Product failed to delete`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 }
