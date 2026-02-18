@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { BsModalService } from 'ngx-bootstrap/modal';
+import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 
 import { FeatureFlagService, FeatureFlagAdminResponse } from '../../services/feature-flag.service';
-import { AuthService } from '../../services/auth.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoadingService } from '../../services/loading.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -18,15 +18,16 @@ interface FlagDefinition {
 @Component({
   selector: 'app-feature-flags',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgdsFormsModule],
+  providers: [BsModalService],
   templateUrl: './feature-flags.component.html',
   styleUrls: ['./feature-flags.component.scss']
 })
 export class FeatureFlagsComponent implements OnInit {
-  loading = signal<boolean>(true);
-  saving = signal<boolean>(false);
+  loading = true;
+  saving = false;
   
-  flagData = signal<FeatureFlagAdminResponse | null>(null);
+  flagData: FeatureFlagAdminResponse | null = null;
   form: UntypedFormGroup = new UntypedFormGroup({});
   
   // Define available flags with metadata
@@ -48,15 +49,17 @@ export class FeatureFlagsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadFlags();
-    this.loading.set(false);
+    this.loading = false;
   }
 
   async loadFlags(): Promise<void> {
     try {
       const data = await this.featureFlagService.getFeatureFlagsAdmin();
-      this.flagData.set(data);
+      this.flagData = data;
       this.buildForm(data.flags);
     } catch (error) {
+      // Build form with defaults on error
+      this.buildForm(undefined);
       this.toastService.addMessage(
         'Failed to load feature flags',
         'Error',
@@ -65,11 +68,11 @@ export class FeatureFlagsComponent implements OnInit {
     }
   }
 
-  buildForm(flags: Record<string, boolean>): void {
+  buildForm(flags: Record<string, boolean> | undefined): void {
     const controls: Record<string, UntypedFormControl> = {};
     
     for (const def of this.flagDefinitions) {
-      controls[def.key] = new UntypedFormControl(flags[def.key] ?? false);
+      controls[def.key] = new UntypedFormControl(flags?.[def.key] ?? false);
     }
     
     this.form = new UntypedFormGroup(controls);
@@ -93,7 +96,7 @@ export class FeatureFlagsComponent implements OnInit {
   }
 
   private async performSave(): Promise<void> {
-    this.saving.set(true);
+    this.saving = true;
     
     try {
       const flags: Record<string, boolean> = {};
@@ -103,7 +106,10 @@ export class FeatureFlagsComponent implements OnInit {
       }
       
       const response = await this.featureFlagService.updateFeatureFlags(flags);
-      this.flagData.set(response);
+      this.flagData = response;
+      
+      // Reset form dirty state after successful save
+      this.form.markAsPristine();
       
       this.toastService.addMessage(
         'Feature flags updated successfully',
@@ -117,19 +123,14 @@ export class FeatureFlagsComponent implements OnInit {
         ToastTypes.ERROR
       );
     } finally {
-      this.saving.set(false);
+      this.saving = false;
     }
   }
 
-  get hasChanges(): boolean {
-    if (!this.flagData()) return false;
-    
-    const currentFlags = this.flagData()!.flags;
-    for (const def of this.flagDefinitions) {
-      if (this.form.get(def.key)?.value !== currentFlags[def.key]) {
-        return true;
-      }
+  cancelChanges(): void {
+    // Reload flags to reset form to original values
+    if (this.flagData?.flags) {
+      this.buildForm(this.flagData.flags);
     }
-    return false;
   }
 }
