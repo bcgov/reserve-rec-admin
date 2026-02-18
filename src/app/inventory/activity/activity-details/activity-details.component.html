@@ -96,29 +96,83 @@
 <section class="container">
   <div class="row">
     <div class="col-md-6">
+      <h4 class="mb-3">Geozones Details</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related geozones...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedGeozones.length === 0" class="text-muted my-3">
+        No geozones are currently associated with this activity.
+      </div>
+      
+      <!-- Geozones list -->
+      <div *ngIf="!loadingRelationships && relatedGeozones.length > 0" class="mb-3">
+        This activity is associated with {{ relatedGeozones.length }} {{ relatedGeozones.length === 1 ? 'geozone' : 'geozones' }}:
+      </div>
+      <div class="mb-2">
+        <div class="row">
+          <app-geozone-list-item
+            *ngFor="let geozone of relatedGeozones"
+            [geozone]="geozone"
+          ></app-geozone-list-item>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
       <h4 class="mb-3">Facilities Details</h4>
-      <div class="mb-3">
-        This activity is associated with the following facilities:
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related facilities...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedFacilities.length === 0" class="text-muted my-3">
+        No facilities are currently associated with this activity.
+      </div>
+      
+      <!-- Facilities list -->
+      <div *ngIf="!loadingRelationships && relatedFacilities.length > 0" class="mb-3">
+        This activity is associated with {{ relatedFacilities.length }} {{ relatedFacilities.length === 1 ? 'facility' : 'facilities' }}:
       </div>
       <div class="mb-2">
         <div class="row">
           <app-facility-list-item
-            *ngFor="let facility of activity?.facilities"
+            *ngFor="let facility of relatedFacilities"
             [facility]="facility"
           ></app-facility-list-item>
         </div>
       </div>
     </div>
     <div class="col-md-6">
-      <h4 class="mb-3">Geozones Details</h4>
-      <div class="mb-3">
-        This activity is associated with the following geozones:
+      <h4 class="mb-3">Products Details</h4>
+      
+      <!-- Loading state -->
+      <div *ngIf="loadingRelationships" class="text-center my-3">
+        <i class="fa fa-spinner fa-spin me-2"></i>
+        Loading related products...
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!loadingRelationships && relatedProducts.length === 0" class="text-muted my-3">
+        No products are currently associated with this activity.
+      </div>
+      
+      <!-- Products list -->
+      <div *ngIf="!loadingRelationships && relatedProducts.length > 0" class="mb-3">
+        This activity is associated with {{ relatedProducts.length }} {{ relatedProducts.length === 1 ? 'product' : 'products' }}:
       </div>
       <div class="mb-2">
         <div class="row">
-          <div class="d-flex align-items-center justify-content-center border rounded-3 py-3">
-            Coming soon...
-          </div>
+          <app-product-list-item
+            *ngFor="let product of relatedProducts"
+            [product]="product"
+          ></app-product-list-item>
         </div>
       </div>
     </div>

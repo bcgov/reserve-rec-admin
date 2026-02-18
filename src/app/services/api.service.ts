@@ -31,7 +31,7 @@ export class ApiService implements OnDestroy {
   }
 
   errorHandler(error: HttpErrorResponse) {
-    return throwError(() => new Error(error.message));
+    return throwError(() => error);
   }
 
   ngOnDestroy() {
@@ -156,7 +156,7 @@ export class ApiService implements OnDestroy {
     let queryString = '';
     if (queryParamsObject) {
       for (const key of Object.keys(queryParamsObject)) {
-        queryString += `&${key}=${queryParamsObject[key]}`;
+        queryString += `&${encodeURIComponent(key)}=${encodeURIComponent(queryParamsObject[key])}`;
       }
       queryString = queryString.substring(1);
     }

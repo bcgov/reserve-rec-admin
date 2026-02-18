@@ -8,16 +8,18 @@ import { LoadalComponent } from '../../../shared/components/loadal/loadal.compon
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { Constants } from '../../../app.constants';
+import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
 
 @Component({
   selector: 'app-geozone-form',
-  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule],
+  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule, SearchTermsComponent],
   templateUrl: './geozone-form.component.html',
   styleUrl: './geozone-form.component.scss'
 })
 export class GeozoneFormComponent implements OnInit, AfterViewInit {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
+  @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
 
@@ -85,12 +87,49 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.initializeForm();
+
+    this.form.valueChanges.subscribe(() => {
+      this.formValue.emit(this.form);
+      this.cdr.detectChanges();
+    });
+
+    this.form.get('mandatoryFields.displayName').valueChanges.subscribe((value) => {
+      this.markerOptions['displayName'] = value;
+      this.updateLocationMarkers();
+    });
+    this.form.get('mandatoryFields.location').valueChanges.subscribe((value) => {
+      this.updateLocationMarkers();
+    });
+    this.form.get('mandatoryFields.envelope').valueChanges.subscribe((value) => {
+      this.updateEnvelopeMarkers();
+    });
+    this.form.get('mandatoryFields.minMapZoom').valueChanges.subscribe((value) => {
+      this._minMapZoom.set(value);
+      this.updateLocationMarkers();
+      this.updateEnvelopeMarkers();
+      if (this.form.get('enforceZoomVisibility').value) {
+        this.mapComponent?.updateMap();
+      }
+    });
+    this.form.get('mandatoryFields.maxMapZoom').valueChanges.subscribe((value) => {
+      this._maxMapZoom.set(value);
+      this.updateLocationMarkers();
+      this.updateEnvelopeMarkers();
+      if (this.form.get('enforceZoomVisibility').value) {
+        this.mapComponent?.updateMap();
+      }
+    });
+  }
+
+  private initializeForm() {
     this.form = new UntypedFormGroup({
       collectionId: new UntypedFormControl(
         this.geozone?.collectionId || '',
         {
           nonNullable: true,
-          validators: [Validators.required]
+          validators: [Validators.required],
+          updateOn: 'blur'
         }
       ),
       mandatoryFields: new UntypedFormGroup({
@@ -180,56 +219,24 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this.geozone?.description || '',
       ),
       isVisible: new UntypedFormControl(
-        this.geozone?.isVisible || true
-      ),
-      orcs: new UntypedFormControl(
-        this.geozone?.orcs || ''
+        this.geozone?.isVisible || false
       ),
       imageUrl: new UntypedFormControl(
         this.geozone?.imageUrl || ''
       ),
       searchTerms: new UntypedFormControl(
-        this.geozone?.searchTerms || ''
+        this.geozone?.searchTerms || []
       ),
       adminNotes: new UntypedFormControl(
         this.geozone?.adminNotes || ''
       ),
-    });
-    this.form.valueChanges.subscribe(() => {
-      this.formValue.emit(this.form);
-    });
-    this.form.get('mandatoryFields.displayName').valueChanges.subscribe((value) => {
-      this.markerOptions['displayName'] = value;
-      this.updateLocationMarkers();
-    });
-    this.form.get('mandatoryFields.location').valueChanges.subscribe((value) => {
-      this.updateLocationMarkers();
-    });
-    this.form.get('mandatoryFields.envelope').valueChanges.subscribe((value) => {
-      this.updateEnvelopeMarkers();
-    });
-    this.form.get('mandatoryFields.minMapZoom').valueChanges.subscribe((value) => {
-      this._minMapZoom.set(value);
-      this.updateLocationMarkers();
-      this.updateEnvelopeMarkers();
-      if (this.form.get('enforceZoomVisibility').value) {
-        this.mapComponent?.updateMap();
-      }
-    });
-    this.form.get('mandatoryFields.maxMapZoom').valueChanges.subscribe((value) => {
-      this._maxMapZoom.set(value);
-      this.updateLocationMarkers();
-      this.updateEnvelopeMarkers();
-      if (this.form.get('enforceZoomVisibility').value) {
-        this.mapComponent?.updateMap();
-      }
     });
   }
 
 
   ngAfterViewInit(): void {
     this.zoomToEnvelopeLimits();
-    this.mapComponent?.map.on('zoomend', () => {
+    this.mapComponent?.map?.on('zoomend', () => {
       // Check if the enforceZoomVisibility is enabled
       if (this.form.get('enforceZoomVisibility').value) {
         // Update the visibility of markers and polygons based on the current zoom level
@@ -319,5 +326,41 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this._envelopeMarkers()[0].coordinates[0]
       ], { padding: 75 });
     }
+  }
+
+  onSearchTermsChange(searchTerms: string[]) {
+    this.form.get('searchTerms')?.setValue(searchTerms);
+    this.cdr.detectChanges();
+  }
+
+  // Mark the search terms form control as dirty when a term is added
+  onSearchTermDirty() {
+    this.form.get('searchTerms')?.markAsDirty();
+  }
+
+
+  // Generic utility method to map entities to pk/sk objects
+  mapEntityPkSk(entities: any[]): { pk: string; sk: string }[] {
+    if (!entities?.length) {
+      return [];
+    }
+    return entities.map(entity => ({
+      pk: entity.pk,
+      sk: entity.sk
+    }));
+  }
+
+  navigateToEntityRelationships() {
+    const collectionId = this.form.get('collectionId')?.value;
+    const geozoneId = this.geozone?.geozoneId;
+    // Navigate to the entity relationships page for this geozone
+    // Format: geozone::collectionId::geozoneId
+    this.router.navigate(['/inventory/create/relationships'], {
+      queryParams: {
+        collectionId: collectionId,
+        sourceEntityType: 'geozone',
+        sourceEntity: `geozone::${collectionId}::${geozoneId}`
+      }
+    });
   }
 }

@@ -232,6 +232,31 @@
   </div>
 </section>
 <hr>
+
+<!-- STEP 2.5: Link Facilities and Activities -->
+<section #relationshipsSection>
+  <div class="d-flex flex-column align-items-center justify-content-center my-5">
+    <div class="d-flex align-items-center mb-5">
+      <h5 class="text-center me-2 my-0">Step 2.5: Link Related Entities</h5>
+    </div>
+
+    <div class="alert alert-info">
+      <i class="fa-solid fa-info-circle me-2"></i>
+      To link this geozone to facilities or activities, use the <strong>Entity Relationships</strong> tool.
+    </div>
+    <button 
+        *ngIf="geozone?.geozoneId"
+        class="btn btn-primary mt-3" (click)="navigateToEntityRelationships()"
+      >
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span> Go to Entity Relationships</span>
+    </button>
+  </div>
+</section>
+<hr>
+
+<!-- Templates for facility and activity display -->
+<hr>
 <section #optionalFieldsSection>
   <div class="d-flex flex-column align-items-center justify-content-center my-5">
     <div class="d-flex align-items-center mb-5">
@@ -267,21 +292,15 @@
         [resetButton]="true"
       >
       </ngds-text-input>
-      <ngds-number-input
-        [control]="form.get('orcs')"
-        [label]="'ORCS'"
-        [placeholder]="'Enter ORCS number'"
-        [resetButton]="true"
-      >
-      </ngds-number-input>
-      <ngds-text-input
-        [control]="form.get('searchTerms')"
-        [label]="'Additional Search Terms'"
-        [multiline]="true"
-        [placeholder]="'Enter terms separated by commas'"
-        [resetButton]="true"
-      >
-      </ngds-text-input>
+
+      <!-- Search terms component -->
+      <app-search-terms
+        #searchTerms
+        [searchTerms]="form.get('searchTerms')?.value || []"
+        (searchTermsChange)="onSearchTermsChange($event)"
+        (searchTermDirty)="onSearchTermDirty()"
+      ></app-search-terms>
+
       <ngds-text-input
         [control]="form.get('adminNotes')"
         [label]="'Administrative Notes'"

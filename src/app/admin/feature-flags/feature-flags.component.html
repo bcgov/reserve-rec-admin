@@ -1,0 +1,62 @@
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>Feature Flags</h2>
+      <p class="text-muted">Manage application feature toggles.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading">
+    <div *ngIf="flagData?.metadata" class="alert alert-light mb-4">
+      <small>
+        <strong>Last updated:</strong> {{ flagData?.metadata?.lastUpdated | date:'medium' }}
+        by {{ flagData?.metadata?.updatedByEmail || flagData?.metadata?.updatedBy }}
+      </small>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3" *ngFor="let flag of flagDefinitions">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="fa-solid fa-toggle-on me-2"></i>
+              {{ flag.displayName }}
+            </h5>
+            <p class="card-text">{{ flag.description }}</p>
+            <ngds-toggle-input
+              [control]="form.get(flag.key)"
+              [switch]="true"
+              [label]="form.get(flag.key)?.value ? 'Enabled' : 'Disabled'"
+            ></ngds-toggle-input>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-primary me-2"
+          [disabled]="!form.dirty || saving"
+          (click)="saveFlags()"
+        >
+<ng-container *ngIf="saving; else saveLabel"><i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...</ng-container><ng-template #saveLabel><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</ng-template>
+        </button>
+        <button 
+          class="btn btn-outline-secondary" 
+          [disabled]="!form.dirty || saving"
+          (click)="cancelChanges()"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

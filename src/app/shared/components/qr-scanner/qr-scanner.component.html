@@ -1,0 +1,76 @@
+<div class="qr-scanner-container">
+  <!-- Header -->
+  <div class="scanner-header d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">
+      <i class="fa-solid fa-qrcode me-2"></i>
+      Scan QR Code
+    </h3>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+  </div>
+
+  <!-- Camera Selection -->
+  <div *ngIf="cameras.length > 1" class="camera-selection mb-3">
+    <label for="cameraSelect" class="form-label">
+      <i class="fa-solid fa-camera me-2"></i>
+      Select Camera
+    </label>
+    <select 
+      id="cameraSelect" 
+      class="form-select" 
+      [(ngModel)]="selectedCameraId" 
+      (change)="changeCamera(selectedCameraId!)"
+      [disabled]="isCameraLoading">
+      <option *ngFor="let camera of cameras" [value]="camera.id">
+        {{ camera.label || 'Camera ' + camera.id }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isCameraLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading camera...</span>
+    </div>
+    <p class="mt-3">Initializing camera...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible" role="alert">
+    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" aria-label="Close" (click)="error = null"></button>
+  </div>
+
+  <!-- Scanner Display -->
+  <div class="scanner-wrapper">
+    <div id="reader" #reader class="qr-reader"></div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="scanner-instructions mt-3 p-3 bg-light border rounded">
+    <h5 class="mb-2">
+      <i class="fa-solid fa-circle-info me-2"></i>
+      Instructions
+    </h5>
+    <ul class="mb-0">
+      <li>Position the QR code within the scanning area</li>
+      <li>Keep the camera steady and well-lit</li>
+      <li>The scanner will automatically detect the QR code</li>
+    </ul>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="d-flex gap-2 mt-3">
+    <button type="button" class="btn btn-outline-secondary" (click)="close()">
+      Cancel
+    </button>
+    <button 
+      *ngIf="error" 
+      type="button" 
+      class="btn btn-primary" 
+      (click)="resetScanner()">
+      <i class="fa-solid fa-rotate-right me-2"></i>
+      Retry
+    </button>
+  </div>
+</div>

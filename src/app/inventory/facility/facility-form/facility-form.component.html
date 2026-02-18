@@ -211,7 +211,7 @@
 <section #attachActivitiesSection>
   <div class="d-flex flex-column text-center align-items-center justify-content-center my-5">
     <div class="d-flex align-items-center mb-5">
-      <h5 class="text-center me-2 my-0">Step 3: Link Activities</h5>
+      <h5 class="text-center me-2 my-0">Step 3: Link Activities and Geozones</h5>
       <a
         class="p-0"
         href="https://github.com/bcgov/reserve-rec-api/wiki/Data-Model#activities"
@@ -224,27 +224,17 @@
         </button>
       </a>
     </div>
-    <p>
-      Facilities serve as the geospatial context for <strong>activities</strong>. If your facility is intended to host
-      activities, you can
-      search for and link preexisting activities here. You can also choose to complete this step later.
-    </p>
-  </div>
-  <div class="row text-center">
-    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-      <h6>Activities Search</h6>
-      <div class="alert alert-secondary mb-2">
-        <i class="fa-solid fa-info-circle me-1"></i>
-        Coming soon: Search for activities to link to this facility.
-      </div>
+    <div class="alert alert-info">
+      <i class="fa-solid fa-info-circle me-2"></i>
+      To link this facility to activities or geozones, use the <strong>Entity Relationships</strong> tool.
     </div>
-    <div class="col-lg-6 d-flex flex-column justify-content-left mb-2">
-      <h6>Linked Activities</h6>
-      <div class="alert alert-secondary mb-2">
-        <i class="fa-solid fa-info-circle me-1"></i>
-        Coming soon: A list of activities linked to this facility will appear here.
-      </div>
-    </div>
+    <button 
+        *ngIf="facility?.facilityId"
+        class="btn btn-primary mt-3" (click)="navigateToEntityRelationships()"
+      >
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span> Go to Entity Relationships</span>
+    </button>
   </div>
 </section>
 <hr>
@@ -292,21 +282,15 @@
         [resetButton]="true"
       >
       </ngds-typeahead-input>
-      <ngds-number-input
-        [control]="form.get('orcs')"
-        [label]="'ORCS'"
-        [placeholder]="'Enter ORCS number'"
-        [resetButton]="true"
-      >
-      </ngds-number-input>
-      <ngds-text-input
-        [control]="form.get('searchTerms')"
-        [label]="'Additional Search Terms'"
-        [multiline]="true"
-        [placeholder]="'Enter terms separated by commas'"
-        [resetButton]="true"
-      >
-      </ngds-text-input>
+
+      <!-- Search terms component -->
+      <app-search-terms
+        #searchTerms
+        [searchTerms]="form.get('searchTerms')?.value || []"
+        (searchTermsChange)="onSearchTermsChange($event)"
+        (searchTermDirty)="onSearchTermDirty()"
+      ></app-search-terms>
+      
       <ngds-text-input
         [control]="form.get('adminNotes')"
         [label]="'Administrative Notes'"

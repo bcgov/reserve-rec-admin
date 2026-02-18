@@ -38,7 +38,20 @@ class CDKProject {
   }
 
   getDeploymentName() {
-    return this.context?.DEPLOYMENT_NAME || 'local';
+    const baseName = this.context?.DEPLOYMENT_NAME || 'local';
+    const sandboxName = this.getSandboxName();
+    if (sandboxName) {
+      return `${baseName}-${sandboxName}`;
+    }
+    return baseName;
+  }
+
+  getSandboxName() {
+    return this.app.node.tryGetContext('sandboxName') || null;
+  }
+
+  isSandbox() {
+    return !!this.getSandboxName();
   }
 
   getRegion() {

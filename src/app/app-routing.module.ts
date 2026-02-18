@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
+import { AdminGuard } from './guards/admin.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
 import { ActivityResolver } from './resolvers/activity.resolver';
 import { policyResolver } from './resolvers/policy.resolver';
+import { ProductResolver } from './resolvers/product.resolver';
 
 export const routes: Routes = [
   {
@@ -23,6 +25,10 @@ export const routes: Routes = [
   {
     path: 'logout',
     loadComponent: () => import('./logout/logout.component').then(mod => mod.LogoutComponent), canActivate: [UserGuard]
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./unauthorized/unauthorized.component').then(mod => mod.UnauthorizedComponent)
   },
   {
     path: 'sales',
@@ -66,6 +72,18 @@ export const routes: Routes = [
         path: 'activity',
         loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent),
         // resolve: { protectedAreas: ProtectedAreasResolver }
+      },
+      {
+        path: 'product',
+        loadComponent: () => import('./inventory/create-inventory/product-create/product-create.component').then(mod => mod.ProductCreateComponent)
+      },
+      {
+        path: 'policy',
+        loadComponent: () => import('./inventory/create-inventory/policy-create/policy-create.component').then(mod => mod.PolicyCreateComponent)
+      },
+      {
+        path: 'relationships',
+        loadComponent: () => import('./inventory/create-inventory/relationship-create/relationship-create.component').then(mod => mod.RelationshipCreateComponent)
       },
     ],
   },
@@ -147,9 +165,38 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'inventory/product/:collectionId/:activityType/:activityId/:productId',
+    loadComponent: () => import('./inventory/product/product.component').then(mod => mod.ProductComponent),
+    canActivate: [UserGuard],
+    resolve: { product: ProductResolver },
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./inventory/product/product-details/product-details.component').then(mod => mod.ProductDetailsComponent),
+        canActivate: [UserGuard],
+      },
+      {
+        path: 'edit',
+        loadComponent: () => import('./inventory/product/product-edit/product-edit.component').then(mod => mod.ProductEditComponent),
+        canActivate: [UserGuard],
+      }
+    ]
+  },
+  {
     path: 'reports',
     loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent),
     canActivate: [UserGuard]
+  },
+  {
+    path: 'reports/daily-passes',
+    loadComponent: () => import('./reports/daily-passes/daily-passes-report.component').then(mod => mod.DailyPassesReportComponent),
+    canActivate: [UserGuard]
+  },
+  {
+    path: 'admin/feature-flags',
+    loadComponent: () => import('./admin/feature-flags/feature-flags.component').then(mod => mod.FeatureFlagsComponent),
+    canActivate: [UserGuard, AdminGuard]
   },
   {
     path: 'customers',

@@ -1,11 +1,15 @@
 <nav class="h-100 bg-secondary text-white" id="sidebar">
   <div class="d-flex flex-column h-100 pb-3">
       <ul class="list-unstyled components ms-3 me-5">
-        <li><a routerLink="/dashboard"><i class="fa-solid fa-gear"></i> Dashboard</a></li>
-        <li><a routerLink="/sales"><i class="fa-solid fa-gear"></i> Sales</a></li>
-        <li><a routerLink="/reports"><i class="fa-solid fa-gear"></i> Reports</a></li>
-        <li><a routerLink="/inventory"><i class="fa-solid fa-gear"></i> Inventory</a></li>
-        <li><a routerLink="/customers"><i class="fa-solid fa-gear"></i> Customers</a></li>
+        <li><a routerLink="/dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+        <li><a routerLink="/sales"><i class="fa-solid fa-cash-register"></i> Sales</a></li>
+        <li><a routerLink="/reports"><i class="fa-solid fa-chart-bar"></i> Reports</a></li>
+        <li><a routerLink="/inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a></li>
+        <li><a routerLink="/customers"><i class="fa-solid fa-users"></i> Customers</a></li>
+        <ng-container *ngIf="isAdmin()">
+          <li class="mt-3 mb-1"><small class="text-white-50">Settings</small></li>
+          <li><a routerLink="/admin/feature-flags"><i class="fa-solid fa-toggle-on"></i> Feature Flags</a></li>
+        </ng-container>
       </ul>
   </div>
 </nav>

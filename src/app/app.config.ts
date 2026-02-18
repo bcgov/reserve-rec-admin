@@ -13,17 +13,20 @@ import { provideToastr } from 'ngx-toastr';
 import { AuthService } from './services/auth.service';
 import { WebsocketService } from './services/ws.service';
 import { ApiService } from './services/api.service';
+import { FeatureFlagService } from './services/feature-flag.service';
 
 export function initConfig(
   configService: ConfigService,
   authService: AuthService,
   apiService: ApiService,
-  websocketService: WebsocketService
+  websocketService: WebsocketService,
+  featureFlagService: FeatureFlagService
 ) {
   return async () => {
     await configService.init();
     await authService.init();
     await apiService.init();
+    await featureFlagService.init();
     await websocketService.init(configService.config['WEBSOCKET_URL']);
   };
 }
@@ -34,7 +37,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAppInitializer(() => {
-        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService));
+        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService), inject(FeatureFlagService));
         return initializerFn();
       }),
     ConfigService,
