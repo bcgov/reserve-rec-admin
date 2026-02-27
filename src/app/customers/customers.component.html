@@ -3,29 +3,28 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Customers</h2>
     <div class="d-flex gap-2">
-      <button class="btn btn-primary" (click)="printCustomers()">
-        <i class="bi bi-printer"></i> Print
-      </button>
-      <button class="btn btn-primary" (click)="createNewCustomer()">
-        <i class="bi bi-plus-circle"></i> Create New
+      <button class="btn btn-primary" (click)="downloadCSV()">
+        <i class="bi bi-download"></i> Download to CSV
       </button>
     </div>
   </div>
 
   <!-- Search and Filter Section -->
-  <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
-    <input 
-      type="text" 
-      class="form-control" 
-      style="max-width: 300px;"
-      [(ngModel)]="searchQuery"
-      (keyup.enter)="onSearch()"
-      placeholder="Search by name, phone number etc.">
-    <button class="btn btn-outline-primary" (click)="onSearch()" [disabled]="loading">
-      <i class="bi bi-search"></i> Search
-    </button>
+  <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+    <div class="d-flex gap-2" style="flex: 1;">
+      <input 
+        type="text" 
+        class="form-control" 
+        style="width: 40%;"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        placeholder="Search by name, phone number etc.">
+      <button class="btn btn-outline-primary" (click)="onSearch()" [disabled]="loading">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </div>
     <button class="btn btn-outline-primary" (click)="openFilters()" [disabled]="loading">
-      <i class="bi bi-funnel"></i> Filters
+      <i class="bi bi-funnel"></i> Columns
     </button>
   </div>
 
@@ -61,19 +60,21 @@
         <tr *ngFor="let customer of customers">
           <td *ngFor="let column of getVisibleColumns()">
             <span *ngIf="column.field === 'activeBooking'" class="badge bg-secondary">No Active Booking</span>
-            <span *ngIf="column.field !== 'activeBooking'">{{ getValue(customer, column.field) }}</span>
+            <span *ngIf="column.field === 'accountType' && getValue(customer, column.field) === 'BCSC'" class="badge" style="background-color: #003366;">BCSC</span>
+            <span *ngIf="column.field === 'accountType' && getValue(customer, column.field) === 'BCP Account'" class="badge bg-success">BCP Account</span>
+            <span *ngIf="column.field !== 'activeBooking' && column.field !== 'accountType'">{{ getValue(customer, column.field) }}</span>
           </td>
           <td>
             <div class="d-flex gap-1">
               <button class="btn btn-sm btn-outline-primary" (click)="viewCustomer(customer)">
-                <i class="bi bi-eye"></i> View
+                View
               </button>
-              <button class="btn btn-sm btn-outline-secondary" (click)="editCustomer(customer)">
+              <!-- <button class="btn btn-sm btn-outline-secondary" (click)="editCustomer(customer)">
                 <i class="bi bi-pencil"></i> Edit
               </button>
               <button class="btn btn-sm btn-outline-info" (click)="copyCustomer(customer)">
                 <i class="bi bi-clipboard"></i> Copy
-              </button>
+              </button> -->
             </div>
           </td>
         </tr>
@@ -95,7 +96,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Column Filters</h5>
+        <h5 class="modal-title">Columns</h5>
         <button type="button" class="btn-close" (click)="closeFilterModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body">

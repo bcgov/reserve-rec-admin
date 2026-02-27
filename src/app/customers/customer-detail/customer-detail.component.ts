@@ -37,6 +37,30 @@ export class CustomerDetailComponent implements OnInit {
     this.router.navigate(['/customers']);
   }
 
+  editCustomer() {
+    console.log('Determine edit functionality');
+  }
+
+  getFullName(): string {
+    const firstName = this.customer?.givenName || '';
+    const lastName = this.customer?.familyName || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+    return fullName || '-';
+  }
+
+  isEmailVerified(): boolean {
+    const status = this.customer?.userStatus;
+    // BCSC accounts are always considered email verified
+    if (status === 'EXTERNAL_PROVIDER') {
+      return true;
+    }
+    // BCP Accounts use the actual email_verified field
+    if (status === 'CONFIRMED' || status === 'UNCONFIRMED') {
+      return this.customer?.email_verified === true;
+    }
+    return false;
+  }
+
   printCustomer() {
     console.log('Print customer button was pressed');
     // TODO: Waiting for designs on how this should look/function
