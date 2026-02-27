@@ -8,9 +8,10 @@
 </section>
 <hr>
 <app-product-form
+  [isEditing]="false"
   (formValue)="updateProductForm($event)"
   (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)"
-  >
+>
 </app-product-form>
 <hr>
 <section>

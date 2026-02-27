@@ -1,0 +1,34 @@
+<app-entity-relationship-selector
+  #selector
+  *ngIf="config"
+  class="d-flex flex-column align-content-center m-auto w-75"
+  [config]="config"
+  [selectedEntities]="selectedPolicy ? [selectedPolicy] : []"
+  (relationshipsChanged)="onChanged($event)"
+  (relationshipsLoaded)="onLoaded($event)"
+></app-entity-relationship-selector>
+
+<div *ngIf="!config" class="text-center text-muted my-3">
+  <i class="fa fa-spinner fa-spin"></i> Initializing {{ label }} selector...
+</div>
+
+<!-- Item display template -->
+<ng-template #itemTemplate let-policy>
+  <app-entity-selection-dropdown-item
+    [entity]="policy"
+    [isSelected]="true"
+  ></app-entity-selection-dropdown-item>
+</ng-template>
+
+<!-- Dropdown list template -->
+<ng-template #selectionTemplate let-matches="matches" let-query="query">
+  <div *ngIf="matches.length === 0" class="text-center text-muted my-3">
+    <h3>No {{ label }} policies found.</h3>
+  </div>
+  <div *ngFor="let match of matches" (click)="selectEntity(match)">
+    <app-entity-selection-dropdown-item
+      [entity]="match.value"
+      [isSelected]="isSelected(match.value)"
+    ></app-entity-selection-dropdown-item>
+  </div>
+</ng-template>

@@ -330,12 +330,8 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
 
   onSearchTermsChange(searchTerms: string[]) {
     this.form.get('searchTerms')?.setValue(searchTerms);
-    this.cdr.detectChanges();
-  }
-
-  // Mark the search terms form control as dirty when a term is added
-  onSearchTermDirty() {
     this.form.get('searchTerms')?.markAsDirty();
+    this.cdr.detectChanges();
   }
 
 

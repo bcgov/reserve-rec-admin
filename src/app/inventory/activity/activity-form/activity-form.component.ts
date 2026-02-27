@@ -137,12 +137,8 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
   // Handle search terms updates from the component
   onSearchTermsChange(searchTerms: string[]) {
     this.form.get('searchTerms')?.setValue(searchTerms);
-    this.cdr.detectChanges();
-  }
-
-  // Mark the search terms form control as dirty when a term is added
-  onSearchTermDirty() {
     this.form.get('searchTerms')?.markAsDirty();
+    this.cdr.detectChanges();
   }
 
   // Allow user to go an create a new facility

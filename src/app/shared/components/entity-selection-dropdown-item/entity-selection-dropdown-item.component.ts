@@ -15,44 +15,82 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
   styleUrls: ['./entity-selection-dropdown-item.component.scss']
 })
 export class EntitySelectionDropdownItemComponent {
-  // The entity object to display (facility, geozone, activity, product, etc.)
   @Input() entity: any;
-  // Type of entity - determines badge text and property names
-  @Input() entityType: 'facility' | 'geozone' | 'activity' | 'product' = 'facility';
   @Input() isSelected: boolean = false;
 
+  private readonly schemaConfig = {
+    geozone: {
+      icon: 'fas fa-location-dot',
+      identifierKey: 'geozoneId',
+      typeKey: 'geozoneType',
+      collectionKey: 'collectionId',
+    },
+    facility: {
+      icon: 'fas fa-building',
+      identifierKey: 'facilityId',
+      typeKey: 'facilityType',
+      collectionKey: 'collectionId',
+    },
+    activity: {
+      icon: 'fas fa-running',
+      identifierKey: 'activityId',
+      typeKey: 'activityType',
+      collectionKey: 'collectionId',
+    },
+    product: {
+      icon: 'fas fa-box-open',
+      identifierKey: 'productId',
+      typeKey: 'productType',
+      collectionKey: 'collectionId',
+    },
+    policy: {
+      icon: 'fas fa-receipt',
+      identifierKey: 'policyId',
+      typeKey: 'policyType',
+      versionKey: 'policyIdVersion'
+    },
+  };
 
-  // Get the specific type badge text (e.g., "Day Use", "Frontcountry")
-  // Looks for {entityType}Type property on the entity
+  // Each entity comes in with a schem, so we use a schemaConfig to help map the badges
+  // e.g. for a geozone entity, we know to look for geozoneId, geozoneType, and collectionId based on the config 
+  private get config() {
+    return this.schemaConfig[this.entity?.schema] ?? { icon: 'fas fa-question' };
+  }
+
+  get icon(): string {
+    return this.config.icon;
+  }
+
   get specificType(): string | null {
-    const typeKey = `${this.entityType}Type`;
-    return this.entity?.[typeKey] || null;
+    return this.config.typeKey ? (this.entity?.[this.config.typeKey] ?? null) : null;
   }
 
-  // Get the entity identifier (e.g., facilityId, geozoneId)
-  // Falls back to generic 'identifier' property or 'N/A'
-  get identifier(): string {
-    const idKey = `${this.entityType}Id`;
-    return this.entity?.[idKey] || this.entity?.identifier || 'N/A';
+  get identifier(): string | null {
+    return this.config.identifierKey ? (this.entity?.[this.config.identifierKey] ?? null) : null;
   }
 
-  // Get the display name for the entity
   get displayName(): string {
-    return this.entity?.displayName || 'Unnamed';
+    return this.entity?.displayName || 'N/A';
   }
 
-  // Get the collection ID for the entity
-  get collectionId(): string {
-    return this.entity?.collectionId || '';
+  get subsetCollection(): string | null {
+    if (this.config.collectionKey) {
+      return this.entity?.[this.config.collectionKey] ?? null;
+    } 
+
+    return null;
   }
 
-  // Get the version number if available
   get version(): number | null {
-    return this.entity?.version || null;
+    const key = this.config.versionKey ?? 'version';
+    return this.entity?.[key] ?? 'asdf';
   }
 
-  // Get the image URL if available
   get imageUrl(): string | null {
-    return this.entity?.imageUrl || null;
+    return this.entity?.imageUrl ?? null;
+  }
+
+  camelToTitle(value: string): string {
+    return value?.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()) ?? '';
   }
 }
