@@ -351,6 +351,8 @@
   <div
     *ngFor="let match of matches"
     (click)="selectActivityEntity(match)"
+    (keydown.enter)="selectActivityEntity(match)"
+    tabindex="0"
   >
     <app-entity-selection-dropdown-item
       [entity]="match.value"

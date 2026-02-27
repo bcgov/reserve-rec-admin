@@ -25,7 +25,7 @@
   <div *ngIf="matches.length === 0" class="text-center text-muted my-3">
     <h3>No {{ label }} policies found.</h3>
   </div>
-  <div *ngFor="let match of matches" (click)="selectEntity(match)">
+  <div *ngFor="let match of matches" (click)="selectEntity(match)" (keydown.enter)="selectEntity(match)" tabindex="0">
     <app-entity-selection-dropdown-item
       [entity]="match.value"
       [isSelected]="isSelected(match.value)"
