@@ -26,16 +26,15 @@ export class CustomersComponent implements OnInit {
   // Column visibility configuration
   availableColumns = [
     { field: 'email', label: 'Email', visible: true, sortable: true },
-    { field: 'givenName', label: 'First Name', visible: true, sortable: true },
-    { field: 'familyName', label: 'Last Name', visible: true, sortable: true },
-    { field: 'phoneNumber', label: 'Phone', visible: true, sortable: true },
-    { field: 'mobilePhone', label: 'Mobile Phone', visible: false, sortable: true },
+    { field: 'name', label: 'Name', visible: true, sortable: true },
+    { field: 'mobilePhone', label: 'Mobile Phone', visible: true, sortable: true },
+    { field: 'phoneNumber', label: 'Home Phone', visible: false, sortable: true },
     { field: 'streetAddress', label: 'Street Address', visible: false, sortable: true },
     { field: 'postalCode', label: 'Postal Code', visible: false, sortable: true },
     { field: 'province', label: 'Province', visible: false, sortable: true },
-    { field: 'licensePlate', label: 'License Plate', visible: false, sortable: true },
-    { field: 'vehicleRegLocale', label: 'Vehicle Reg Locale', visible: false, sortable: true },
-    { field: 'activeBooking', label: 'Active Booking', visible: true, sortable: false }
+    { field: 'activeBooking', label: 'Active Booking', visible: true, sortable: false },
+    { field: 'accountType', label: 'Account Type', visible: false, sortable: true },
+    { field: 'emailVerified', label: 'Email Verified', visible: false, sortable: true }
   ];
   
   constructor(
@@ -94,6 +93,46 @@ export class CustomersComponent implements OnInit {
   }
 
   getValue(customer: any, field: string): string {
+    if (field === 'name') {
+      const firstName = customer?.givenName || '';
+      const lastName = customer?.familyName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      return fullName || '-';
+    }
+    
+    if (field === 'accountType') {
+      const status = customer?.userStatus;
+      if (status === 'EXTERNAL_PROVIDER') {
+        return 'BCSC';
+      } else if (status === 'CONFIRMED' || status === 'UNCONFIRMED') {
+        return 'BCP Account';
+      }
+      return '-';
+    }
+    
+    if (field === 'verified') {
+      const status = customer?.userStatus;
+      if (status === 'CONFIRMED' || status === 'EXTERNAL_PROVIDER') {
+        return 'Yes';
+      } else if (status === 'UNCONFIRMED') {
+        return 'No';
+      }
+      return '-';
+    }
+    
+    if (field === 'emailVerified') {
+      const status = customer?.userStatus;
+      // BCSC accounts are always considered email verified
+      if (status === 'EXTERNAL_PROVIDER') {
+        return 'Yes';
+      }
+      // BCP Accounts use the actual email_verified field
+      if (status === 'CONFIRMED' || status === 'UNCONFIRMED') {
+        return customer?.email_verified === true ? 'Yes' : 'No';
+      }
+      return '-';
+    }
+    
     return customer?.[field] || '-';
   }
 
@@ -122,14 +161,9 @@ export class CustomersComponent implements OnInit {
     // TODO: Implement copy functionality once requirements are determined
   }
 
-  printCustomers() {
-    console.log('Print button clicked');
-    // TODO: Implement print functionality
-  }
-
-  createNewCustomer() {
-    console.log('Create new customer button clicked');
-    // TODO: Implement create new customer functionality
+  downloadCSV() {
+    console.log('Download to CSV button clicked');
+    // TODO: Implement CSV download functionality
   }
 
   openFilters() {
