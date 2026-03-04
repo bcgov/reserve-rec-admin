@@ -3,13 +3,15 @@ import { Component, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Constants } from '../../../app.constants';
-import { RelationshipService } from '../../../services/relationship.service';
 import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
+import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-list-item.component';
+import { PolicyService } from '../../../services/policy.service';
+import { ActivityService } from '../../../services/activity.service';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe, DatePipe, ActivityListItemComponent],
+  imports: [CommonModule, UpperCasePipe, DatePipe, ActivityListItemComponent, PolicyListItemComponent],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.scss',
   providers: [BsModalService]
@@ -29,11 +31,13 @@ export class ProductDetailsComponent {
   };
 
   // Relationship data
-  public relatedActivities: any[] = [];
+  public relatedActivity: any[] = [];
+  public relatedPolicies: any[] = [];
   public loadingRelationships: boolean = false;
 
   constructor(
-    private relationshipService: RelationshipService,
+    private activityService: ActivityService,
+    private policyService: PolicyService,
     private route: ActivatedRoute,
   ) {
     // Subscribe to route data changes to handle updates
@@ -58,7 +62,6 @@ export class ProductDetailsComponent {
   }
 
   // Load relationships for the current product
-  // Fetches facility and geozone relationships from the relationships endpoint
   async loadRelationships() {
     if (!this.product?.pk || !this.product?.sk) {
       console.warn('Cannot load relationships: Activity missing pk or sk');
@@ -68,8 +71,8 @@ export class ProductDetailsComponent {
     this.loadingRelationships = true;
 
     try {
-      // Fetch geozone relationships
       await this.loadActivityRelationships();
+      await this.loadPolicyRelationships();
     } catch (error) {
       console.error('Error loading relationships:', error);
     } finally {
@@ -77,37 +80,39 @@ export class ProductDetailsComponent {
     }
   }
 
-
-  // Load and fetch activities entities that are related to this product
+  // Load and fetch activity entity that is related to this product based on collectionId, activityType, and activityId
   async loadActivityRelationships() {
     try {
-      // Get activities relationships for this product with entity data expanded
-      // bidirectional=true will include both:
-      // 1. Activities that the product is linked TO (forward)
-      // 2. Activities that are linked to the product (reverse via GSI)
-      const relationshipsResponse = await this.relationshipService.getRelationshipsFrom(
-        this.product.pk,
-        this.product.sk,
-        'activity', // target schema filter
-        true, // expand entities
-        true  // bidirectional
-      );
+      const activity = await this.activityService.getActivity(this.product.collectionId, this.product.activityType, this.product.activityId);
 
-      if (relationshipsResponse?.length > 0) {
-        console.log(`Found ${relationshipsResponse.length} activities relationships`);
-
-        // Extract the entity data directly from expanded relationships
-        this.relatedActivities = relationshipsResponse
-          .map((rel: any) => rel.entity)
-          .filter((entity: any) => entity !== null);
-
+      if (activity) {
+        console.log(`Found ${activity.length} activity`);
+        this.relatedActivity = activity;
       } else {
-        console.log('No activities relationships found');
-        this.relatedActivities = [];
+        console.log('No activity found');
+        this.relatedActivity = null;
       }
     } catch (error) {
       console.error('Error loading activities relationships:', error);
-      this.relatedActivities = [];
+      this.relatedActivity = null;
+    }
+  }
+  
+  // Load and fetch policies - uses the product pk and sk to fetch policies related to the product from the policies endpoint
+  async loadPolicyRelationships() {
+    try {
+      const productPolicies = await this.policyService.getPoliciesByProduct(this.product.pk, this.product.sk)
+
+      if (productPolicies?.length > 0) {
+        console.log(`Found ${productPolicies.length} policies`);
+        this.relatedPolicies = productPolicies;
+      } else {
+        console.log('No policies relationships found');
+        this.relatedPolicies = [];
+      }
+    } catch (error) {
+      console.error('Error loading policies relationships:', error);
+      this.relatedPolicies = [];
     }
   }
 }

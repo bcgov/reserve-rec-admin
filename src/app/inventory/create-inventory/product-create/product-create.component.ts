@@ -32,8 +32,8 @@ export class ProductCreateComponent {
   onRelationshipsChanged(type: string, relationships: any[]) {
     console.log(`Relationships changed for ${type}:`, relationships);
     // Update form controls directly - the form already tracks these
-    this.productForm?.get('activities')?.setValue(relationships);
-    this.productForm?.get('activities')?.markAsDirty();
+    this.productForm?.get(type)?.setValue(relationships);
+    this.productForm?.get(type)?.markAsDirty();
   }
 
   async submit() {
@@ -54,7 +54,7 @@ export class ProductCreateComponent {
     }
 
     const props = this.formatFormForSubmission();
-    
+
     const res = await this.productService.createProduct(collectionId, props);
 
     const productId = res[0]?.data?.productId;
@@ -73,8 +73,17 @@ export class ProductCreateComponent {
       }
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+    for (const policy of ['reservationPolicy', 'partyPolicy', 'feePolicy', 'changePolicy']) {
+      if (props[policy]) {
+        props[policy] = {
+          pk: props[policy][0]['pk'],
+          sk: props[policy][0]['sk']
+        };
+      }
+    }
    
-    delete props['policies']; // TODO: we are temporarily removing policies from the props
+    delete props['activities']; // Remove the activities
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;

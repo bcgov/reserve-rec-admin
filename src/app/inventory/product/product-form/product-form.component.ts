@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal, TemplateRef } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal, TemplateRef, Input } from '@angular/core';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { Constants } from '../../../app.constants';
 import { LoadingService } from '../../../services/loading.service';
@@ -10,20 +10,36 @@ import { SearchTermsComponent } from '../../../shared/components/search-terms/se
 import { EntityRelationshipSelectorComponent, EntityRelationshipConfig } from '../../../shared/components/entity-relationship-selector/entity-relationship-selector.component';
 import { EntitySelectionDropdownItemComponent } from '../../../shared/components/entity-selection-dropdown-item/entity-selection-dropdown-item.component';
 import { RelationshipService } from '../../../services/relationship.service';
-import { ActivityService } from '../../../services/activity.service';
+import { PolicyService } from '../../../services/policy.service';
+import { PolicySelectorComponent } from '../../../shared/components/policy-selector/policy-selector.component';
+import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
+import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-list-item.component';
+import { ActivityRelationshipService } from '../../../services/activityRelationip.service';
 
 @Component({
   selector: 'app-product-form',
-  imports: [NgdsFormsModule, LoadalComponent, CommonModule, SearchTermsComponent, EntityRelationshipSelectorComponent, EntitySelectionDropdownItemComponent],
+  imports: [
+    CommonModule,
+    LoadalComponent,
+    ActivityListItemComponent,
+    EntityRelationshipSelectorComponent,
+    EntitySelectionDropdownItemComponent,
+    NgdsFormsModule,
+    PolicyListItemComponent,
+    PolicySelectorComponent,
+    SearchTermsComponent
+  ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
-export class ProductFormComponent implements OnInit, AfterViewChecked {
+export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChecked {
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
   @ViewChild('activityItemTemplate') activityItemTemplate: TemplateRef<any>;
   @ViewChild('activitySelectionTemplate') activitySelectionTemplate: TemplateRef<any>;
   @ViewChild('activityRelationshipSelector') activityRelationshipSelector: EntityRelationshipSelectorComponent;
+
+  @Input() isEditing: boolean = false;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
   @Output() relationshipsLoaded: EventEmitter<{ type: string, relationships: any[] }> = new EventEmitter();
@@ -47,36 +63,52 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   public timezones = Constants.timezones;
   public activityTypes = Object.entries(Constants.activityTypes).map(([key, value]) => value);
 
-  // Activity selection (single activity only)
+  // Activity selection
   public activitiesLoading: boolean = false;
   public _activities: WritableSignal<any[]> = signal([]);
   public selectedActivity: any = null;
   public activityRelationshipConfig: EntityRelationshipConfig | null = null;
 
-  // Policies (coming soon)
-  public policies = ["policy1", "policy2", "policy3"];
+  // Reservation policy selection
+  public selectedPolicies: Record<string, any> = { reservation: null, party: null, fee: null, change: null };
+  public resolvedPolicies: Record<string, any> = { reservation: null, party: null, fee: null, change: null };
+  public policyTypes: ('reservation' | 'party' | 'fee' | 'change')[] = ['reservation', 'party', 'fee', 'change'];
 
   constructor(
     protected cdr: ChangeDetectorRef,
-    protected activityService: ActivityService,
+    protected policyService: PolicyService,
     protected relationshipService: RelationshipService,
     protected loadingService: LoadingService,
     protected router: Router,
-    protected route: ActivatedRoute
+    protected route: ActivatedRoute,
+    protected activityRelationshipService: ActivityRelationshipService
+
   ) {
     if (this.route?.parent?.snapshot?.data?.['product']) {
       this.product = this.route.parent.snapshot.data['product'];
     }
-    // Initialize the location marker with an empty array
-    effect(() => {});
   };
 
   ngOnInit(): void {
     this.activityTypes = this.activityTypes.filter(type => type.value !== 'noType');
-    
     this.initializeForm();
-    
-    this.initializeRelationshipConfigs();
+  }
+
+  ngAfterViewInit(): void {
+    // We build the activity relationship config outside of the product component
+    this.activityRelationshipConfig = this.activityRelationshipService.buildConfig(
+      this.form,
+      this.activityItemTemplate,
+      this.activitySelectionTemplate,
+      () => this.activityRelationshipSelector
+    );
+
+    // We load the activity and policies differently if it's an edit
+    // Because you don't actually edit either (just show them to the user)
+    if (this.isEditing) {
+      this.loadActivityForEdit();
+      this.loadPoliciesForEdit();
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -147,8 +179,29 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         hours: new UntypedFormControl(Number(this.product?.maxStay?.hours) || 0),
         minutes: new UntypedFormControl(Number(this.product?.maxStay?.minutes) || 0)
       }),
-      policies: new UntypedFormControl(
-        this.product?.policies || []
+      reservationPolicy: new UntypedFormControl(
+        this.product?.reservationPolicy || [],
+        {
+          validators: [Validators.required]
+        }
+      ),
+      partyPolicy: new UntypedFormControl(
+        this.product?.partyPolicy || [],
+        {
+          validators: [Validators.required]
+        }
+      ),
+      feePolicy: new UntypedFormControl(
+        this.product?.feePolicy || [],
+        {
+          validators: [Validators.required]
+        }
+      ),
+      changePolicy: new UntypedFormControl(
+        this.product?.changePolicy || [],
+        {
+          validators: [Validators.required]
+        }
       ),
       description: new UntypedFormControl(
         this.product?.description || '',
@@ -166,11 +219,11 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       validators: [
         this.displayNameValidator,
         this.dateRangeValidator,
-        this.stayDurationValidator
+        this.stayDurationValidator,
+        this.policiesRequiredValidator
       ]
     });
 
-    // this.form.get('displayName').markAsDirty();
     this.form.updateValueAndValidity();
 
     this.form.valueChanges.subscribe(() => {
@@ -193,111 +246,92 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  // Handle search terms updates from the component
-  onSearchTermsChange(searchTerms: string[]) {
-    this.form.get('searchTerms')?.setValue(searchTerms);
-    this.cdr.detectChanges();
-  }
-
-  // Mark the search terms form control as dirty when a term is added
-  onSearchTermDirty() {
-    this.form.get('searchTerms')?.markAsDirty();
-  }
-
-  initializeRelationshipConfigs() {
-    // Activity selection configuration (single select only)
-    this.activityRelationshipConfig = {
-      sourceSchema: 'product',
-      targetSchema: 'activity',
-      label: 'Select the activity for this product',
-      placeholder: 'Start typing to search activities...',
-      multiselect: false,
-      immutableSelection: true,
-      selectedItemTemplate: this.activityItemTemplate,
-      selectionListTemplate: this.activitySelectionTemplate,
-      searchFields: {
-        collectionId: this.form.get('collectionId')?.value
-      },
-      fetchFn: async (searchFields) => {
-        // Only fetch activities if collectionId is set
-        if (this.form.get('collectionId')?.value) {
-          const result = await this.activityService.getActivitiesByCollectionId(
-            searchFields.collectionId
-          );
-          return result;
-        }
-      },
-      filterFn: (activity, searchFields) => {
-        // Only show activities matching the product's collectionId
-        return activity.collectionId === searchFields.collectionId;
-      }
-    };
-
-    // Watch for collectionId changes to update search fields
-    this.form.get('collectionId')?.valueChanges.subscribe(collectionId => {
-      if (this.activityRelationshipConfig) {
-        this.activityRelationshipConfig.searchFields = { collectionId };
-        // Trigger reload of entities in the selector component
-        if (this.activityRelationshipSelector) {
-          this.activityRelationshipSelector.loadAvailableEntities();
-        }
-      }
-    });
-  }
-
-  // Handle activity selection (just a single activity only)
-  async onActivitiesChanged(activities: any[]) {
-    console.log('Activity changed:', activities);
-    
-    // Since it's single select, take the first (and only) activity
-    const activity = activities.length > 0 ? activities[0] : null;
-    this.selectedActivity = activity;
-    
-    if (activity) {
-      // Auto-populate activityType, activitySubType, and activityId from selected activity
-      this.form.get('activityType')?.setValue(activity.activityType);
-      this.form.get('activityType')?.markAsDirty();
-      
-      this.form.get('activitySubType')?.setValue(activity.activitySubType || null);
-      this.form.get('activitySubType')?.markAsDirty();
-      
-      this.form.get('activityId')?.setValue(activity.activityId);
-      this.form.get('activityId')?.markAsDirty();
-
-      // Also set the activities array, used for creating relationship
-      this.form.get('activities')?.setValue(activities);
-      this.form.get('activities')?.markAsDirty();
-      
-      console.log('Auto-populated from activity:', {
-        activityType: activity.activityType,
-        activitySubType: activity.activitySubType,
-        activityId: activity.activityId
-      });
-    } else {
-      // Clear fields if no activity selected
-      this.form.get('activityType')?.setValue(null);
-      this.form.get('activitySubType')?.setValue(null);
-      this.form.get('activityId')?.setValue(null);
-      this.form.get('activities')?.setValue([]);
+  // If we're editing a product, we load the activity but we don't allow it to actually be editable
+  async loadActivityForEdit() {
+    if (!this.product) return;
+    const { collectionId, activityType, activityId } = this.product;
+    try {
+      this.selectedActivity = await this.activityRelationshipService.loadActivityForProduct(
+        collectionId, activityType, activityId
+      );
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error loading activity for product:', error);
     }
-    
-    // Emit event to parent
+  }
+
+  // Same for policies - if we're editing a product, we don't allow the policies to actually be editable
+  async loadPoliciesForEdit() {
+    if (!this.product?.pk || !this.product?.sk) return;
+    try {
+      const policies = await this.policyService.getPoliciesByProduct(this.product.pk, this.product.sk);
+      if (policies?.length) {
+        for (const policy of policies) {
+          if (policy?.policyType) {
+            this.resolvedPolicies[policy.policyType] = policy;
+          }
+        }
+      }
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error loading policies for product:', error);
+    }
+  }
+
+  // When the activity relationship selector loads the available activities, if the product already has an activity we want to show load it in
+  async onActivitiesChanged(activities: any[]) {
+    const activity = activities[0] ?? null;
+
+    // Just the one activity per product
+    this.selectedActivity = activity;
+    const fields = activity
+      ? { activityType: activity.activityType, activitySubType: activity.activitySubType, activityId: activity.activityId, activities }
+      : { activityType: null, activitySubType: null, activityId: null, activities: [] };
+
+    // Update form values and mark as dirty to ensure they are included in form submission
+    Object.entries(fields).forEach(([key, value]) => {
+      this.form.get(key)?.setValue(value);
+      if (activity) this.form.get(key)?.markAsDirty();
+    });
+
     this.relationshipsChanged.emit({ type: 'activities', relationships: activities });
     this.cdr.detectChanges();
   }
 
-  // Handle activity relationships loaded (for edit mode)
+  isActivityEntitySelected = (entity: any): boolean =>
+    this.selectedActivity?.pk === entity.pk && this.selectedActivity?.sk === entity.sk;
+
+  selectActivityEntity = (match: any) =>
+    this.activityRelationshipSelector?.selectEntity(match);
+
   onActivityRelationshipsLoaded(activities: any[]) {
-    console.log('Activity relationships loaded:', activities);
-    if (activities.length > 0) {
-      this.selectedActivity = activities[0];
-    }
+    if (activities.length > 0) this.selectedActivity = activities[0];
     this.relationshipsLoaded.emit({ type: 'activity', relationships: activities });
   }
 
-  // Check if an entity is currently selected
-  isEntitySelected(entity: any): boolean {
-    return this.selectedActivity?.pk === entity.pk && this.selectedActivity?.sk === entity.sk;
+  // Handle policy selection changes
+  onPolicyChanged(policyType, policies) {
+    const policy = policies[0] ?? null;
+    this.selectedPolicies[policyType] = policy;
+    this.form.get(`${policyType}Policy`)?.setValue(policies);
+    this.form.get(`${policyType}Policy`)?.markAsDirty();
+    this.relationshipsChanged.emit({ type: `${policyType}Policy`, relationships: policies });
+    this.cdr.detectChanges();
+  }
+
+  // Handle policy relationships loaded
+  onPolicyLoaded(policyType, policies) {
+    if (policies.length > 0) {
+      this.selectedPolicies[policyType] = policies[0];
+    }
+    this.relationshipsLoaded.emit({ type: `${policyType}Policy`, relationships: policies });
+  }
+
+  // Handle search terms updates from the component
+  onSearchTermsChange(searchTerms: string[]) {
+    this.form.get('searchTerms')?.setValue(searchTerms);
+    this.form.get('searchTerms')?.markAsDirty();
+    this.cdr.detectChanges();
   }
 
   private displayNameValidator(control: AbstractControl) {
@@ -366,4 +400,18 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     return null;
   }
 
+  private policiesRequiredValidator(control: AbstractControl) {
+    const group = control as UntypedFormGroup;
+    const reservationPolicy = group.get('reservationPolicy')?.value;
+    const partyPolicy = group.get('partyPolicy')?.value;
+    const feePolicy = group.get('feePolicy')?.value;
+    const changePolicy = group.get('changePolicy')?.value;
+
+    // Error if even one policy is missing
+    if (reservationPolicy.length === 0 || partyPolicy.length === 0 || feePolicy.length === 0 || changePolicy.length === 0) {
+      return { policiesRequired: true };
+    }
+
+    return null;
+  }
 }

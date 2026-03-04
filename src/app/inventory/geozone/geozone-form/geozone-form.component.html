@@ -298,7 +298,6 @@
         #searchTerms
         [searchTerms]="form.get('searchTerms')?.value || []"
         (searchTermsChange)="onSearchTermsChange($event)"
-        (searchTermDirty)="onSearchTermDirty()"
       ></app-search-terms>
 
       <ngds-text-input

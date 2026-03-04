@@ -113,18 +113,22 @@
   </div>
   <div class="row text-center">
     <div class="col-lg-12 d-flex flex-column justify-content-center mb-2">
-      <!-- Entity Relationship Selector for Activities -->
-      <app-entity-relationship-selector
-        class="d-flex flex-column align-content-center m-auto w-50"
-        #activityRelationshipSelector
-        *ngIf="activityRelationshipConfig"
-        [config]="activityRelationshipConfig"
-        [sourceEntity]="product"
-        [selectedEntities]="selectedActivity ? [selectedActivity] : []"
-        (relationshipsChanged)="onActivitiesChanged($event)"
-        (relationshipsLoaded)="onActivityRelationshipsLoaded($event)"
-      ></app-entity-relationship-selector>
-
+      <!-- Activity -->
+      <ng-container *ngIf="!isEditing">
+        <app-entity-relationship-selector
+          class="d-flex flex-column align-content-center m-auto w-100"
+          #activityRelationshipSelector
+          *ngIf="activityRelationshipConfig"
+          [config]="activityRelationshipConfig"
+          [sourceEntity]="product"
+          [selectedEntities]="selectedActivity ? [selectedActivity] : []"
+          (relationshipsChanged)="onActivitiesChanged($event)"
+          (relationshipsLoaded)="onActivityRelationshipsLoaded($event)"
+        ></app-entity-relationship-selector>
+      </ng-container>
+      <ng-container *ngIf="isEditing">
+        <app-activity-list-item [activity]="selectedActivity" />
+      </ng-container>
       <!-- Fallback message if config not ready -->
       <div *ngIf="!activityRelationshipConfig" class="text-center text-muted my-3">
         <i class="fa fa-spinner fa-spin"></i> Initializing activity selector...
@@ -239,52 +243,33 @@
       <strong>Invalid Stay Duration:</strong> Maximum stay must be greater than minimum stay.
     </div>
 <hr>
-<section #attachActivitiesSection>
+<section>
+  <section>
   <div class="d-flex flex-column text-center align-items-center justify-content-center my-3">
-    <div class="d-flex align-items-center mb-5">
-      <h5 class="text-center me-2 my-0">Step 5: Select policies (coming soon)</h5>
-    </div>
-    <p>
-      Products require policies to define rules and guidelines for their use. Select the policies that will be associated with this product.
-    </p>
+    <h5>Step 5: Select policies</h5>
   </div>
   <div class="row text-center">
-    <div class="col-lg-12 d-flex flex-column align-items-center justify-content-center mb-5">
-      <div class="col-6">
-        <ngds-picklist-input
-        [control]="form.get('policies')"
-        [label]="'Booking Policy'"
-        [selectionListItems]=""
-        [placeholder]="'Select policies'"
-        [resetButton]="true"
-        [disabled]="true"
-        ></ngds-picklist-input>
-        <ngds-picklist-input
-          [control]="form.get('policies')"
-          [label]="'Party Policy'"
-          [selectionListItems]=""
-          [placeholder]="'Select policies'"
-          [resetButton]="true"
-          [disabled]="true"
-        ></ngds-picklist-input>
-        <ngds-picklist-input
-          [control]="form.get('policies')"
-          [label]="'Fee Policy'"
-          [selectionListItems]=""
-          [placeholder]="'Select policies'"
-          [resetButton]="true"
-          [disabled]="true"
-        ></ngds-picklist-input>
-        <ngds-picklist-input
-          [control]="form.get('policies')"
-          [label]="'Change Policy'"
-          [selectionListItems]=""
-          [placeholder]="'Select policies'"
-          [resetButton]="true"
-          [disabled]="true"
-        ></ngds-picklist-input>
+    <div class="col-lg-6 d-flex flex-column align-items-center justify-content-center mb-5"
+         *ngFor="let policyType of policyTypes">
+      <div class="col-12">
+        <ng-container *ngIf="!isEditing">
+          <app-policy-selector
+            [policyType]="policyType"
+            [selectedPolicy]="selectedPolicies[policyType]"
+            (policyChanged)="onPolicyChanged(policyType, $event)"
+            (policyLoaded)="onPolicyLoaded(policyType, $event)"
+          ></app-policy-selector>
+        </ng-container>
+        <ng-container *ngIf="isEditing">
+          <app-policy-list-item *ngIf="resolvedPolicies[policyType]" [policy]="resolvedPolicies[policyType]" />
+        </ng-container>
       </div>
     </div>
+  </div>
+  <!-- Policies validation error -->
+  <div *ngIf="form.hasError('policiesRequired') && (form.get('reservationPolicy')?.dirty && form.get('partyPolicy')?.dirty && form.get('feePolicy')?.dirty && form.get('changePolicy')?.dirty)"
+    class="alert alert-danger small text-center p-2 w-50 m-auto">
+    <strong>Invalid:</strong> Must have a reservation policy, party policy, fee policy, and change policy assigned.
   </div>
 </section>
 <hr>
@@ -328,7 +313,6 @@
         #searchTerms
         [searchTerms]="form.get('searchTerms')?.value || []"
         (searchTermsChange)="onSearchTermsChange($event)"
-        (searchTermDirty)="onSearchTermDirty()"
       ></app-search-terms>
       
       <ngds-text-input
@@ -347,7 +331,6 @@
 <ng-template #activityItemTemplate let-activity>
   <app-entity-selection-dropdown-item
     [entity]="activity"
-    [entityType]="'activity'"
     [isSelected]="true"
   ></app-entity-selection-dropdown-item>
 </ng-template>
@@ -365,11 +348,15 @@
   >
     No <strong>{{ form.get('collectionId')?.value || 'activities' }}</strong> activities found matching "{{ query }}".
   </div>
-  <div *ngFor="let match of matches">
+  <div
+    *ngFor="let match of matches"
+    (click)="selectActivityEntity(match)"
+    (keydown.enter)="selectActivityEntity(match)"
+    tabindex="0"
+  >
     <app-entity-selection-dropdown-item
       [entity]="match.value"
-      [entityType]="'activity'"
-      [isSelected]="isEntitySelected(match.value)"
+      [isSelected]="isActivityEntitySelected(match.value)"
     ></app-entity-selection-dropdown-item>
   </div>
 </ng-template>
