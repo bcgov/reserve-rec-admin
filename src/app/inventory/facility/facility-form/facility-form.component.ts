@@ -135,7 +135,7 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
         this.facility?.description || '',
       ),
       isVisible: new UntypedFormControl(
-        this.facility?.isVisible || true
+        this.facility?.isVisible || false
       ),
       imageUrl: new UntypedFormControl(
         this.facility?.imageUrl || ''
@@ -228,12 +228,8 @@ export class FacilityFormComponent implements OnInit, AfterViewChecked {
   // Handle search terms updates from the component
   onSearchTermsChange(searchTerms: string[]) {
     this.form.get('searchTerms')?.setValue(searchTerms);
-    this.cdr.detectChanges();
-  }
-
-  // Mark the search terms form control as dirty when a term is added
-  onSearchTermDirty() {
     this.form.get('searchTerms')?.markAsDirty();
+    this.cdr.detectChanges();
   }
 
   navigateToEntityRelationships() {

@@ -1,7 +1,6 @@
 <div
   class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between entity-select"
   [class.selected]="isSelected"
-  [attr.data-entity-type]="entityType"
   tabindex="0"
 >
   <!-- Entity information section -->
@@ -15,12 +14,13 @@
     <div class="d-flex flex-wrap">
       <!-- Entity type badge (primary) -->
       <div class="badge bg-primary">
-        {{ entityType | titlecase }}
+        <i [class]="icon"></i>&nbsp;
+        {{ camelToTitle(entity.schema) }}
       </div>
       
       <!-- Collection ID badge -->
-      <div class="badge bg-secondary ms-1">
-        {{ collectionId }}
+      <div *ngIf="subsetCollection" class="badge bg-secondary ms-1">
+        {{ subsetCollection }}
       </div>
       
       <!-- Specific type badge (e.g., facilityType, geozoneType) -->
@@ -29,12 +29,12 @@
       </div>
       
       <!-- Identifier badge (e.g., facilityId, geozoneId) -->
-      <div class="badge bg-secondary ms-1">
+      <div *ngIf="identifier" class="badge bg-secondary ms-1">
         #{{ identifier }}
       </div>
       
       <!-- Version badge -->
-      <div class="badge bg-light text-muted border border-1 ms-1" *ngIf="version">
+      <div *ngIf="version" class="badge bg-light text-muted border border-1 ms-1">
         v{{ version }}
       </div>
     </div>

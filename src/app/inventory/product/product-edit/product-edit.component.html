@@ -5,6 +5,7 @@
 </section>
 <hr>
 <app-product-form
+  [isEditing]="true"
   (formValue)="updateProductForm($event)"
   (relationshipsLoaded)="onRelationshipsLoaded($event.type, $event.relationships)"
   (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)">

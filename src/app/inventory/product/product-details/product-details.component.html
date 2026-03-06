@@ -82,13 +82,13 @@
           <strong>Minimum Stay:</strong>
         </div>
         <div class="col-auto">
-          <span class="badge bg-primary text-dark me-1">
+          <span class="badge bg-primary text-light me-1">
             {{ product?.minStay?.days }} {{ product?.minStay?.days === 1 ? 'day' : 'days' }}
           </span>
           <span class="badge bg-secondary text-dark badge text-dark me-1">
             {{ product?.minStay?.hours }} {{ product?.minStay?.hours === 1 ? 'hour' : 'hours' }}
           </span>
-          <span class="badge bg-primary text-dark badge text-dark me-1">
+          <span class="badge bg-primary text-light badge text-dark me-1">
             {{ product?.minStay?.minutes }} {{ product?.minStay?.minutes === 1 ? 'minute' : 'minutes' }}
           </span>
         </div>
@@ -98,13 +98,13 @@
           <strong>Maximum Stay:</strong>
         </div>
         <div class="col-auto">
-          <span class="badge bg-primary text-dark me-1">
+          <span class="badge bg-primary text-light me-1">
             {{ product?.maxStay?.days }} {{ product?.maxStay?.days === 1 ? 'day' : 'days' }}
           </span>
           <span class="badge bg-secondary text-dark badge text-dark me-1">
             {{ product?.maxStay?.hours }} {{ product?.maxStay?.hours === 1 ? 'hour' : 'hours' }}
           </span>
-          <span class="badge bg-primary text-dark badge text-dark me-1">
+          <span class="badge bg-primary text-light badge text-dark me-1">
             {{ product?.maxStay?.minutes }} {{ product?.maxStay?.minutes === 1 ? 'minute' : 'minutes' }}
           </span>
         </div>
@@ -158,19 +158,18 @@
       </div>
       
       <!-- Empty state -->
-      <div *ngIf="!loadingRelationships && relatedActivities.length === 0" class="text-muted my-3">
+      <div *ngIf="!loadingRelationships && relatedActivity.length === 0" class="text-muted my-3">
         This product has been orphaned - if no relationship exists, the activity has been deleted.
       </div>
       
       <!-- Activities list -->
-      <div *ngIf="!loadingRelationships && relatedActivities.length > 0" class="mb-3">
-        This product is associated with {{ relatedActivities.length }} {{ relatedActivities.length === 1 ? 'activity' : 'activities' }}:
+      <div *ngIf="!loadingRelationships && relatedActivity.length > 0" class="mb-3">
+        This product is associated with {{ relatedActivity.length }} activity:
       </div>
       <div class="mb-2">
         <div class="row">
           <app-activity-list-item
-            *ngFor="let activity of relatedActivities"
-            [activity]="activity"
+            [activity]="relatedActivity"
           ></app-activity-list-item>
         </div>
       </div>
@@ -181,7 +180,7 @@
 <section class="container">
   <div class="row">
     <div class="col-md-6">
-      <h4 class="mb-3">Policy Details (coming soon)</h4>
+      <h4 class="mb-3">Policy Details</h4>
       
       <!-- Loading state -->
       <div *ngIf="loadingRelationships" class="text-center my-3">
@@ -195,15 +194,15 @@
       </div> -->
       
       <!-- Policies list -->
-      <!-- <div *ngIf="!loadingRelationships && relatedPolicies.length > 0" class="mb-3">
+      <div *ngIf="!loadingRelationships && relatedPolicies.length > 0" class="mb-3">
         This product is associated with {{ relatedPolicies.length }} {{ relatedPolicies.length === 1 ? 'policy' : 'policies' }}:
-      </div> -->
+      </div>
       <div class="mb-2">
         <div class="row">
-          <!-- <app-policy-list-item
+          <app-policy-list-item
             *ngFor="let policy of relatedPolicies"
             [policy]="policy"
-          ></app-policy-list-item> -->
+          ></app-policy-list-item>
         </div>
       </div>
     </div>

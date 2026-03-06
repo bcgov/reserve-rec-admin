@@ -1,0 +1,91 @@
+<div class="container-fluid p-4">
+  <!-- Back Button -->
+  <div class="mb-3">
+    <button class="btn btn-outline-secondary" (click)="backToCustomerList()">
+      <i class="bi bi-arrow-left"></i> Back to Customer List
+    </button>
+  </div>
+
+  <!-- Customer Details -->
+  <div *ngIf="customer">
+    <!-- Header Section -->
+    <div class="mb-4">
+      <h2>{{ customer.givenName || '-' }} {{ customer.familyName || '-' }}</h2>
+    </div>
+
+    <!-- Details Section -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Details</h5>
+        <button class="btn btn-primary" (click)="editCustomer()">
+          Edit
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Left Column -->
+          <div class="col-md-6">
+            <!-- Name Section -->
+            <div class="mb-4">
+              <h6 class="text-muted mb-2">Name</h6>
+              <p class="mb-0">{{ getFullName() }}</p>
+            </div>
+            
+            <!-- Email Address Section -->
+            <div class="mb-4">
+              <h6 class="text-muted mb-2">Email Address</h6>
+              <p class="mb-0">
+                {{ customer.email || '-' }}
+                <span *ngIf="isEmailVerified()" class="text-success ms-2">
+                  <i class="bi bi-check-circle"></i> Verified
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="col-md-6">
+            <!-- Home Address Section -->
+            <div class="mb-4">
+              <h6 class="text-muted mb-2">Home Address</h6>
+              <p class="mb-0">
+                {{ customer.streetAddress || '-' }}<br>
+                <span *ngIf="customer.province || customer.postalCode">
+                  {{ customer.province || '' }}<span *ngIf="customer.province && customer.postalCode">, </span>{{ customer.postalCode || '' }}<br>
+                </span>
+                Canada
+              </p>
+            </div>
+            
+            <!-- Phone Numbers Section -->
+            <div class="mb-4">
+              <h6 class="text-muted mb-2">Phone Numbers</h6>
+              <p class="mb-1"><strong>Mobile:</strong> {{ customer.mobilePhone || '-' }}</p>
+              <p class="mb-0"><strong>Home:</strong> {{ customer.phoneNumber || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookings in here! -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Current Bookings</h5>
+      </div>
+      <!-- Need to make logic for bookings in here-->
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Past Bookings</h5>
+      </div>
+      <!-- Need to make logic for bookings in here-->
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="!customer" class="alert alert-warning">
+    Customer not found.
+  </div>
+</div>

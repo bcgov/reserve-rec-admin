@@ -32,5 +32,43 @@ export class PolicyService {
       this.loggerService.error(error);
     }
   }
+  
+  async getPoliciesByProduct(productPk: string, productSk: string) {
+    const queryParams = {};
+    if (productPk && productSk) {
+      queryParams['product'] = true;
+    }
+    if (productPk) {
+      queryParams['productPk'] = productPk;
+    }
+    if (productSk) {
+      queryParams['productSk'] = productSk;
+    }
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.POLICY_RESULT);
+      const res = (await lastValueFrom(
+        this.apiService.get('policies', queryParams)
+      ))['data'];
+      this.dataService.setItemValue(Constants.dataIds.POLICY_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      this.loggerService.error(error);
+    }
+  }
+
+  async getPoliciesByPolicyType(policyType) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.POLICY_RESULT);
+      const res = (await lastValueFrom(this.apiService.get(`policies/${policyType}/`, {})))['data'];
+      this.dataService.setItemValue(Constants.dataIds.POLICY_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      this.loggerService.error(error);
+    }
+  }
 
 }
