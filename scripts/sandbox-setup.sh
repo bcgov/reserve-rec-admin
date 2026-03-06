@@ -6,7 +6,7 @@ set -e
 
 SANDBOX_NAME="${1:?Usage: ./sandbox-setup.sh <sandbox-name> [base-env]}"
 BASE_ENV="${2:-dev}"
-DEPLOYMENT_NAME="${BASE_ENV}-${SANDBOX_NAME}"
+DEPLOYMENT_NAME="${SANDBOX_NAME}"
 APP_NAME="reserveRecAdmin"
 REGION="ca-central-1"
 

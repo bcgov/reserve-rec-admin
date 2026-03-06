@@ -38,12 +38,11 @@ class CDKProject {
   }
 
   getDeploymentName() {
-    const baseName = this.context?.DEPLOYMENT_NAME || 'local';
     const sandboxName = this.getSandboxName();
     if (sandboxName) {
-      return `${baseName}-${sandboxName}`;
+      return sandboxName;
     }
-    return baseName;
+    return this.context?.DEPLOYMENT_NAME || 'local';
   }
 
   getSandboxName() {

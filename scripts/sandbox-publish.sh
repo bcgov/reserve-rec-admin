@@ -21,7 +21,7 @@ if [ -z "${SANDBOX_NAME}" ]; then
 fi
 
 BASE_ENV="${2:-dev}"
-DEPLOYMENT_NAME="${BASE_ENV}-${SANDBOX_NAME}"
+DEPLOYMENT_NAME="${SANDBOX_NAME}"
 REGION="${AWS_REGION:-ca-central-1}"
 APP_NAME="reserve-rec-admin"
 
@@ -51,7 +51,7 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "STEP 2/5: Deploying CDK infrastructure..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-npx cdk deploy -c @context=dev -c sandboxName="${SANDBOX_NAME}" --all --require-approval never
+AWS_REGION="${REGION}" npx cdk deploy -c @context=dev -c sandboxName="${SANDBOX_NAME}" --all --require-approval never
 echo ""
 
 # ============================================================================
@@ -79,7 +79,7 @@ echo "STEP 4/5: Uploading to S3..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Construct bucket name (CDK uses lowercase stack name)
-BUCKET_NAME="reserverecadmin-${BASE_ENV}-${SANDBOX_NAME}-distributionstack-distbucket"
+BUCKET_NAME="reserverecadmin-${SANDBOX_NAME}-distributionstack-distbucket"
 S3_PATH="s3://${BUCKET_NAME}/latest/${APP_NAME}/browser"
 
 echo "  Bucket: ${BUCKET_NAME}"

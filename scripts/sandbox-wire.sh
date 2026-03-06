@@ -7,7 +7,7 @@ set -e
 
 SANDBOX_NAME="${1:?Usage: ./sandbox-wire.sh <sandbox-name> [base-env]}"
 BASE_ENV="${2:-dev}"
-DEPLOYMENT_NAME="${BASE_ENV}-${SANDBOX_NAME}"
+DEPLOYMENT_NAME="${SANDBOX_NAME}"
 REGION="ca-central-1"
 
 echo "========================================="

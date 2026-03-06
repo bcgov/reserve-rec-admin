@@ -1,0 +1,22 @@
+.queue-id {
+  font-family: monospace;
+  font-size: 0.85rem;
+  max-width: 400px;
+  word-break: break-all;
+}
+
+.metrics-row td {
+  border-top: none;
+}
+
+.metric-card {
+  border-right: 1px solid #dee2e6;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}

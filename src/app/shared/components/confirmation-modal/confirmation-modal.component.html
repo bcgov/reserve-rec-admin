@@ -2,6 +2,7 @@
   <h4 class="modal-title">{{ title }}</h4>
 </div>
 <div class="modal-body">
+  <p *ngIf="body">{{ body }}</p>
   <div *ngFor="let row of details">
     <strong>{{ row.label }}:</strong><br>
     {{ row.eitherOr ? row.eitherOr(row.value) : row.value }}
