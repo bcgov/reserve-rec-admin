@@ -37,20 +37,20 @@
             <!-- Config inputs (only shown when inactive) -->
             <div *ngIf="!mode2Active" class="row g-2 align-items-end mt-1 mb-2" style="max-width:600px">
               <div class="col-4">
-                <label class="form-label small mb-1">Batch size (users per release)</label>
-                <input type="number" class="form-control form-control-sm" [(ngModel)]="mode2BatchSize"
+                <label for="mode2BatchSize" class="form-label small mb-1">Batch size (users per release)</label>
+                <input id="mode2BatchSize" type="number" class="form-control form-control-sm" [(ngModel)]="mode2BatchSize"
                        min="1" max="500" step="1">
               </div>
               <div class="col-4">
-                <label class="form-label small mb-1">Release mode</label>
-                <select class="form-select form-select-sm" [(ngModel)]="mode2ReleaseMode">
+                <label for="mode2ReleaseMode" class="form-label small mb-1">Release mode</label>
+                <select id="mode2ReleaseMode" class="form-select form-select-sm" [(ngModel)]="mode2ReleaseMode">
                   <option value="auto">Auto (timed)</option>
                   <option value="manual">Manual (on demand)</option>
                 </select>
               </div>
               <div class="col-4" *ngIf="mode2ReleaseMode === 'auto'">
-                <label class="form-label small mb-1">Release interval (minutes)</label>
-                <input type="number" class="form-control form-control-sm" [(ngModel)]="mode2IntervalMinutes"
+                <label for="mode2IntervalMinutes" class="form-label small mb-1">Release interval (minutes)</label>
+                <input id="mode2IntervalMinutes" type="number" class="form-control form-control-sm" [(ngModel)]="mode2IntervalMinutes"
                        min="1" max="60" step="1">
               </div>
             </div>
@@ -133,20 +133,20 @@
         <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
           <div class="row g-3 mb-3">
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Collection ID</label>
-              <input class="form-control" formControlName="collectionId" placeholder="e.g. golden-ears">
+              <label for="collectionId" class="form-label fw-semibold">Collection ID</label>
+              <input id="collectionId" class="form-control" formControlName="collectionId" placeholder="e.g. golden-ears">
               <div *ngIf="createForm.get('collectionId')?.invalid && createForm.get('collectionId')?.touched"
                    class="text-danger small mt-1">Required</div>
             </div>
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Activity Type</label>
-              <input class="form-control" formControlName="activityType" placeholder="e.g. camping">
+              <label for="activityType" class="form-label fw-semibold">Activity Type</label>
+              <input id="activityType" class="form-control" formControlName="activityType" placeholder="e.g. camping">
               <div *ngIf="createForm.get('activityType')?.invalid && createForm.get('activityType')?.touched"
                    class="text-danger small mt-1">Required</div>
             </div>
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Activity ID</label>
-              <input class="form-control" formControlName="activityId" placeholder="e.g. standard-sites">
+              <label for="activityId" class="form-label fw-semibold">Activity ID</label>
+              <input id="activityId" class="form-control" formControlName="activityId" placeholder="e.g. standard-sites">
               <div *ngIf="createForm.get('activityId')?.invalid && createForm.get('activityId')?.touched"
                    class="text-danger small mt-1">Required</div>
             </div>
@@ -154,7 +154,7 @@
 
           <!-- Opening Times -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">Opening Times</label>
+            <div class="form-label fw-semibold">Opening Times</div>
             <p class="text-muted small mb-2">One row per booking date. Opening time is when the queue randomizes and starts releasing users.</p>
 
             <div formArrayName="openingTimes">
