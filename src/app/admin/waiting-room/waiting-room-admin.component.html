@@ -1,0 +1,304 @@
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2><i class="fa-solid fa-door-open me-2"></i>Waiting Room Management</h2>
+      <p class="text-muted">Create and manage virtual queues for high-demand booking events.</p>
+    </div>
+    <div class="col-auto align-self-center">
+      <button class="btn btn-primary" (click)="toggleCreateForm()">
+        <i class="fa-solid me-1" [class.fa-plus]="!showCreateForm" [class.fa-xmark]="showCreateForm"></i>
+        {{ showCreateForm ? 'Cancel' : 'Create Queues' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status"><span class="visually-hidden">Loading…</span></div>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Mode 2: Full-Site Gating -->
+    <div class="card mb-4" [class.border-warning]="mode2Active">
+      <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between">
+          <div class="flex-grow-1">
+            <h5 class="card-title mb-1">
+              <i class="fa-solid fa-shield-halved me-2"></i>Full-Site Gating (Mode 2)
+              <span *ngIf="mode2Active" class="badge bg-warning text-dark ms-2">ACTIVE</span>
+            </h5>
+            <p class="card-text text-muted mb-2 small">
+              When active, all visitors without an admission token are queued. Users are admitted in batches.
+            </p>
+
+            <!-- Config inputs (only shown when inactive) -->
+            <div *ngIf="!mode2Active" class="row g-2 align-items-end mt-1 mb-2" style="max-width:600px">
+              <div class="col-4">
+                <label for="mode2BatchSize" class="form-label small mb-1">Batch size (users per release)</label>
+                <input id="mode2BatchSize" type="number" class="form-control form-control-sm" [(ngModel)]="mode2BatchSize"
+                       min="1" max="500" step="1">
+              </div>
+              <div class="col-4">
+                <label for="mode2ReleaseMode" class="form-label small mb-1">Release mode</label>
+                <select id="mode2ReleaseMode" class="form-select form-select-sm" [(ngModel)]="mode2ReleaseMode">
+                  <option value="auto">Auto (timed)</option>
+                  <option value="manual">Manual (on demand)</option>
+                </select>
+              </div>
+              <div class="col-4" *ngIf="mode2ReleaseMode === 'auto'">
+                <label for="mode2IntervalMinutes" class="form-label small mb-1">Release interval (minutes)</label>
+                <input id="mode2IntervalMinutes" type="number" class="form-control form-control-sm" [(ngModel)]="mode2IntervalMinutes"
+                       min="1" max="60" step="1">
+              </div>
+            </div>
+
+            <!-- Live stats when active -->
+            <div *ngIf="mode2Active && mode2Queue" class="d-flex gap-4 mt-2 text-center flex-wrap">
+              <div>
+                <div class="fw-bold text-primary fs-5">{{ mode2Queue.totalEntries }}</div>
+                <div class="text-muted small">Total joined</div>
+              </div>
+              <div>
+                <div class="fw-bold text-success fs-5">{{ mode2Queue.admittedCount }}</div>
+                <div class="text-muted small">Admitted</div>
+              </div>
+              <div>
+                <div class="fw-bold fs-5">{{ mode2Queue.totalEntries - mode2Queue.admittedCount - (mode2Queue.abandonedCount ?? 0) }}</div>
+                <div class="text-muted small">Waiting</div>
+              </div>
+              <div *ngIf="mode2Queue.batchSize">
+                <div class="fw-bold fs-5">{{ mode2Queue.batchSize }}</div>
+                <div class="text-muted small">Batch size</div>
+              </div>
+              <div>
+                <div class="fw-bold fs-5">{{ mode2Queue['releaseMode'] === 'manual' ? 'Manual' : 'Auto' }}</div>
+                <div class="text-muted small">Release mode</div>
+              </div>
+              <div *ngIf="mode2Queue['releaseMode'] !== 'manual' && mode2Queue.releaseIntervalSeconds">
+                <div class="fw-bold fs-5">{{ mode2Queue.releaseIntervalSeconds / 60 }}m</div>
+                <div class="text-muted small">Interval</div>
+              </div>
+              <div *ngIf="mode2Queue.lastReleasedAt">
+                <div class="small text-muted">Last release</div>
+                <div class="small">{{ formatTs(mode2Queue.lastReleasedAt) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ms-4 flex-shrink-0 d-flex flex-column gap-2">
+            <!-- Manual release button (only shown when Mode 2 is active and in manual mode) -->
+            <button
+              *ngIf="mode2Active && mode2Queue && mode2Queue['releaseMode'] === 'manual'"
+              class="btn btn-success"
+              [disabled]="mode2Releasing"
+              (click)="releaseMode2()"
+            >
+              <i class="fa-solid me-1"
+                [class.fa-people-arrows]="!mode2Releasing"
+                [class.fa-spinner]="mode2Releasing"
+                [class.fa-spin]="mode2Releasing">
+              </i>
+              {{ mode2Releasing ? 'Releasing…' : 'Release Batch' }}
+            </button>
+
+            <button
+              class="btn"
+              [class.btn-warning]="!mode2Active"
+              [class.btn-outline-secondary]="mode2Active"
+              [disabled]="mode2Saving"
+              (click)="toggleMode2()"
+            >
+              <i class="fa-solid me-1"
+                [class.fa-circle-play]="!mode2Active && !mode2Saving"
+                [class.fa-circle-stop]="mode2Active && !mode2Saving"
+                [class.fa-spinner]="mode2Saving"
+                [class.fa-spin]="mode2Saving">
+              </i>
+              {{ mode2Saving ? 'Saving…' : (mode2Active ? 'Deactivate' : 'Activate') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Queue Form -->
+    <div *ngIf="showCreateForm" class="card mb-4 border-primary">
+      <div class="card-header bg-primary text-white">
+        <i class="fa-solid fa-plus me-2"></i>Create Queues
+      </div>
+      <div class="card-body">
+        <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label for="collectionId" class="form-label fw-semibold">Collection ID</label>
+              <input id="collectionId" class="form-control" formControlName="collectionId" placeholder="e.g. golden-ears">
+              <div *ngIf="createForm.get('collectionId')?.invalid && createForm.get('collectionId')?.touched"
+                   class="text-danger small mt-1">Required</div>
+            </div>
+            <div class="col-md-4">
+              <label for="activityType" class="form-label fw-semibold">Activity Type</label>
+              <input id="activityType" class="form-control" formControlName="activityType" placeholder="e.g. camping">
+              <div *ngIf="createForm.get('activityType')?.invalid && createForm.get('activityType')?.touched"
+                   class="text-danger small mt-1">Required</div>
+            </div>
+            <div class="col-md-4">
+              <label for="activityId" class="form-label fw-semibold">Activity ID</label>
+              <input id="activityId" class="form-control" formControlName="activityId" placeholder="e.g. standard-sites">
+              <div *ngIf="createForm.get('activityId')?.invalid && createForm.get('activityId')?.touched"
+                   class="text-danger small mt-1">Required</div>
+            </div>
+          </div>
+
+          <!-- Opening Times -->
+          <div class="mb-3">
+            <div class="form-label fw-semibold">Opening Times</div>
+            <p class="text-muted small mb-2">One row per booking date. Opening time is when the queue randomizes and starts releasing users.</p>
+
+            <div formArrayName="openingTimes">
+              <div *ngFor="let row of openingTimesArray.controls; let i = index"
+                   [formGroupName]="i"
+                   class="row g-2 mb-2 align-items-center">
+                <div class="col-md-4">
+                  <input type="date" class="form-control" formControlName="startDate" placeholder="Booking date">
+                  <div *ngIf="row.get('startDate')?.invalid && row.get('startDate')?.touched"
+                       class="text-danger small mt-1">Required</div>
+                </div>
+                <div class="col-md-6">
+                  <input type="datetime-local" class="form-control" formControlName="openingTime" placeholder="Opening time">
+                  <div *ngIf="row.get('openingTime')?.invalid && row.get('openingTime')?.touched"
+                       class="text-danger small mt-1">Required</div>
+                </div>
+                <div class="col-auto">
+                  <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeOpeningTimeRow(i)"
+                          [disabled]="openingTimesArray.length === 1">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary btn-sm mt-1" (click)="addOpeningTimeRow()">
+              <i class="fa-solid fa-plus me-1"></i>Add Date
+            </button>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="creating">
+              <i class="fa-solid me-1" [class.fa-check]="!creating" [class.fa-spinner]="creating" [class.fa-spin]="creating"></i>
+              {{ creating ? 'Creating…' : 'Create Queues' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="toggleCreateForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Queue List -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-list-check me-2"></i>Queues</span>
+        <span class="badge bg-secondary">{{ queues.length }}</span>
+      </div>
+
+      <div *ngIf="queues.length === 0" class="card-body text-muted text-center py-5">
+        No queues configured. Use "Create Queues" to set up a waiting room for a high-demand event.
+      </div>
+
+      <div *ngIf="queues.length > 0" class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Queue</th>
+              <th>Status</th>
+              <th>Opens</th>
+              <th class="text-center">Total</th>
+              <th class="text-center">Admitted</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let q of queues; trackBy: trackByQueueId">
+              <!-- Queue row -->
+              <tr>
+                <td class="queue-id">{{ formatQueueId(q.queueId) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="statusBadgeClass(q.queueStatus)">
+                    {{ q.queueStatus }}
+                  </span>
+                </td>
+                <td class="text-nowrap">{{ formatIso(q.openingTime) }}</td>
+                <td class="text-center">{{ q.totalEntries }}</td>
+                <td class="text-center">{{ q.admittedCount }}</td>
+                <td class="text-end text-nowrap">
+                  <!-- Metrics toggle -->
+                  <button class="btn btn-sm btn-outline-secondary me-1"
+                          [disabled]="loadingMetrics[q.queueId]"
+                          (click)="toggleMetrics(q.queueId)"
+                          title="View metrics">
+                    <i class="fa-solid"
+                      [class.fa-chart-bar]="!loadingMetrics[q.queueId] && !isMetricsExpanded(q.queueId)"
+                      [class.fa-chevron-up]="!loadingMetrics[q.queueId] && isMetricsExpanded(q.queueId)"
+                      [class.fa-spinner]="loadingMetrics[q.queueId]"
+                      [class.fa-spin]="loadingMetrics[q.queueId]">
+                    </i>
+                  </button>
+                  <!-- Close -->
+                  <button *ngIf="canClose(q.queueStatus)"
+                          class="btn btn-sm btn-outline-warning me-1"
+                          [disabled]="actionInProgress[q.queueId]"
+                          (click)="closeQueue(q)"
+                          title="Force-close queue">
+                    <i class="fa-solid fa-ban"></i>
+                  </button>
+                  <!-- Delete -->
+                  <button class="btn btn-sm btn-outline-danger"
+                          [disabled]="actionInProgress[q.queueId]"
+                          (click)="deleteQueue(q)"
+                          title="Delete queue">
+                    <i class="fa-solid" [class.fa-trash]="!actionInProgress[q.queueId]"
+                       [class.fa-spinner]="actionInProgress[q.queueId]"
+                       [class.fa-spin]="actionInProgress[q.queueId]"></i>
+                  </button>
+                </td>
+              </tr>
+              <!-- Metrics expansion row -->
+              <tr *ngIf="isMetricsExpanded(q.queueId)" class="metrics-row">
+                <td colspan="6" class="bg-light py-3 px-4">
+                  <ng-container *ngIf="expandedMetrics[q.queueId] as m; else metricsError">
+                    <div class="row g-3">
+                      <div class="col-auto" *ngFor="let entry of [
+                        { label: 'Waiting',   val: m.counts.waiting,   cls: 'text-primary' },
+                        { label: 'Admitting', val: m.counts.admitting, cls: 'text-warning' },
+                        { label: 'Admitted',  val: m.counts.admitted,  cls: 'text-success' },
+                        { label: 'Expired',   val: m.counts.expired,   cls: 'text-secondary' },
+                        { label: 'Abandoned', val: m.counts.abandoned, cls: 'text-danger' }
+                      ]">
+                        <div class="metric-card text-center px-3">
+                          <div class="fs-4 fw-bold" [ngClass]="entry.cls">{{ entry.val }}</div>
+                          <div class="small text-muted">{{ entry.label }}</div>
+                        </div>
+                      </div>
+                      <div class="col-auto">
+                        <div class="metric-card text-center px-3">
+                          <div class="small text-muted">Last updated</div>
+                          <div class="small">{{ formatTs(m.updatedAt) }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <ng-template #metricsError>
+                    <span class="text-danger small">Failed to load metrics</span>
+                  </ng-template>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

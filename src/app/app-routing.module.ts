@@ -199,6 +199,11 @@ export const routes: Routes = [
     canActivate: [UserGuard, AdminGuard]
   },
   {
+    path: 'admin/waiting-room',
+    loadComponent: () => import('./admin/waiting-room/waiting-room-admin.component').then(mod => mod.WaitingRoomAdminComponent),
+    canActivate: [UserGuard, AdminGuard]
+  },
+  {
     path: 'customers',
     loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
     canActivate: [UserGuard]
