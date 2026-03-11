@@ -60,8 +60,6 @@ export class ProductCreateComponent {
 
     const res = await this.productService.createProduct(collectionId, props);
 
-    console.log('res >>>', res);
-
     const productId = res?.[0]?.data?.productId;
     if (productId) {
       this.navigateToProduct(collectionId, activityType, activityId, productId);

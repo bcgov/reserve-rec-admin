@@ -1,6 +1,6 @@
 <div class="mb-1 ms-1">
   <div class="d-flex align-items-center justify-content-start">
-    <h5 class="text-primary me-3" (click)="navigateToPolicy(policy)" style="cursor: pointer;">
+    <h5 class="text-primary me-3" tabindex="0" (click)="navigateToPolicy(policy)" (keyup.enter)="navigateToPolicy(policy)" style="cursor: pointer;">
       {{policy?.displayName || policy?.display }}
     </h5>
     <button class="btn btn-lg p-1" (click)="removePolicy(policy);">

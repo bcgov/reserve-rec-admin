@@ -1,5 +1,5 @@
   <div class="my-3"> 
-    <h5 class="text-primary mb-1" (click)= "navigateToActivity(activity)" style="cursor: pointer;">
+    <h5 class="text-primary mb-1" tabindex="0" (click)="navigateToActivity(activity)" (keyup.enter)="navigateToActivity(activity)" style="cursor: pointer;">
       {{activity?.displayName}}
     </h5>
   </div>

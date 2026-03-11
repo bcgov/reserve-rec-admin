@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, signal, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectorRef, Component, signal, ViewChild, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe, UpperCasePipe } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -13,7 +13,7 @@ import { PolicyService } from '../../../services/policy.service';
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.scss'
 })
-export class ProductDetailsComponent implements AfterViewInit {
+export class ProductDetailsComponent {
   public product;
   public _markers: WritableSignal<any[]> = signal([]);
   public markerOptions = {
@@ -49,10 +49,7 @@ export class ProductDetailsComponent implements AfterViewInit {
     return JSON.stringify(data, null, 2);
   }
 
-  ngAfterViewInit(): void {
-    // Ensure the map is updated after the view has initialized
-    // this.updateMarkers();
-  }
+
 
   // updateMarkers() {
   //   if (this.product?.location?.coordinates) {
