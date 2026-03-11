@@ -1,16 +1,19 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ProductService } from '../../../services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductFormComponent } from '../../product/product-form/product-form.component';
+import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 
 @Component({
   selector: 'app-product-create',
-  imports: [ProductFormComponent],
+  imports: [ProductFormComponent, LoadalComponent],
   templateUrl: './product-create.component.html',
   styleUrl: './product-create.component.scss'
 })
 export class ProductCreateComponent {
+  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
+
   public productForm: UntypedFormGroup;
   public product;
 
@@ -37,6 +40,7 @@ export class ProductCreateComponent {
   }
 
   async submit() {
+    this.loadal.show();
     // Check form validity first
     if (!this.productForm || this.productForm.invalid) {
       const invalidControls = Object.entries(this.productForm?.controls ?? {})
@@ -56,13 +60,18 @@ export class ProductCreateComponent {
       return;
     }
 
-    const props = this.formatFormForSubmission();
-
-    const res = await this.productService.createProduct(collectionId, props);
-
-    const productId = res?.[0]?.data?.productId;
-    if (productId) {
-      this.navigateToProduct(collectionId, activityType, activityId, productId);
+    this.loadal.show();
+    try {
+      const props = this.formatFormForSubmission();
+      const res = await this.productService.createProduct(collectionId, props);
+      const productId = res?.[0]?.data?.productId;
+      if (productId) {
+        this.navigateToProduct(collectionId, activityType, activityId, productId);
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+    } finally {
+      this.loadal.hide();
     }
   }
 

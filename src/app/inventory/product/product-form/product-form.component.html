@@ -31,42 +31,48 @@
           </div>
         </div>
       </div>
-      <div class="card mb-4">
+      <div class="card mb-5">
         <div class="card-body p-4">
           <h3 class="mb-4">Details</h3>
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
                 [class]="'label-top'"
                 [control]="form.get('isVisible')"
                 [switch]="true"
                 [label]="'Visibility'"
-              ></ngds-toggle-input>
+                ></ngds-toggle-input>
+              </div>
               <span class="small">{{ form.get('isVisible')?.value ? 'Visible to public' : 'Not visible to public' }}</span>
             </div>
           </div>
         
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
                 [class]="'label-top'"
                 [control]="form.get('passesRequired')"
                 [switch]="true"
                 [label]="'Passes'"
-              ></ngds-toggle-input>
+                ></ngds-toggle-input>
+              </div>
               <span class="small">{{ form.get('passesRequired')?.value ? 'Passes required' : 'Passes are not required' }}</span>
             </div>
           </div>
           
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
-                [class]="'label-top'"
-                [control]="form.get('qrCodeEnabled')"
-                [switch]="true"
-                [label]="'QR codes'"
-              ></ngds-toggle-input>
-              <span class="small">{{ form.get('qrCodeEnabled')?.value ? 'QR code is enabled' : 'QR code is disabled' }}</span>
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
+                  [class]="'label-top'"
+                  [control]="form.get('qrCodeEnabled')"
+                  [switch]="true"
+                  [label]="'QR codes'"
+                ></ngds-toggle-input>
+              </div>
+              <span class="small ms--3">{{ form.get('qrCodeEnabled')?.value ? 'QR code enabled' : 'QR code disabled' }}</span>
             </div>
           </div>
 
@@ -125,15 +131,17 @@
             (searchTermsChange)="onSearchTermsChange($event)"
           ></app-search-terms>
 
-          <hr>
+          <hr class="mt-4">
           <div *ngIf="!isCreating">
-            <h3 class="mb-4 mt-4">Activities</h3>
+            <h3 class="mb-4 mt-4">Activity</h3>
             <div class="row">
               <app-activity-list-item
               [activity]="relatedActivity"
               ></app-activity-list-item>
             </div>
           </div>
+
+          <hr>
           <h3 class="mb-4 mt-4">Policies</h3>
           <p class="small mt-2">Polices are rules defining how the <strong>product</strong> behaves. They control the booking's stock, party limit, changes/cancellations, and fees. </p>
           <div class="row">
