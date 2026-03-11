@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -23,13 +23,13 @@ interface FlagDefinition {
   templateUrl: './feature-flags.component.html',
   styleUrls: ['./feature-flags.component.scss']
 })
-export class FeatureFlagsComponent implements OnInit {
+export class FeatureFlagsComponent implements OnInit, OnDestroy {
   loading = true;
   saving = false;
-  
+
   flagData: FeatureFlagAdminResponse | null = null;
   form: UntypedFormGroup = new UntypedFormGroup({});
-  
+
   // Define available flags with metadata
   flagDefinitions: FlagDefinition[] = [
     {
@@ -44,8 +44,9 @@ export class FeatureFlagsComponent implements OnInit {
     private featureFlagService: FeatureFlagService,
     private toastService: ToastService,
     private loadingService: LoadingService,
-    private modalService: BsModalService
-  ) {}
+    private modalService: BsModalService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   async ngOnInit(): Promise<void> {
     await this.loadFlags();
@@ -70,11 +71,11 @@ export class FeatureFlagsComponent implements OnInit {
 
   buildForm(flags: Record<string, boolean> | undefined): void {
     const controls: Record<string, UntypedFormControl> = {};
-    
+
     for (const def of this.flagDefinitions) {
       controls[def.key] = new UntypedFormControl(flags?.[def.key] ?? false);
     }
-    
+
     this.form = new UntypedFormGroup(controls);
   }
 
@@ -97,20 +98,20 @@ export class FeatureFlagsComponent implements OnInit {
 
   private async performSave(): Promise<void> {
     this.saving = true;
-    
+
     try {
       const flags: Record<string, boolean> = {};
-      
+
       for (const def of this.flagDefinitions) {
         flags[def.key] = this.form.get(def.key)?.value ?? false;
       }
-      
+
       const response = await this.featureFlagService.updateFeatureFlags(flags);
       this.flagData = response;
-      
+
       // Reset form dirty state after successful save
       this.form.markAsPristine();
-      
+
       this.toastService.addMessage(
         'Feature flags updated successfully',
         'Success',
@@ -132,5 +133,10 @@ export class FeatureFlagsComponent implements OnInit {
     if (this.flagData?.flags) {
       this.buildForm(this.flagData.flags);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.cd.detectChanges(); // Force this component to unload
+    this.cd.detach();
   }
 }
