@@ -38,7 +38,7 @@ export class PolicyDetailsComponent {
     return `bg-secondary`;
   }
 
-    getPolicyIcon(policyType = null) {
+  getPolicyIcon(policyType = null) {
     if (!policyType) {
       policyType = this.policy?.policyType;
     }

@@ -39,7 +39,10 @@ export class ProductCreateComponent {
   async submit() {
     // Check form validity first
     if (!this.productForm || this.productForm.invalid) {
-      console.error('Form is invalid. Please correct errors before submitting.');
+      const invalidControls = Object.entries(this.productForm?.controls ?? {})
+        .filter(([, control]) => control.invalid)
+        .map(([key, control]) => ({ key, errors: control.errors, value: control.value }));
+      console.error('Form is invalid. Please correct errors before submitting.', this.productForm?.errors, invalidControls);
       this.productForm?.markAllAsTouched();
       return;
     }
@@ -57,7 +60,9 @@ export class ProductCreateComponent {
 
     const res = await this.productService.createProduct(collectionId, props);
 
-    const productId = res[0]?.data?.productId;
+    console.log('res >>>', res);
+
+    const productId = res?.[0]?.data?.productId;
     if (productId) {
       this.navigateToProduct(collectionId, activityType, activityId, productId);
     }
@@ -77,13 +82,16 @@ export class ProductCreateComponent {
     for (const policy of ['reservationPolicy', 'partyPolicy', 'feePolicy', 'changePolicy']) {
       if (props[policy]) {
         props[policy] = {
-          pk: props[policy][0]['pk'],
-          sk: props[policy][0]['sk']
+          pk: props[policy]?.['pk'],
+          sk: props[policy]?.['sk']
         };
+      } else {
+        delete props[policy]; // Remove any policies that are not set
       }
     }
    
-    delete props['activities']; // Remove the activities
+    delete props['activity']; // Remove the activity
+    delete props['policies']; // Remove the policies
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;

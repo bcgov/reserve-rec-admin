@@ -1,0 +1,85 @@
+<div class="entity-relationship-selector">
+  <!-- Entity Search/Selection -->
+  <div class="row g-2">
+    <div class="col">
+      <ngds-typeahead-input
+        [control]="searchControl"
+        [label]="config().label"
+        [selectionListItems]="availableEntities()"
+        [displaySelectionItems]="'false'"
+        [resetButton]="false"
+        [multiselect]="false"
+        [placeholder]="config().placeholder"
+        [selectionListTemplate]="config().selectionListTemplate"
+        [loadWhile]="loading"
+        [disabled]="!isSelectionEditable()">
+      </ngds-typeahead-input>
+    </div>
+    <div class="col-auto mb-1">
+      <button
+        class="btn btn-primary rounded-1"
+        [disabled]="!searchControl.value?.pk"
+        (click)="linkCurrentSelection()">
+        Link {{ config().targetSchema }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Immutability Notice -->
+  <div *ngIf="!isSelectionEditable() && config().sourceSchema"
+    class="alert alert-info mt-2 mb-0 d-flex align-items-center" role="alert">
+    <i class="fa-solid fa-lock me-2"></i>
+    <small>This selection cannot be changed after creation.</small>
+  </div>
+
+  <!-- Selected Entities List -->
+  <div class="selected-entities mt-3">
+    <!-- No selection message -->
+    <div 
+      *ngIf="getSelectedEntities().length === 0" 
+      class="alert alert-primary small p-2 rounded-1 text-primary">
+      <i class="fa-solid fa-circle-exclamation m-2"></i>
+      There is no {{ config().targetSchema }} associated with this {{ config().sourceSchema }}.
+    </div>
+
+    <!-- Selected items with default or custom template -->
+    <div *ngFor="let entity of getSelectedEntities(); trackBy: trackBySelectedEntity">
+      <div class="row align-items-center my-2">
+        
+        <!-- Custom template if provided -->
+        <div
+          class="col text-start"
+          *ngIf="config().selectedItemTemplate">
+          <ng-container *ngTemplateOutlet="config().selectedItemTemplate; context: { $implicit: entity }"></ng-container>
+        </div>
+
+        <!-- Default template -->
+        <div 
+          *ngIf="!config().selectedItemTemplate"
+          class="col d-flex align-items-center">
+          <h5 class="text-primary ms-1 me-3 mb-0"
+            style="cursor: pointer;">
+            {{ entity.displayName || entity.name }}
+          </h5>
+          
+          <!-- Remove button (only shown when editable) -->
+          <button 
+            *ngIf="isSelectionEditable()"
+            class="btn btn-lg p-1"
+            [title]="'Remove ' + config().targetSchema + ' from this ' + config().sourceSchema"
+            (click)="removeEntity(entity)">
+            <i class="fa fa-x text-primary me-1"></i>
+          </button>
+
+          <!-- Locked indicator (shown when not editable) -->
+          <div
+            *ngIf="!isSelectionEditable()"
+            class="d-flex align-items-center px-3 text-muted"
+            [title]="'This ' + config().targetSchema + ' selection is locked'">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

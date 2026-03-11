@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { ProductService } from '../../../services/product.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
 
 @Component({
   selector: 'app-product-edit',
@@ -10,45 +11,31 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './product-edit.component.html',
   styleUrl: './product-edit.component.scss'
 })
-export class ProductEditComponent {
+export class ProductEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
+  @ViewChild(ProductFormComponent) productFormComponent!: ProductFormComponent;
+
   public productForm;
   public product;
 
-  // Track initial state for relationship diffing
-  public initialActivities: any[] = [];
-
-  // Current state (updated as user edits)
-  public existingActivities: any[] = [];
-
   constructor(
     protected productService: ProductService,
-    protected relationshipService: RelationshipService,
-    protected router: Router,
-    protected route: ActivatedRoute,
-    protected cdr: ChangeDetectorRef
+    relationshipService: RelationshipService,
+    router: Router,
+    route: ActivatedRoute,
+    cdr: ChangeDetectorRef
   ) {
+    super(relationshipService, router, route, cdr);
     if (this.route.parent?.snapshot.data['product']) {
       this.product = this.route.parent?.snapshot.data['product'];
     }
   }
 
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges();
+  }
+
   updateProductForm(event) {
     this.productForm = event;
-  }
-
-
-  // Called by child component when relationships are initially loaded
-  // Captures the initial state for diffing later
-  onRelationshipsLoaded(type: string, relationships: any[]) {
-    this.initialActivities = [...relationships];
-    this.existingActivities = [...relationships];
-  }
-
-
-  // Called when relationships change (user adds/removes entities)
-  // Updates the current state for diffing
-  onRelationshipsChanged(type: string, relationships: any[]) {
-    this.existingActivities = [...relationships];
   }
 
   async submit() {
@@ -76,33 +63,12 @@ export class ProductEditComponent {
     }
   }
 
-
-  // Sync relationship changes with the backend
-  // Compares initial state vs current state and creates/deletes as needed
   async synchronize() {
     if (!this.product?.pk || !this.product?.sk) {
       console.warn('Cannot sync relationships: product missing pk or sk');
       return;
     }
-
-    const sourceEntity = {
-      schema: 'product',
-      pk: this.product.pk,
-      sk: this.product.sk
-    };
-
-    try {
-      // Sync activity relationships
-      await this.relationshipService.syncRelationships(
-        sourceEntity,
-        this.initialActivities,
-        this.existingActivities
-      );
-      console.log('Activity relationships synced successfully');
-    } catch (error) {
-      console.error('Error syncing relationships:', error);
-      throw error;
-    }
+    await this.synchronizeAll({ schema: 'product', pk: this.product.pk, sk: this.product.sk });
   }
 
   formatFormForSubmission() {
@@ -119,18 +85,41 @@ export class ProductEditComponent {
     // Handle search terms
     props['searchTerms'] = this.productForm.get('searchTerms')?.value || [];
 
-    // Delete relationship form values
-    delete props['activities'];
+    for (const policy of ['reservationPolicy', 'partyPolicy', 'feePolicy', 'changePolicy']) {
+      if (props[policy]) {
+        props[policy] = {
+          pk: props[policy]?.['pk'],
+          sk: props[policy]?.['sk']
+        };
+      }
+    }
 
-    delete props['collectionId']; // Remove collectionId from the props
-    delete props['meta']; // Remove meta fields from the props
+    delete props['activity'];
+    delete props['policies'];
+    delete props['collectionId'];
+    delete props['meta'];
     return props;
+  }
+
+  resetForm() {
+    this.productFormComponent.resetToProduct(this.product);
+    for (const [type, items] of this.initialRelationships) {
+      this.currentRelationships.set(type, [...items]);
+    }
+  }
+
+  cancel() {
+    const collectionId = this.product?.collectionId;
+    const activityType = this.product?.activityType;
+    const activityId = this.product?.activityId;
+    const productId = this.product?.productId;
+    this.navigateToProduct(collectionId, activityType, activityId, productId);
   }
 
   navigateToProduct(collectionId, activityType, activityId, productId) {
     this.router.navigate([`/inventory/product/${collectionId}/${activityType}/${activityId}/${productId}`]).then(() => {
       window.scrollTo(0, 0);
-      this.cdr.detectChanges();
+      this.cdr.detectChanges(); // prevent weird duplicate stacking on details page
     });
   }
 }

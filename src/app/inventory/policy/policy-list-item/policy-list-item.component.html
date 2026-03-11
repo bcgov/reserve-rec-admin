@@ -1,49 +1,10 @@
-<h5 *ngIf="policy?.policyType">{{ headingLabel }}</h5>
-<div class="card-body m-1 border border-2 rounded-3 d-flex justify-content-between mb-4">
-  <div class="p-3">
-    <div class="mb-1">
-      {{policy?.displayName}}
-    </div>
-    <div class="d-flex">
-      <div class="badge bg-primary">
-        <i class="fas fa-receipt"></i>
-        &nbsp;Policy
-      </div>
-      <div class="badge bg-primary ms-1">
-        {{ (policy?.policyType | titlecase) || 'N/A' }}
-      </div>
-      <div class="badge bg-secondary ms-1">
-        {{ policy?.policyId || 'N/A' }}
-      </div>
-      <div class="badge bg-light text-muted  border border-1 ms-1">
-        {{ policy?.sk || 'N/A' }}
-      </div>
-    </div>
-  </div>
-  <div class="p-1">
-    <div class="d-flex align-items-center justify-content-center">
-      <div class="border border-1 rounded-3">
-        <div *ngIf="policy?.imageUrl">
-          <img
-            [src]="policy?.imageUrl"
-            alt="image"
-            width="100%"
-            height="80px"
-            style="object-fit: cover;"
-          />
-        </div>
-        <div
-          *ngIf="!policy?.imageUrl"
-          class="text-muted d-flex justify-content-center m-4"
-        >
-          No image
-        </div>
-      </div>
-      <div *ngIf="showDetailsButton" class="ms-1 p-1 border border-1 rounded-3">
-        <!-- <button class="btn btn-outline-light text-dark p-0" (click)= "navigateTopolicy(policy)" title="Open policy Details in New Tab">
-          <i class="bi bi-arrow-up-right-square"></i>
-        </button> -->
-      </div>
-    </div>
+<div class="mb-1 ms-1">
+  <div class="d-flex align-items-center justify-content-start">
+    <h5 class="text-primary me-3" (click)="navigateToPolicy(policy)" style="cursor: pointer;">
+      {{policy?.displayName || policy?.display }}
+    </h5>
+    <button class="btn btn-lg p-1" (click)="removePolicy(policy);">
+      <i *ngIf="isEditing || isCreating" class="fa fa-x text-primary"></i>
+    </button>
   </div>
 </div>

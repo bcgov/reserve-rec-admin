@@ -31,6 +31,9 @@ export class ProductComponent {
     });
   }
 
+  get isEditing(): boolean {
+    return this.router.url.endsWith('/edit');
+  }
 
   getActivityTypeOption() {
     return Constants.activityTypes[this.data?.activityType] || { display: 'Unknown', value: 'unknown', iconClass: 'fa-solid fa-question' };

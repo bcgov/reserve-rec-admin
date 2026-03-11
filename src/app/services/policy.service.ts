@@ -71,4 +71,17 @@ export class PolicyService {
     }
   }
 
+  async getAllPolicies() {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.POLICY_RESULT);
+      const res = (await lastValueFrom(this.apiService.get('policies', {})))['data'];
+      this.dataService.setItemValue(Constants.dataIds.POLICY_RESULT, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.POLICY_RESULT);
+      this.loggerService.error(error);
+    }
+  }
+
 }

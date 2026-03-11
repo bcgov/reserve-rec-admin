@@ -110,6 +110,7 @@ export const routes: Routes = [
     loadComponent: () => import('./inventory/facility/facility.component').then(mod => mod.FacilityComponent),
     canActivate: [UserGuard],
     resolve: { facility: FacilityResolver },
+    runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',

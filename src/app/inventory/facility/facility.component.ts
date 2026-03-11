@@ -30,7 +30,10 @@ export class FacilityComponent {
       }
     });
   }
-
+  
+  get isEditing(): boolean {
+    return this.router.url.endsWith('/edit');
+  }
 
   getFacilityTypeOption() {
     return Constants.facilityTypes[this.data?.facilityType] || { display: 'Unknown', value: 'unknown', iconClass: 'fa-solid fa-question' };

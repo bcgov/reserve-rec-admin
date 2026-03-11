@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Constants } from '../../../app.constants';
-import { CommonModule, TitleCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-facility-list-item',
-  imports: [TitleCasePipe, CommonModule],
+  imports: [CommonModule],
   templateUrl: './facility-list-item.component.html',
   styleUrl: './facility-list-item.component.scss'
 })

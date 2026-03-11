@@ -1,28 +1,19 @@
-<section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center mb-5">Create New Product</h4>
-    <div class="text-center mb-3">
-      Products are bookable items or passes associated with activities at BC Parks locations.
+<section class="container pt-3 pb-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex flex-column align-items-start justify-content-center">
+        <h2 class="text-center mb-2">Create a new Product</h2>
+      </div>
     </div>
   </div>
 </section>
-<hr>
 <app-product-form
-  [isEditing]="false"
-  (formValue)="updateProductForm($event)"
-  (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)"
->
+  [isCreating]="true"
+  (formValue)="updateProductForm($event)">
 </app-product-form>
-<hr>
 <section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center mb-5">Create New Product</h4>
-    <button 
-      class="btn btn-success btn-lg"
-      (click)="submit()"
-      [disabled]="!productForm?.valid || !productForm?.dirty"
-    >
-      <i class="fa-solid fa-plus me-2"></i>
+  <div class="d-flex flex-column align-items-center justify-content-center mt-2 mb-5">
+    <button class="btn btn-outline-success btn-lg" (click)="submit()" [disabled]="!productForm?.valid">
       <span>Create Product</span>
     </button>
   </div>

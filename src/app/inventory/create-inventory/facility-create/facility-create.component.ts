@@ -13,6 +13,7 @@ import { FacilityFormComponent } from '../../facility/facility-form/facility-for
 export class FacilityCreateComponent {
   public facilityForm: UntypedFormGroup;
   public facility;
+  public isCreating: boolean = true;
 
   constructor(
     protected facilityService: FacilityService,
@@ -42,6 +43,12 @@ export class FacilityCreateComponent {
   }
 
   async submit() {
+    this.facilityForm.markAllAsTouched();
+
+    if (this.facilityForm.invalid) {
+      return;
+    }
+
     const collectionId = this.facilityForm.get('collectionId').value || this.facility?.collectionId;
     const facilityType = this.facilityForm.get('facilityType').value || this.facility?.facilityType;
 

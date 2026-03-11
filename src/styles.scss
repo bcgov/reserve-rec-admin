@@ -26,22 +26,14 @@ app-root {
   background-color: #fca5a5 !important;
 }
 
-.bg-policy-booking {
-  background-color: #FBB13C !important;
-  color: #000000 !important;
-}
-
-.bg-policy-change {
-  background-color: #D81159 !important;
-  color: #ffffff !important;
-}
-
-.bg-policy-party {
-  background-color: #73D2DE !important;
-  color: #000000 !important;
-}
-
-.bg-policy-fee {
-  background-color: #6BA292 !important;
-  color: #ffffff !important;
+// Workaround to make ngds-text-input label appear above the input instead of to the right
+.label-top {
+  .d-flex {
+    flex-direction: column-reverse !important;
+    gap: 3px;
+    align-items: flex-start !important;
+    ngds-input-header {
+      margin-left: 0 !important;
+    }
+  }
 }

@@ -8518,6 +8518,13 @@
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
+"@tinymce/tinymce-angular@^9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@tinymce/tinymce-angular/-/tinymce-angular-9.1.1.tgz#8a3a986af109e8466a728449962c99879533a1f2"
+  integrity sha512-4W15Ruheqg9hnCUhtNoYX/SnvytT9N0ugv1Tk/aXXXVQMUCQwL3MQBNn8SNer8iZvkDbP+11au0zWW9dWVGSVA==
+  dependencies:
+    tslib "^2.3.0"
+
 "@tufjs/canonical-json@2.0.0":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@tufjs/canonical-json/-/canonical-json-2.0.0.tgz"
@@ -16289,6 +16296,11 @@ tinyglobby@^0.2.12, tinyglobby@^0.2.13:
   dependencies:
     fdir "^6.4.4"
     picomatch "^4.0.2"
+
+tinymce@^8.3.2:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/tinymce/-/tinymce-8.3.2.tgz#bfdba186b00d61598eafbc29cab778de7f8e1e33"
+  integrity sha512-iZ8aIUtrgGOw2AkukNf8spUM0LOzNLoCHRepwXQwWmHxP2TI5LzHjjG0SmXGxbya4EmoD5/pAox0ZXJfLO5DUw==
 
 tinyqueue@^1.2.0:
   version "1.2.3"

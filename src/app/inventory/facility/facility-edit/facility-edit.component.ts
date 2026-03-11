@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FacilityFormComponent } from '../facility-form/facility-form.component';
 import { FacilityService } from '../../../services/facility.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
 
 @Component({
   selector: 'app-facility-edit',
@@ -10,127 +11,82 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './facility-edit.component.html',
   styleUrl: './facility-edit.component.scss'
 })
-export class FacilityEditComponent {
+export class FacilityEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
+  @ViewChild(FacilityFormComponent) facilityFormComponent!: FacilityFormComponent;
+
   public facilityForm;
   public facility;
-  
-  // Track initial state for relationship diffing
-  public initialActivities: any[] = [];
-  public initialGeozones: any[] = [];
-  
-  // Current state (updated as user edits)
-  public existingActivities: any[] = [];
-  public existingGeozones: any[] = [];
 
   constructor(
     protected facilityService: FacilityService,
-    protected relationshipService: RelationshipService,
-    protected router: Router,
-    protected route: ActivatedRoute,
-    protected cdr: ChangeDetectorRef
+    relationshipService: RelationshipService,
+    router: Router,
+    route: ActivatedRoute,
+    cdr: ChangeDetectorRef
   ) {
+    super(relationshipService, router, route, cdr);
     if (this.route.parent?.snapshot.data['facility']) {
       this.facility = this.route.parent?.snapshot.data['facility'];
     }
   }
 
-    updateFacilityForm(event) {
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges();
+  }
+
+  updateFacilityForm(event) {
     this.facilityForm = event;
   }
 
-  /**
-   * Called by child component when relationships are initially loaded
-   * Captures the initial state for diffing later
-   */
-  onRelationshipsLoaded(type: string, relationships: any[]) {
-    if (type === 'activities') {
-      this.initialActivities = [...relationships];
-      this.existingActivities = [...relationships];
-    } else if (type === 'geozones') {
-      this.initialGeozones = [...relationships];
-      this.existingGeozones = [...relationships];
-    }
-  }
-
-  /**
-   * Called when relationships change (user adds/removes entities)
-   * Updates the current state for diffing
-   */
-  onRelationshipsChanged(type: string, relationships: any[]) {
-    if (type === 'activities') {
-      this.existingActivities = [...relationships];
-    } else if (type === 'geozones') {
-      this.existingGeozones = [...relationships];
-    }
+  get isEditing(): boolean {
+    return this.router.url.endsWith('/edit');
   }
 
   async submit() {
+    this.facilityForm.markAllAsTouched();
+
+    if (this.facilityForm.invalid) {
+      return;
+    }
+
     const collectionId = this.facility?.collectionId;
     const facilityType = this.facility?.facilityType;
     const facilityId = this.facility?.facilityId;
     const props = this.formatFormForSubmission();
-    
-    // Step 1: Update the facility entity itself
+
     const res = await this.facilityService.updateFacility(collectionId, facilityType, facilityId, props);
-    
+
     if (res) {
-      // Step 2: Sync relationships (handles additions and deletions)
+      for (const [type] of this.initialRelationships) {
+        const desired = this.facilityFormComponent.getSelectedForType(type);
+        this.currentRelationships.set(type, [...desired]);
+      }
+
       await this.synchronize();
-      
-      // Step 3: Navigate to the updated facility
+
       this.navigateToFacility(collectionId, facilityType, facilityId);
     }
   }
 
-  /**
-   * Sync relationship changes with the backend
-   * Compares initial state vs current state and creates/deletes as needed
-   */
   async synchronize() {
     if (!this.facility?.pk || !this.facility?.sk) {
       console.warn('Cannot sync relationships: facility missing pk or sk');
       return;
     }
-
-    const sourceEntity = {
-      schema: 'facility',
-      pk: this.facility.pk,
-      sk: this.facility.sk
-    };
-
-    try {
-      // Sync activity relationships
-      await this.relationshipService.syncRelationships(
-        sourceEntity,
-        this.initialActivities,
-        this.existingActivities
-      );
-      console.log('Activity relationships synced successfully');
-
-      // Sync geozone relationships
-      await this.relationshipService.syncRelationships(
-        sourceEntity,
-        this.initialGeozones,
-        this.existingGeozones
-      );
-      console.log('Geozone relationships synced successfully');
-    } catch (error) {
-      console.error('Error syncing relationships:', error);
-      throw error;
-    }
+    await this.synchronizeAll({ schema: 'facility', pk: this.facility.pk, sk: this.facility.sk });
   }
 
-    formatFormForSubmission() {
+  formatFormForSubmission() {
     // Get all dirty controls by recursion
     const props = Object.entries(this.facilityForm.controls).map(([key, control]) => {
-      if (control['dirty']){
+      if (control['dirty']) {
         return {
           [key]: control['value']
         }
       }
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
-    
+
     if (props?.['location']) {
       const location = this.facilityForm?.get('location').value;
       props['location'] = {
@@ -142,19 +98,32 @@ export class FacilityEditComponent {
     // Handle search terms
     props['searchTerms'] = this.facilityForm.get('searchTerms')?.value || [];
 
-    // Delete relationship form values
+    // Delete relationship form values (managed by RelationshipService post-submit)
     delete props['activities'];
     delete props['geozones'];
-    
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
     return props;
   }
 
+  resetForm() {
+    this.facilityFormComponent.resetToFacility(this.facility, this.initialRelationships);
+    for (const [type, items] of this.initialRelationships) {
+      this.currentRelationships.set(type, [...items]);
+    }
+  }
+
+  cancel() {
+    const collectionId = this.facility?.collectionId;
+    const facilityType = this.facility?.facilityType;
+    const facilityId = this.facility?.facilityId;
+    this.navigateToFacility(collectionId, facilityType, facilityId);
+  }
+
   navigateToFacility(collectionId, facilityType, facilityId) {
     this.router.navigate([`/inventory/facility/${collectionId}/${facilityType}/${facilityId}`]).then(() => {
       window.scrollTo(0, 0);
-      this.cdr.detectChanges();
+      this.cdr.detectChanges(); // prevent weird duplicate stacking on details page
     });
   }
 }

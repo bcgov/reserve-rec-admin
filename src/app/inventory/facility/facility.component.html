@@ -1,66 +1,53 @@
 
-<section class="container pt-5 pb-4">
-  <div class="row d-flex justify-content-between align-items-center">
-    <div class="col-auto">
+<section class="container pt-5">
+  <div class="row d-flex justify-content-between align-items-start">
+    <div class="col-auto ps-4 pe-4">
       <div class="row">
         <div class="col-auto">
           <h2>{{data?.displayName || "&lt;Facility not found&gt; "}}</h2>
         </div>
         <div class="col-auto">
-          <div
-            *ngIf="data"
-            class="badge bg-primary d-flex justify-content-between align-items-center rounded-pill px-3"
-          >
-            <i class="fa-solid fa-location-dot me-1 fa-xl"></i>
-            <h4 class="mb-0">{{data?.schema | uppercase}}</h4>
+          <div *ngIf="data" class="badge bg-primary d-flex justify-content-between align-items-center rounded-pill px-3 mb-1">
+            <i class="fa-solid fa-map-location-dot me-2 fa-xl"></i>
+            <h4 class="mb-0">{{data?.schema | titlecase }}</h4>
+          </div>
+        </div>
+        <div class="col-auto">
+          <div *ngIf="data && data?.isOpen" class="badge bg-success d-flex justify-content-between align-items-center rounded-pill px-3">
+            <h4 class="mb-0">Open</h4>
+          </div>
+          <div *ngIf="data && !data?.isOpen" class="badge bg-danger d-flex justify-content-between align-items-center rounded-pill px-3">
+            <h4 class="mb-0">Closed</h4>
           </div>
         </div>
       </div>
       <div class="row">
-        <div class="col-auto">
+        <div class="col-auto d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 mt-3">
           <div
             *ngTemplateOutlet="typeBadge; context: { type: getFacilityTypeOption(), subtype: getFacilitySubTypeOption() }"
           >
           </div>
+          <span class="p2">Last edited {{ data?.lastUpdated | date:'YYYY-LL-dd, h:mma' }}</span>
         </div>
       </div>
     </div>
-    <div class="col-auto">
-      <div class="btn-group border me-3">
-        <button
-          class="btn btn-light"
-          (click)="navToEdit()"
-        >
+    <div class="col-auto mt-3 mt-lg-1 ps-4 pe-4" *ngIf="!isEditing">
+      <div class="d-flex justify-content-end align-items-center gap-2">
+        <button class="btn btn-outline-danger rounded-1" (click)="onDelete()">
           <div class="col-auto">
-            <i class="fa-solid fa-pen-to-square me-1"></i>
+            Delete
+          </div>
+        </button>
+        <button class="btn btn-outline-secondary rounded-1" (click)="navToEdit()">
+          <div class="col-auto">
             Edit
           </div>
         </button>
-        <button
-        class="btn btn-danger"
-        (click)="onDelete()"
-        >
-        <div class="col-auto">
-          <i class="fa-solid fa-trash-can me-1"></i>
-          Delete
-        </div>
-      </button>
-      <button
-        class="btn btn-light"
-        disabled
-      >
-        <div
-          class="badge bg-light text-dark border d-flex justify-content-between align-items-center rounded-pill px-3"
-        >
-          <h5 class="mb-0">v{{data?.version || '?'}}</h5>
-        </div>
-      </button>
       </div>
     </div>
   </div>
 
 </section>
-<hr>
 <div class="container">
   <router-outlet></router-outlet>
 </div>
@@ -70,24 +57,10 @@
   let-type="type"
   let-subtype="subtype"
 >
-  <div class="badge bg-secondary d-flex align-items-center rounded-pill px-2">
-    <i
-      [ngClass]="type?.iconClass"
-      class="me-1 fa-xl"
-    ></i>
+  <div class="badge bg-secondary d-flex align-items-center px-2 me-2">
     <h6 class="mb-0">{{type?.display}}</h6>
-    <div
-      *ngIf="subtype?.value"
-      class="badge bg-info text-dark rounded-pill d-flex align-items-center px-2 ms-2"
-    >
-      <i
-        [ngClass]="subtype?.iconClass"
-        class="me-1 fa-xl"
-      ></i>
-      <h6
-        *ngIf="subtype"
-        class="ms-2 mb-0"
-      >{{subtype?.display}}</h6>
-    </div>
+  </div>
+  <div *ngIf="subtype?.value" class="badge bg-info text-dark d-flex align-items-center px-2">
+    <h6 *ngIf="subtype" class="ms-2 mb-0">{{subtype?.display}}</h6>
   </div>
 </ng-template>

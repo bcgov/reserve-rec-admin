@@ -89,14 +89,12 @@ export class ProductService {
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
-      this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
       this.toastService.addMessage(
-        errorMessage,
+        `${error}`,
         `Product failed to create`,
         ToastTypes.ERROR
       );
-      return null;
+      this.loggerService.error(error);
     }
   }
 

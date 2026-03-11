@@ -1,21 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Constants } from '../../../app.constants';
-import { CommonModule, TitleCasePipe } from '@angular/common';
-
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-activity-list-item',
-  imports: [TitleCasePipe, CommonModule],
+  imports: [CommonModule],
   templateUrl: './activity-list-item.component.html',
   styleUrl: './activity-list-item.component.scss'
 })
-export class ActivityListItemComponent implements OnInit {
+export class ActivityListItemComponent {
   @Input() activity: any;
-  @Input() showDetailsButton: boolean = true;
+  @Input() isEditing: boolean = false;
+  @Output() activityRemoved = new EventEmitter<any>();
 
-  public constantsData = null;
-
-  ngOnInit(): void {
-    this.constantsData = Constants.activityTypes[this.activity?.activityType] || { displayName: 'Unknown', icon: 'question-circle' };
+  removeActivity(policy: any) {
+    this.activityRemoved.emit(policy);
   }
 
   navigateToActivity(activity: any) {

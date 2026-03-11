@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { TemplateRef } from '@angular/core';
-import { EntityRelationshipConfig, EntityRelationshipSelectorComponent } from '../shared/components/entity-relationship-selector/entity-relationship-selector.component';
+import { EntityRelationshipConfig, EntityRelationshipSelectorComponent } from '../shared/components/entity/entity-relationship-selector/entity-relationship-selector.component';
 import { ActivityService } from './activity.service';
 
 @Injectable({ providedIn: 'root' })
