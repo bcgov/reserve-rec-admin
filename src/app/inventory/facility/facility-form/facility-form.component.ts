@@ -12,6 +12,8 @@ import { WysiwygInputComponent } from '../../../shared/components/wysiwyg-editor
 import { EntityRelationshipSelectorComponent } from '../../../shared/components/entity/entity-relationship-selector/entity-relationship-selector.component';
 import { ActivityService } from '../../../services/activity.service';
 import { EntityFormBaseComponent } from '../../../shared/components/entity/entity-base/entity-form-base.component';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+
 @Component({
   selector: 'app-facility-form',
   imports: [
@@ -22,6 +24,7 @@ import { EntityFormBaseComponent } from '../../../shared/components/entity/entit
     WysiwygInputComponent,
     ReactiveFormsModule,
     EntityRelationshipSelectorComponent,
+    NgbTooltip,
   ],
   providers: [],
   templateUrl: './facility-form.component.html',

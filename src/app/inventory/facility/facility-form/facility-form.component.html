@@ -99,7 +99,7 @@
             </div>
           </div>
 
-          <div class="row mt-4">
+          <div class="row mt-4 pb-2">
             <div class="col-12 col-lg-6">
               <ngds-text-input class="mb-4"
                 [control]="form.get('description')"
@@ -112,16 +112,18 @@
           
           <div class="row mt-4">
             <div class="col-12">
-              <label class="small fw-bold mb-2">Agreements</label>
-              <!-- <i class="fa fa-circle-info text-muted ms-1" 
-                 title="Agreements can include any specific rules, regulations, or conditions that users must adhere to when using the facility.
-                        You can use the toolbar to format the text, create lists, and add links or images as needed."
-                 
-              ></i> -->
-              <app-wysiwyg-input
-                [control]="form.get('agreements')"
-                [placeholder]="'Type any agreements for the facility. This can include rules, regulations, or conditions that users must adhere to when using the facility.'"
-              ></app-wysiwyg-input>
+              <label class="small fw-bold">
+                <span class="col-lg-12 d-block mb-2">Agreements
+                  <i class="fa fa-circle-info text-muted ms-1" 
+                    ngbTooltip="Agreements can include any specific rules, regulations, or conditions that users must adhere to when using the facility.
+                            You can use the toolbar to format the text, create lists, and add links or images as needed."
+                  ></i>
+                  </span>
+                <app-wysiwyg-input
+                  [control]="form.get('agreements')"
+                  [placeholder]="'Type any agreements for the facility. This can include rules, regulations, or conditions that users must adhere to when using the facility.'"
+                ></app-wysiwyg-input>
+              </label>
             </div>
           </div>
           
