@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EntityRelationshipSelectorComponent, EntityRelationshipConfig } from '../entity-relationship-selector/entity-relationship-selector.component';
-import { EntitySelectionDropdownItemComponent } from '../entity-selection-dropdown-item/entity-selection-dropdown-item.component';
+import { EntityRelationshipSelectorComponent, EntityRelationshipConfig } from '../entity/entity-relationship-selector/entity-relationship-selector.component';
+import { EntitySelectionDropdownItemComponent } from '../entity/entity-selection-dropdown-item/entity-selection-dropdown-item.component';
 import { PolicyService } from '../../../services/policy.service';
 
 @Component({

@@ -13,7 +13,7 @@ import {
 import { UntypedFormControl } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
-import { RelationshipService } from '../../../services/relationship.service';
+import { RelationshipService } from '../../../../services/relationship.service';
 
 /*
  * Configuration for the entity relationship selector
@@ -203,6 +203,15 @@ export class EntityRelationshipSelectorComponent {
     }
   }
 
+  // Called by the "Link {{config}}" button
+  // Commits the currently staged typeahead selection
+  linkCurrentSelection() {
+    const value = this.searchControl.value;
+    if (!value?.pk) return;
+    this.selectEntity({ value, display: value.displayName || value.name || '' });
+    this.searchControl.setValue(' ');
+  }
+
   // Handle entity selection from typeahead
   selectEntity(match: any) {
     // Prevent selection if not editable (immutable and already has selections)
@@ -296,4 +305,5 @@ export class EntityRelationshipSelectorComponent {
   trackBySelectedEntity(index, entity) {
     return `${entity.pk}::${entity.sk}`
   }
+
 }

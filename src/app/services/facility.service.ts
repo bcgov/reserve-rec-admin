@@ -85,13 +85,15 @@ export class FacilityService {
       );
       return res;
     } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
+      this.loggerService.error(error);
+      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Facility failed to update`,
         ToastTypes.ERROR
       );
-      this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
-      this.loggerService.error(error);
+      return null;
     }
   }
 

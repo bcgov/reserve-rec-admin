@@ -20,8 +20,15 @@ export class LoadalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    // Disable if working locally
+    // I think if we're locally building, it's Ricky Bobby fast
+    // And that's why the spinner just hangs forever (loads before we can hide it)
+    if (window.location.hostname === 'localhost') {
+      return;
+    }
+    
     if (this.loadalElement?.nativeElement) {
-      this.loadal = new bootstrap.Modal(this.loadalElement.nativeElement);
+      this.loadal = new bootstrap.Modal(this.loadalElement.nativeElement, { animation: false });
       this.isViewInitialized = true;
     }
   }

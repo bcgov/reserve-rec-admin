@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,21 +9,16 @@ import { CommonModule } from '@angular/common';
 })
 export class PolicyListItemComponent {
   @Input() policy: any;
-  @Input() showDetailsButton: boolean = true;
+  @Input() isEditing: boolean = false;
+  @Input() isCreating: boolean = false;
+  @Output() policyRemoved = new EventEmitter<any>();
 
-  public constantsData = null;
-
-  get headingLabel() {
-    if (this.policy?.policyType) {
-      return this.policy.policyType.charAt(0).toUpperCase() + this.policy.policyType.replace(/_/g, ' ').slice(1) + " Policy"; 
-    } else {
-      return 'Policy';
-    }
+  removePolicy(policy: any) {
+    this.policyRemoved.emit(policy);
   }
 
-  // navigateToPolicy(policy: any) {
-  //   const policyUrl = `/inventory/policy/${policy.collectionId}/${policy.activityType}/${policy.activityId}/${policy.policyId}`;
-  //   window.open(policyUrl, '_blank');
-  // }
-
+  navigateToPolicy(policy: any) {
+    const policyUrl = `/inventory/policy/${policy.collectionId}/${policy.policyType}/${policy.policyId}`;
+    window.open(policyUrl, '_blank');
+  }
 }

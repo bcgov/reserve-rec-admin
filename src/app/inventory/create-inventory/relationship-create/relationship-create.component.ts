@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
-import { EntityRelationshipSelectorComponent } from '../../../shared/components/entity-relationship-selector/entity-relationship-selector.component';
+import { EntityRelationshipSelectorComponent } from '../../../shared/components/entity/entity-relationship-selector/entity-relationship-selector.component';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivityService } from '../../../services/activity.service';
 import { FacilityService } from '../../../services/facility.service';

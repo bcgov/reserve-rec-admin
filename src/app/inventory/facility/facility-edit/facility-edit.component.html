@@ -1,19 +1,28 @@
-<section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center">Update {{ facility?.displayName }}</h4>
-  </div>
-</section>
-<hr>
 <app-facility-form
-  (formValue)="updateFacilityForm($event)">
+  (formValue)="updateFacilityForm($event)"
+  (relationshipsLoaded)="onRelationshipsLoaded($event.type, $event.relationships)"
+  (relationshipsChanged)="onRelationshipsChanged($event.type, $event.relationships)">
 </app-facility-form>
-<hr>
-<section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center mb-5">Update Facility</h4>
-<button class="btn btn-secondary btn-lg" (click)="submit()" [disabled]="!facilityForm?.valid || !facilityForm?.dirty">
-  <i class="fa-solid fa-pen-to-square me-2"></i>
-  <span>Update {{facility?.displayName}}</span>
-</button>
+<div class="row d-flex justify-content-end">
+  <div class="col-auto p-4">
+    <div class="d-flex justify-content-end align-items-center gap-2">
+      <button
+        class="btn btn-outline-danger rounded-1"
+        (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-secondary rounded-1"
+        (click)="resetForm()"
+        [disabled]="!facilityForm?.dirty">
+        Reset
+      </button>
+      <button
+        class="btn btn-primary rounded-1"
+        (click)="submit()"
+        [disabled]="!facilityForm?.valid || !facilityForm?.dirty">
+        Save
+      </button>
+    </div>
   </div>
-</section>
+</div>

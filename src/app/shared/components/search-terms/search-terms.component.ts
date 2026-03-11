@@ -29,7 +29,6 @@ export class SearchTermsComponent {
   // Convert comma-separated string to array
   getSearchTermsArray(input: string): string[] {
     if (!input) return [];
-    console.log('Search term input', input);
     return input
       .replace(/\n/g, '')
       .split(',')
@@ -48,13 +47,15 @@ export class SearchTermsComponent {
 
     if (strings.length > 1) {
       let duplicate = false;
+      const toAdd: string[] = [];
       strings.forEach((string) => {
         if (string && !this.searchTerms.includes(string)) {
-          this.searchTerms.push(string);
+          toAdd.push(string);
         } else if (string) {
           duplicate = true;
         }
       });
+      this.searchTerms = [...this.searchTerms, ...toAdd];
       this.searchTermExists = duplicate;
       this.searchTermSet = '';
       this.searchTermsChange.emit([...this.searchTerms]);
@@ -62,7 +63,7 @@ export class SearchTermsComponent {
       return;
     } else {
       if (!this.searchTerms.includes(this.searchTermSet)) {
-        this.searchTerms.push(this.searchTermSet);
+        this.searchTerms = [...this.searchTerms, this.searchTermSet];
         this.searchTermSet = '';
         this.searchTermsChange.emit([...this.searchTerms]);
         this.searchTermDirty.emit();
@@ -73,7 +74,7 @@ export class SearchTermsComponent {
   }
 
   removeSearchTerm(index: any) {
-    this.searchTerms.splice(index, 1);
+    this.searchTerms = this.searchTerms.filter((_, i) => i !== index);
     this.searchTermDirty.emit();
     this.searchTermsChange.emit([...this.searchTerms]);
   }

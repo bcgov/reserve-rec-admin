@@ -1,23 +1,20 @@
-<section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center mb-5">Create New Facility</h4>
-    <div class="text-center mb-3">
-      Facilities are specific geospatial locations defined by a latitude and longitude and can represent the location of campgrounds, trails, structures, natural features, and other amenities.
+<section class="container pt-3 pb-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex flex-column align-items-start justify-content-center">
+        <h2 class="text-center mb-2">Create a new Facility</h2>
+      </div>
     </div>
   </div>
 </section>
-<hr>
 <app-facility-form
+  [isCreating]="true"
   (formValue)="updateFacilityForm($event)">
-  >
 </app-facility-form>
-<hr>
 <section>
-  <div class="d-flex flex-column align-items-center justify-content-center my-5">
-    <h4 class="text-center mb-5">Create New Facility</h4>
-<button class="btn btn-success btn-lg" (click)="submit()">
-  <i class="fa-solid fa-plus me-2"></i>
-  <span>Create Facility</span>
-</button>
+  <div class="d-flex flex-column align-items-center justify-content-center mt-2 mb-5">
+    <button class="btn btn-outline-success btn-lg" (click)="submit()" [disabled]="!facilityForm?.valid">
+      <span>Create Facility</span>
+    </button>
   </div>
 </section>
