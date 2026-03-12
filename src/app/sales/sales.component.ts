@@ -65,7 +65,7 @@ export class SalesComponent implements OnInit, OnDestroy {
   bookings: Booking[] = [];
   filteredBookings: Booking[] = [];
   numberOfPermits = 0;
-  
+
   // UI state
   isLoading = false;
   showFilters = true;
@@ -145,8 +145,10 @@ export class SalesComponent implements OnInit, OnDestroy {
     const res = await lastValueFrom(
       this.apiService.get('bookings/admin', queryParams)
     );
-
-    return res['data'] as SearchResponse;
+    if (res?.['data']) {
+      return res['data'] as SearchResponse;
+    }
+    return { items: [], hasMore: false } as SearchResponse;
   }
 
   async searchByKeyword(keyword: string) {
@@ -184,7 +186,7 @@ export class SalesComponent implements OnInit, OnDestroy {
       // New search
       this.bookings = response.items || [];
     }
-    
+
     this.filteredBookings = [...this.bookings];
     this.numberOfPermits = this.bookings.length;
     this.lastEvaluatedKey = response.lastEvaluatedKey;
@@ -243,7 +245,7 @@ export class SalesComponent implements OnInit, OnDestroy {
       const queryParams = {
         bookingId: booking.bookingId
       };
-      
+
       const res = await lastValueFrom(
         this.apiService.get('bookings/admin', queryParams)
       );
@@ -327,31 +329,31 @@ export class SalesComponent implements OnInit, OnDestroy {
   toggleFiltersPanel() {
     this.showFilters = !this.showFilters;
   }
-  
+
   // QR Code Scanner Methods
   openQRScanner() {
     this.showQRScanner = true;
     this.qrVerificationResult = null;
     this.showVerificationResult = false;
   }
-  
+
   closeQRScanner() {
     this.showQRScanner = false;
   }
-  
+
   async onQRScanSuccess(result: QRScanResult) {
     try {
       this.isLoading = true;
       this.closeQRScanner();
-      
+
       // Call the verification endpoint
       const verificationResponse = await lastValueFrom(
         this.apiService.get(`verify/${result.bookingId}/${result.hash}`, {})
       );
-      
+
       this.qrVerificationResult = verificationResponse['data'];
       this.showVerificationResult = true;
-      
+
       this.toastService.addMessage(
         'QR code scanned successfully',
         'Success',
@@ -368,7 +370,7 @@ export class SalesComponent implements OnInit, OnDestroy {
       this.isLoading = false;
     }
   }
-  
+
   onQRScanError(error: string) {
     this.toastService.addMessage(
       error,
@@ -376,23 +378,23 @@ export class SalesComponent implements OnInit, OnDestroy {
       ToastTypes.WARNING
     );
   }
-  
+
   closeVerificationResult() {
     this.showVerificationResult = false;
     this.qrVerificationResult = null;
   }
-  
+
   getVerificationStatus(): 'valid' | 'invalid' | 'expired' | 'cancelled' {
     if (!this.qrVerificationResult) return 'invalid';
-    
+
     const verification = this.qrVerificationResult.verification;
     if (verification?.isCancelled) return 'cancelled';
     if (verification?.isExpired) return 'expired';
     if (verification?.isConfirmed && this.qrVerificationResult.isValid) return 'valid';
-    
+
     return 'invalid';
   }
-  
+
   getStatusIcon(): string {
     const status = this.getVerificationStatus();
     switch (status) {
@@ -402,7 +404,7 @@ export class SalesComponent implements OnInit, OnDestroy {
       default: return 'fa-exclamation-triangle';
     }
   }
-  
+
   getStatusClass(): string {
     const status = this.getVerificationStatus();
     switch (status) {
@@ -412,7 +414,7 @@ export class SalesComponent implements OnInit, OnDestroy {
       default: return 'alert-danger';
     }
   }
-  
+
   getStatusMessage(): string {
     const status = this.getVerificationStatus();
     switch (status) {
