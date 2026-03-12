@@ -1,3 +1,4 @@
+<app-loadal #loadal></app-loadal>
 <section class="container pt-3 pb-3">
   <div class="row">
     <div class="col-12">
@@ -41,18 +42,20 @@
           </div>
         </div>
       </div>
-      <div class="card mb-4">
+      <div class="card mb-5">
         <div class="card-body p-4">
           <h3 class="mb-4">Details</h3>
           
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
                 [class]="'label-top'"
                 [control]="form.get('isOpen')"
                 [switch]="true"
                 [label]="'Status'"
-              ></ngds-toggle-input>
+                ></ngds-toggle-input>
+              </div>
               <span class="{{ form.get('isOpen')?.value ? 'text-success' : '' }} small">
                 {{ form.get('isOpen')?.value ? 'Open' : 'Closed' }}
               </span>
@@ -61,24 +64,28 @@
 
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
                 [class]="'label-top'"
                 [control]="form.get('isVisible')"
                 [switch]="true"
                 [label]="'Visibility'"
-              ></ngds-toggle-input>
+                ></ngds-toggle-input>
+              </div>
               <span class="small">{{ form.get('isVisible')?.value ? 'Visible to public' : 'Not visible to public' }}</span>
             </div>
           </div>
         
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
-              <ngds-toggle-input
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
                 [class]="'label-top'"
                 [control]="form.get('passesRequired')"
                 [switch]="true"
                 [label]="'Passes'"
-              ></ngds-toggle-input>
+                ></ngds-toggle-input>
+              </div>
               <span class="small">{{ form.get('passesRequired')?.value ? 'Passes required' : 'Passes are not required' }}</span>
             </div>
           </div>
@@ -114,7 +121,7 @@
             <div class="col-12">
               <label class="small fw-bold">
                 <span class="col-lg-12 d-block mb-2">Agreements
-                  <i class="fa fa-circle-info text-muted ms-1" 
+                  <i class="fa-regular fa-circle-info text-muted fa-lg ms-1" 
                     ngbTooltip="Agreements can include any specific rules, regulations, or conditions that users must adhere to when using the facility.
                             You can use the toolbar to format the text, create lists, and add links or images as needed."
                   ></i>
@@ -144,7 +151,7 @@
             (searchTermsChange)="onSearchTermsChange($event)"
           ></app-search-terms>
 
-          <hr>
+          <hr class="mt-4">
           <h3 class="mb-4 mt-4">Activities</h3>
           <div class="row">
             <div *ngIf="!isCreating" class="col-12">
@@ -184,7 +191,7 @@
         <div class="card-body p-4">
           <h3 class="m-1 mb-4">Geospatial details</h3>
           <div class="row">
-            <div class="col-lg-6">
+            <div class="col-lg-6 mb-2">
               <h4 class="mb-4">Details</h4>
               
               <div class="row g-3">

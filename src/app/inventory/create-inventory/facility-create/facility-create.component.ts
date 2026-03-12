@@ -1,16 +1,19 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { FacilityService } from '../../../services/facility.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilityFormComponent } from '../../facility/facility-form/facility-form.component';
+import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 
 @Component({
   selector: 'app-facility-create',
-  imports: [FacilityFormComponent],
+  imports: [FacilityFormComponent, LoadalComponent],
   templateUrl: './facility-create.component.html',
   styleUrl: './facility-create.component.scss'
 })
 export class FacilityCreateComponent {
+  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
+
   public facilityForm: UntypedFormGroup;
   public facility;
   public isCreating: boolean = true;
@@ -57,13 +60,19 @@ export class FacilityCreateComponent {
       return;
     }
 
-    const props = this.formatFormForSubmission();
-    
-    const res = await this.facilityService.createFacility(collectionId, facilityType, props);
+    this.loadal.show();
+    try {
+      const props = this.formatFormForSubmission();
+      const res = await this.facilityService.createFacility(collectionId, facilityType, props);
 
-    const facilityId = res[0]?.data?.facilityId;
-    if (facilityId) {
-      this.navigateToFacility(collectionId, facilityType, facilityId);
+      const facilityId = res[0]?.data?.facilityId;
+      if (facilityId) {
+        this.navigateToFacility(collectionId, facilityType, facilityId);
+      }
+    } catch (error) {
+      console.error('Error creating facility:', error);
+    } finally {
+      this.loadal.hide();
     }
   }
 

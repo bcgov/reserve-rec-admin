@@ -4,15 +4,17 @@ import { ProductService } from '../../../services/product.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
+import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 
 @Component({
   selector: 'app-product-edit',
-  imports: [ProductFormComponent],
+  imports: [ProductFormComponent, LoadalComponent],
   templateUrl: './product-edit.component.html',
   styleUrl: './product-edit.component.scss'
 })
 export class ProductEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
   @ViewChild(ProductFormComponent) productFormComponent!: ProductFormComponent;
+  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
 
   public productForm;
   public product;
@@ -49,17 +51,24 @@ export class ProductEditComponent extends EntityEditBaseComponent implements Aft
       return;
     }
 
-    const props = this.formatFormForSubmission();
+    this.loadal.show();
+    try {
+      const props = this.formatFormForSubmission();
 
-    // Step 1: Update the product entity itself
-    const res = await this.productService.updateProduct(collectionId, activityType, activityId, productId, props);
+      // Step 1: Update the product entity itself
+      const res = await this.productService.updateProduct(collectionId, activityType, activityId, productId, props);
 
-    if (res) {
-      // Step 2: Sync relationships (handles additions and deletions)
-      await this.synchronize();
+      if (res) {
+        // Step 2: Sync relationships (handles additions and deletions)
+        await this.synchronize();
 
-      // Step 3: Navigate to the updated product
-      this.navigateToProduct(collectionId, activityType, activityId, productId);
+        // Step 3: Navigate to the updated product
+        this.navigateToProduct(collectionId, activityType, activityId, productId);
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+    } finally {
+      this.loadal.hide();
     }
   }
 

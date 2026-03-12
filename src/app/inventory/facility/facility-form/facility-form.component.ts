@@ -19,6 +19,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
   imports: [
     NgdsFormsModule,
     MapComponent,
+    LoadalComponent,
     CommonModule,
     SearchTermsComponent,
     WysiwygInputComponent,
@@ -253,13 +254,19 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
         collectionId: this.facility?.collectionId
       },
       fetchFn: async (searchFields) => {
-        // Only fetch activities if collectionId is set
         if (this.form.get('collectionId')?.value) {
-          const result = await this.activityService.getActivitiesByCollectionId(
-            searchFields.collectionId
-          );
-          this.initialActivities = [...result.items]
-          return result;
+          this.loadal.show();
+          try {
+            const result = await this.activityService.getActivitiesByCollectionId(
+              searchFields.collectionId
+            );
+            this.initialActivities = [...result.items];
+            return result;
+          } catch (error) {
+            console.error('Error loading activities:', error);
+          } finally {
+            this.loadal.hide();
+          }
         }
       },
       filterFn: (activity, searchFields) => {
