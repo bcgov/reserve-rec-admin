@@ -124,7 +124,62 @@
               >
             </ngds-picklist-input>
           </div>
+
+          <hr class="mt-4">
+          <h3 class="mb-4">Asset List</h3>
+          <div class="row">
+            <div class="col-12 col-lg-6">
+              <label for="numberOfPassesInput" class="form-label">Number of Passes</label>
+              <input 
+                id="numberOfPassesInput"
+                type="number" 
+                class="form-control" 
+                [formControl]="$any(form.get('numberOfPasses'))"
+                placeholder="Enter number of passes"
+                min="1">
+            </div>
+          </div>
+
+          <hr class="mt-4">
+          <h3 class="mb-4">Date Range</h3>
+          <div class="row">
+            <div class="col-12 col-lg-6">
+              <label for="rangeStartInput" class="form-label">Range Start</label>
+              <input 
+                id="rangeStartInput"
+                type="date" 
+                class="form-control mb-3" 
+                [formControl]="$any(form.get('rangeStart'))"
+                placeholder="YYYY-MM-DD">
+              <label for="rangeEndInput" class="form-label">Range End</label>
+              <input 
+                id="rangeEndInput"
+                type="date" 
+                class="form-control" 
+                [formControl]="$any(form.get('rangeEnd'))"
+                placeholder="YYYY-MM-DD">
+            </div>
+          </div>
+
+          <hr class="mt-4">
+          <h3 class="mb-4">Availability Estimation</h3>
+          <div class="row">
+            <div class="col-12 col-lg-6">
+              <ngds-picklist-input
+                [control]="form.get('estimationMode')"
+                [label]="'Estimation Mode'"
+                [selectionListItems]="[
+                  { display: 'Exact', value: 'exact' },
+                  { display: 'Tiered', value: 'tiered' }
+                ]"
+                [placeholder]="'Select estimation mode'"
+                [resetButton]="true"
+              >
+              </ngds-picklist-input>
+            </div>
+          </div>
           
+          <hr class="mt-4">
           <app-search-terms
             #searchTerms
             [searchTerms]="form.get('searchTerms')?.value || []"
