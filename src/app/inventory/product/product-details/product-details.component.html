@@ -133,7 +133,7 @@
               <ng-container *ngIf="getProductDateForDay(day) as pd; else noDate">
                 <div class="border rounded p-3 h-100 bg-light">
                   <p class="fw-bold small mb-1">
-                    <a class="text-primary text-decoration-none" style="cursor:pointer" (click)="navigateToProductDate(day)">{{ day | date:'EEEE, MMM d' }}</a>
+                    <button class="btn btn-link p-0 text-primary text-decoration-none fw-bold" (click)="navigateToProductDate(day)">{{ day | date:'EEEE, MMM d' }}</button>
                   </p>
                   <p class="small mb-0 text-muted">Passes: {{ pd.assetList?.[0]?.quantity ?? '—' }}</p>
                 </div>
