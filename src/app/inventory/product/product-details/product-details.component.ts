@@ -6,6 +6,8 @@ import { ActivityListItemComponent } from '../../activity/activity-list-item/act
 import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-list-item.component';
 import { ActivityService } from '../../../services/activity.service';
 import { PolicyService } from '../../../services/policy.service';
+import { ProductService } from '../../../services/product.service';
+import { ProductDateService } from '../../../services/product-date.service';
 
 @Component({
   selector: 'app-product-details',
@@ -23,6 +25,31 @@ export class ProductDetailsComponent {
   public relatedActivity: any[] = [];
   public relatedPolicies: any[] = [];
   public loadingRelationships: boolean = false;
+  public productDates: any[] = [];
+  public loadingProductDates: boolean = false;
+  public currentWeekStart: Date = new Date();
+
+  get currentWeekEnd(): Date {
+    const end = new Date(this.currentWeekStart);
+    end.setDate(end.getDate() + 6);
+    return end;
+  }
+
+  get weekLabel(): string {
+    const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    return `${this.currentWeekStart.toLocaleDateString('en-CA', opts)} – ${this.currentWeekEnd.toLocaleDateString('en-CA', opts)}`;
+  }
+  get weekDays(): Date[] {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(this.currentWeekStart);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  }
+
+  getProductDateForDay(date: Date): any {
+    return this.productDates.find(pd => pd.sk === this.toLocalISODate(date)) || null;
+  }
 
   constructor(
     protected router: Router,
@@ -30,13 +57,22 @@ export class ProductDetailsComponent {
     protected cdr: ChangeDetectorRef,
     protected route: ActivatedRoute,
     private activityService: ActivityService,
-    private policyService: PolicyService
+    private policyService: PolicyService,
+    private productService: ProductService,
+    private productDateService: ProductDateService
   ) {
     // Subscribe to route data changes to handle updates
     this.route.data.subscribe(async (data) => {
       if (data?.['product']) {
         this.product = data['product'];
+        // Start week navigator on the Monday of the product's rangeStart week
+        if (this.product?.rangeStart) {
+          this.currentWeekStart = this.snapToMonday(new Date(this.product.rangeStart + 'T00:00:00'));
+        } else {
+          this.currentWeekStart = this.snapToMonday(new Date());
+        }
         await this.loadRelationships();
+        await this.loadProductDatesForWeek();
       }
     });
   }
@@ -127,6 +163,79 @@ export class ProductDetailsComponent {
     }
   }
 
+  async loadProductDatesForWeek() {
+    const { collectionId, activityType, activityId, productId } = this.product || {};
+    if (!collectionId || !activityType || !activityId || !productId) return;
+    this.loadingProductDates = true;
+    try {
+      const res = await this.productDateService.getProductDates(
+        collectionId, activityType, activityId, productId,
+        this.toLocalISODate(this.currentWeekStart),
+        this.toLocalISODate(this.currentWeekEnd)
+      );
+      // runQuery returns { items: [], lastEvaluatedKey }
+      this.productDates = res?.items ?? (Array.isArray(res) ? res : []);
+    } catch (error) {
+      console.error('Error loading product dates:', error);
+      this.productDates = [];
+    } finally {
+      this.loadingProductDates = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  previousWeek() {
+    this.currentWeekStart = new Date(this.currentWeekStart);
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7);
+    this.loadProductDatesForWeek();
+  }
+
+  nextWeek() {
+    this.currentWeekStart = new Date(this.currentWeekStart);
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7);
+    this.loadProductDatesForWeek();
+  }
+
+  // We may need to add some more info to be passed into product date at this point
+  navigateToProductDate(date: Date) {
+    const iso = this.toLocalISODate(date);
+    this.router.navigate([
+      '/inventory/product-date',
+      this.product.collectionId,
+      this.product.activityType,
+      this.product.activityId,
+      this.product.productId,
+      iso
+    ]);
+  }
+
+  /**
+   * Initialize ProductDates for this product
+   * Creates ProductDate and AvailabilitySignal records for each day in the product's date range
+   */
+  async initializeProductDates() {
+    if (!this.product?.collectionId || !this.product?.activityType || !this.product?.activityId || !this.product?.productId) {
+      console.error('Cannot initialize product dates: Missing product identifiers');
+      return;
+    }
+
+    try {
+      const result = await this.productService.createProductDates(
+        this.product.collectionId,
+        this.product.activityType,
+        this.product.activityId,
+        this.product.productId,
+        {} // Empty body to use product's default rangeStart/rangeEnd
+      );
+
+      if (result) {
+        console.log('Successfully initialized product dates:', result);
+      }
+    } catch (error) {
+      console.error('Error initializing product dates:', error);
+    }
+  }
+
   /**
    * Load and fetch geozone entities that are related to this activity
    */
@@ -160,4 +269,19 @@ export class ProductDetailsComponent {
   //   }
   // }
 
+  // Uses local date parts to avoid UTC offset shifting the date (toISOString() converts to UTC)
+  private toLocalISODate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  private snapToMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay(); // 0=Sun, 1=Mon ... 6=Sat
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
 }

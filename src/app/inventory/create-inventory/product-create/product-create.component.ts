@@ -86,6 +86,42 @@ export class ProductCreateComponent {
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
+    // Transform numberOfPasses into assetList
+    if (props['numberOfPasses']) {
+      props['assetList'] = [{
+        primaryKey: {
+          pk: 'asset::pass::1', // Placeholder - you may need to create actual assets
+          sk: 'v1'
+        },
+        allocationType: 'fixed',
+        quantity: Number(props['numberOfPasses'])
+      }];
+      delete props['numberOfPasses'];
+    }
+
+    // Transform estimationMode into availabilityEstimationPattern
+    if (props['estimationMode']) {
+      props['availabilityEstimationPattern'] = {
+        estimationMode: props['estimationMode'],
+        cadence: {
+          id: '5min',
+          label: 'Every 5 minutes'
+        }
+      };
+      
+      // Add default tiers if tiered mode
+      if (props['estimationMode'] === 'tiered') {
+        props['availabilityEstimationPattern']['tiers'] = [
+          { id: 'full', label: 'Full', maxPercentage: 0 },
+          { id: 'low', label: 'Low', maxPercentage: 0.25 },
+          { id: 'medium', label: 'Medium', maxPercentage: 0.75 },
+          { id: 'high', label: 'High', maxPercentage: 1 }
+        ];
+      }
+      
+      delete props['estimationMode'];
+    }
+
     for (const policy of ['reservationPolicy', 'partyPolicy', 'feePolicy', 'changePolicy']) {
       if (props[policy]) {
         props[policy] = {

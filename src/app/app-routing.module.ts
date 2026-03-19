@@ -185,6 +185,11 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'inventory/product-date/:collectionId/:activityType/:activityId/:productId/:date',
+    loadComponent: () => import('./inventory/product-date/product-date-details/product-date-details.component').then(mod => mod.ProductDateDetailsComponent),
+    canActivate: [UserGuard],
+  },
+  {
     path: 'reports',
     loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent),
     canActivate: [UserGuard]

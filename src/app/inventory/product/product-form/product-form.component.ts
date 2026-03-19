@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, AfterViewChecked, ViewChild } from '@angular/core';
 import { Constants } from '../../../app.constants';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, Validators, AbstractControl, UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, Validators, AbstractControl, UntypedFormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,7 @@ import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-li
   imports: [
     CommonModule,
     NgdsFormsModule,
+    ReactiveFormsModule,
     SearchTermsComponent,
     ActivityListItemComponent,
     PolicyListItemComponent,
@@ -88,7 +89,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       activityType: [this.product?.activityType || '', [Validators.required]],
       activitySubType: [this.product?.activitySubType || []],
       adminNotes: [this.product?.adminNotes || ''],
-      collectionId: [this.product?.collectionId || '', {
+      collectionId: [this.product?.collectionId || 'bcparks_', {
         nonNullable: true,
         validators: [Validators.required],
         updateOn: 'blur'
@@ -113,6 +114,12 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       description: [this.product?.description || ''],
       feePolicy: [this.product?.feePolicy || null],
       partyPolicy: [this.product?.partyPolicy || null],
+
+      // New required fields
+      numberOfPasses: [this.product?.assetList?.[0]?.quantity || 1, [Validators.required, Validators.min(1)]],
+      rangeStart: [this.product?.rangeStart || ''],
+      rangeEnd: [this.product?.rangeEnd || ''],
+      estimationMode: [this.product?.availabilityEstimationPattern?.estimationMode || 'exact', [Validators.required]],
     }, {
       validators: [this.displayNameValidator]
     });

@@ -1,0 +1,193 @@
+<section class="container pt-3 pb-3">
+  <div class="row">
+    <div class="col-12">
+
+      <div class="mb-3">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+          <i class="fa fa-arrow-left me-2"></i>Back to Product
+        </button>
+      </div>
+
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted small">Loading product date...</p>
+      </div>
+
+      <div *ngIf="!loading && error" class="alert alert-warning">
+        {{ error }}
+      </div>
+
+      <ng-container *ngIf="!loading && productDate">
+
+        <p class="text-muted small mb-1">
+          <span *ngIf="activityName">{{ activityName }}</span>
+          <span *ngIf="activityName && productName"> &rsaquo; </span>
+          <span *ngIf="productName">{{ productName }}</span>
+        </p>
+        <h3 class="mb-4">{{ date | date:'EEEE, MMMM d, y' }}</h3>
+
+        <!-- Summary & Inventory -->
+        <div class="card mb-4">
+          <div class="card-body p-4">
+            <div class="row">
+              <div class="col-md-6">
+                <h4 class="mb-3">Summary</h4>
+                <div class="row mb-2">
+                  <div class="col-4"><strong>Collection:</strong></div>
+                  <div class="col-auto">
+                    <span class="badge bg-secondary">{{ collectionId }}</span>
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4"><strong>Activity Type:</strong></div>
+                  <div class="col-auto">
+                    <span class="badge bg-light text-dark border">{{ activityType }}</span>
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4"><strong>Activity ID:</strong></div>
+                  <div class="col-auto"><span>{{ activityId }}</span></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4"><strong>Product ID:</strong></div>
+                  <div class="col-auto"><span>{{ productId }}</span></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4"><strong>Date:</strong></div>
+                  <div class="col-auto"><span>{{ productDate.date }}</span></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h4 class="mb-3">Inventory</h4>
+                <ng-container *ngFor="let asset of productDate.assetList">
+                  <div class="row mb-2">
+                    <div class="col-4"><strong>Quantity:</strong></div>
+                    <div class="col-auto"><span>{{ asset.quantity }}</span></div>
+                  </div>
+                  <div class="row mb-2" *ngIf="asset.type">
+                    <div class="col-4"><strong>Asset Type:</strong></div>
+                    <div class="col-auto"><span>{{ asset.type }}</span></div>
+                  </div>
+                  <div class="row mb-2" *ngIf="asset.id">
+                    <div class="col-4"><strong>Asset ID:</strong></div>
+                    <div class="col-auto"><span class="text-muted small">{{ asset.id }}</span></div>
+                  </div>
+                </ng-container>
+                <p *ngIf="!productDate.assetList?.length" class="text-muted small">No inventory data.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservation Context -->
+        <div class="card mb-4">
+          <div class="card-body p-4">
+            <h4 class="mb-3">Reservation Context</h4>
+
+            <div class="d-flex gap-2 mb-4">
+              <span class="badge px-3 py-2 fs-6"
+                [ngClass]="reservationContext?.isDiscoverable ? 'bg-success' : 'bg-secondary'">
+                <i class="fa me-1" [ngClass]="reservationContext?.isDiscoverable ? 'fa-eye' : 'fa-eye-slash'"></i>
+                {{ reservationContext?.isDiscoverable ? 'Discoverable' : 'Not Discoverable' }}
+              </span>
+              <span class="badge px-3 py-2 fs-6"
+                [ngClass]="reservationContext?.isReservable ? 'bg-success' : 'bg-secondary'">
+                <i class="fa fa-calendar-check me-1"></i>
+                {{ reservationContext?.isReservable ? 'Reservable' : 'Not Reservable' }}
+              </span>
+            </div>
+
+            <div class="row mb-2">
+              <div class="col-3"><strong>Min Daily Inventory:</strong></div>
+              <div class="col-auto"><span>{{ reservationContext?.minDailyInventory ?? '—' }}</span></div>
+            </div>
+            <div class="row mb-4">
+              <div class="col-3"><strong>Max Daily Inventory:</strong></div>
+              <div class="col-auto"><span>{{ reservationContext?.maxDailyInventory ?? '—' }}</span></div>
+            </div>
+
+            <h5 class="mb-3">Temporal Windows</h5>
+            <p *ngIf="!temporalWindowsList.length" class="text-muted small">No temporal windows defined.</p>
+            <div class="row g-3">
+              <div *ngFor="let window of temporalWindowsList" class="col-md-6">
+                <div class="border rounded p-3 h-100 bg-light">
+                  <p class="fw-bold mb-2">
+                    <i class="fa fa-clock me-2 text-primary"></i>{{ window.label || window.id }}
+                  </p>
+                  <div class="row mb-1">
+                    <div class="col-3 text-muted small">Opens:</div>
+                    <div class="col-auto small">
+                      <span *ngIf="window.open">{{ window.open | date:'medium' }}</span>
+                      <span *ngIf="!window.open" class="text-muted">—</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-3 text-muted small">Closes:</div>
+                    <div class="col-auto small">
+                      <span *ngIf="window.close">{{ window.close | date:'medium' }}</span>
+                      <span *ngIf="!window.close" class="text-muted">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policies -->
+        <div class="card mb-4">
+          <div class="card-body p-4">
+            <h4 class="mb-3">Policies</h4>
+            <div class="row g-3">
+              <div class="col-md-4" *ngIf="productDate.partyPolicy">
+                <div class="border rounded p-3 h-100">
+                  <h6 class="mb-2"><i class="fa fa-users me-2 text-primary"></i>Party Policy</h6>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">Name:</div>
+                    <div class="col-auto small">{{ productDate.partyPolicy?.displayName || '—' }}</div>
+                  </div>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">ID:</div>
+                    <div class="col-auto small text-muted">{{ productDate.partyPolicy?.policyId || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4" *ngIf="productDate.changePolicy">
+                <div class="border rounded p-3 h-100">
+                  <h6 class="mb-2"><i class="fa fa-edit me-2 text-primary"></i>Change Policy</h6>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">Name:</div>
+                    <div class="col-auto small">{{ productDate.changePolicy?.displayName || '—' }}</div>
+                  </div>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">ID:</div>
+                    <div class="col-auto small text-muted">{{ productDate.changePolicy?.policyId || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4" *ngIf="productDate.feePolicy">
+                <div class="border rounded p-3 h-100">
+                  <h6 class="mb-2"><i class="fa fa-dollar-sign me-2 text-primary"></i>Fee Policy</h6>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">Name:</div>
+                    <div class="col-auto small">{{ productDate.feePolicy?.displayName || '—' }}</div>
+                  </div>
+                  <div class="row mb-1">
+                    <div class="col-4 small text-muted">ID:</div>
+                    <div class="col-auto small text-muted">{{ productDate.feePolicy?.policyId || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!productDate.partyPolicy && !productDate.changePolicy && !productDate.feePolicy"
+                class="col-12 text-muted small">
+                No policy data available.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</section>

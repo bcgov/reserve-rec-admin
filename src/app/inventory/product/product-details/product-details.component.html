@@ -52,6 +52,32 @@
 
           <div class="row mt-2">
             <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Date&nbsp;range:</p>
+              <p class="small">
+                {{ product?.rangeStart ? (product.rangeStart | date:'mediumDate') : 'No start date' }} 
+                &ndash; 
+                {{ product?.rangeEnd ? (product.rangeEnd | date:'mediumDate') : 'No end date' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Total&nbsp;inventory:</p>
+              <p class="small">{{ product?.assetList?.[0]?.quantity || 'Not specified' }} passes</p>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <button type="button" class="btn btn-primary" (click)="initializeProductDates()">
+                <i class="fa fa-calendar-plus me-2"></i>Initialize Product Dates
+              </button>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
               <p class="small fw-bold">Created on:</p>
               <p class="small">{{ product?.creationDate | date:'YYYY-LL-dd, h:mma' }}
             </div>
@@ -76,6 +102,48 @@
                   [policy]="policy"
                 ></app-policy-list-item>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Dates Card -->
+      <div class="card mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0">Product Dates</h3>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="previousWeek()">
+                <i class="fa fa-chevron-left"></i>
+              </button>
+              <span class="small fw-semibold">{{ weekLabel }}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="nextWeek()">
+                <i class="fa fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="loadingProductDates" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span class="ms-2 small text-muted">Loading...</span>
+          </div>
+
+          <div *ngIf="!loadingProductDates" class="row g-2">
+            <div *ngFor="let day of weekDays" class="col">
+              <ng-container *ngIf="getProductDateForDay(day) as pd; else noDate">
+                <div class="border rounded p-3 h-100 bg-light">
+                  <p class="fw-bold small mb-1">
+                    <button class="btn btn-link p-0 text-primary text-decoration-none fw-bold" (click)="navigateToProductDate(day)">{{ day | date:'EEEE, MMM d' }}</button>
+                  </p>
+                  <p class="small mb-0 text-muted">Passes: {{ pd.assetList?.[0]?.quantity ?? '—' }}</p>
+                </div>
+              </ng-container>
+              <ng-template #noDate>
+                <div class="border rounded p-3 h-100 bg-white text-muted">
+                  <p class="fw-bold small mb-1">{{ day | date:'EEEE, MMM d' }}</p>
+                  <p class="small mb-0">No data</p>
+                </div>
+              </ng-template>
             </div>
           </div>
         </div>

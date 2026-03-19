@@ -14,6 +14,7 @@ export class Constants {
     POLICY_RESULT: 'policyResult',
     PRODUCT_RESULT: 'productResult',
     PRODUCT_LIST: 'productList',
+    PRODUCT_DATE_LIST: 'productDateList',
 
     // Relationships
     GEOZONE_RELATIONSHIP_RESULT: 'geozoneRelationshipResult',
