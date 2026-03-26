@@ -6,7 +6,7 @@ import { LoggerService } from './logger.service';
 export interface FeatureFlagMetadata {
   lastUpdated: string;
   updatedBy: string;
-  updatedByEmail: string;
+  updatedByUsername: string;
 }
 
 export interface FeatureFlagAdminResponse {

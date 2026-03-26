@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
 import { AdminGuard } from './guards/admin.guard';
+import { PermissionsGuard } from './guards/permissions.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
@@ -32,121 +33,152 @@ export const routes: Routes = [
   },
   {
     path: 'sales',
-    loadComponent: () => import('./sales/sales.component').then(mod => mod.SalesComponent), canActivate: [UserGuard]
+    loadComponent: () => import('./sales/sales.component').then(mod => mod.SalesComponent),
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
   },
   {
     path: 'customers',
     loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
-    canActivate: [UserGuard]
-  },
-  {
-    path: 'customers/:id',
-    loadComponent: () => import('./customers/customer-detail/customer-detail.component').then(mod => mod.CustomerDetailComponent),
-    canActivate: [UserGuard]
-  },
-  {
-    path: 'customers/:id/edit',
-    loadComponent: () => import('./customers/customer-edit/customer-edit.component').then(mod => mod.CustomerEditComponent),
-    canActivate: [UserGuard]
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'staff' },
+    children: [
+      {
+        path: ':id',
+        loadComponent: () => import('./customers/customer-detail/customer-detail.component').then(mod => mod.CustomerDetailComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'staff' },
+      },
+      {
+        path: ':id/edit',
+        loadComponent: () => import('./customers/customer-edit/customer-edit.component').then(mod => mod.CustomerEditComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'staff' },
+      }
+    ]
   },
   // Inventory
   {
     path: 'inventory',
     loadComponent: () => import('./inventory/inventory.component').then(mod => mod.InventoryComponent),
-    canActivate: [UserGuard]
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
   },
   {
     path: 'inventory/create',
     loadComponent: () => import('./inventory/create-inventory/create-inventory.component').then(mod => mod.CreateInventoryComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'superadmin' },
     children: [
       {
         path: 'geozone',
-        loadComponent: () => import('./inventory/create-inventory/geozone-create/geozone-create.component').then(mod => mod.GeozoneCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/geozone-create/geozone-create.component').then(mod => mod.GeozoneCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
       {
         path: 'facility',
-        loadComponent: () => import('./inventory/create-inventory/facility-create/facility-create.component').then(mod => mod.FacilityCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/facility-create/facility-create.component').then(mod => mod.FacilityCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
       {
         path: 'activity',
         loadComponent: () => import('./inventory/create-inventory/activity-create/activity-create.component').then(mod => mod.ActivityCreateComponent),
-        // resolve: { protectedAreas: ProtectedAreasResolver }
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
       {
         path: 'product',
-        loadComponent: () => import('./inventory/create-inventory/product-create/product-create.component').then(mod => mod.ProductCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/product-create/product-create.component').then(mod => mod.ProductCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
       {
         path: 'policy',
-        loadComponent: () => import('./inventory/create-inventory/policy-create/policy-create.component').then(mod => mod.PolicyCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/policy-create/policy-create.component').then(mod => mod.PolicyCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
       {
         path: 'relationships',
-        loadComponent: () => import('./inventory/create-inventory/relationship-create/relationship-create.component').then(mod => mod.RelationshipCreateComponent)
+        loadComponent: () => import('./inventory/create-inventory/relationship-create/relationship-create.component').then(mod => mod.RelationshipCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       },
     ],
   },
   {
     path: 'inventory/geozone/:collectionId/:geozoneId',
     loadComponent: () => import('./inventory/geozone/geozone.component').then(mod => mod.GeozoneComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { geozone: GeozoneResolver },
     children: [
       {
         path: '',
         loadComponent: () => import('./inventory/geozone/geozone-details/geozone-details.component').then(mod => mod.GeozoneDetailsComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' },
       },
       {
         path: 'edit',
         loadComponent: () => import('./inventory/geozone/geozone-edit/geozone-edit.component').then(mod => mod.GeozoneEditComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
       }
     ]
   },
   {
     path: 'inventory/facility/:collectionId/:facilityType/:facilityId',
     loadComponent: () => import('./inventory/facility/facility.component').then(mod => mod.FacilityComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { facility: FacilityResolver },
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         loadComponent: () => import('./inventory/facility/facility-details/facility-details.component').then(mod => mod.FacilityDetailsComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' }
       },
       {
         path: 'edit',
         loadComponent: () => import('./inventory/facility/facility-edit/facility-edit.component').then(mod => mod.FacilityEditComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'staff' }
+
       }
     ]
   },
   {
     path: 'inventory/activity/:collectionId/:activityType/:activityId',
     loadComponent: () => import('./inventory/activity/activity.component').then(mod => mod.ActivityComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { activity: ActivityResolver },
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         loadComponent: () => import('./inventory/activity/activity-details/activity-details.component').then(mod => mod.ActivityDetailsComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' },
       },
       {
         path: 'edit',
         loadComponent: () => import('./inventory/activity/activity-edit/activity-edit.component').then(mod => mod.ActivityEditComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'staff' },
       }
     ]
   },
   {
     path: 'inventory/policy/:policyType/:policyId',
     loadComponent: () => import('./inventory/policy/policy.component').then(mod => mod.PolicyComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { policy: policyResolver },
     runGuardsAndResolvers: 'always',
     children: [
@@ -159,7 +191,8 @@ export const routes: Routes = [
         path: ':policyIdVersion',
         loadComponent: () => import('./inventory/policy/policy-details/policy-details.component').then(mod => mod.PolicyDetailsComponent),
         resolve: { policy: policyResolver },
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' },
         children: [
         ]
       }
@@ -168,19 +201,22 @@ export const routes: Routes = [
   {
     path: 'inventory/product/:collectionId/:activityType/:activityId/:productId',
     loadComponent: () => import('./inventory/product/product.component').then(mod => mod.ProductComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { product: ProductResolver },
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         loadComponent: () => import('./inventory/product/product-details/product-details.component').then(mod => mod.ProductDetailsComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' },
       },
       {
         path: 'edit',
         loadComponent: () => import('./inventory/product/product-edit/product-edit.component').then(mod => mod.ProductEditComponent),
-        canActivate: [UserGuard],
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' },
       }
     ]
   },
@@ -192,38 +228,39 @@ export const routes: Routes = [
   {
     path: 'reports',
     loadComponent: () => import('./reports/reports.component').then(mod => mod.ReportsComponent),
-    canActivate: [UserGuard]
-  },
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
+},
   {
     path: 'reports/daily-passes',
     loadComponent: () => import('./reports/daily-passes/daily-passes-report.component').then(mod => mod.DailyPassesReportComponent),
-    canActivate: [UserGuard]
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
   },
   {
     path: 'admin/feature-flags',
     loadComponent: () => import('./admin/feature-flags/feature-flags.component').then(mod => mod.FeatureFlagsComponent),
-    canActivate: [UserGuard, AdminGuard]
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'superadmin' },
   },
   {
     path: 'admin/waiting-room',
     loadComponent: () => import('./admin/waiting-room/waiting-room-admin.component').then(mod => mod.WaitingRoomAdminComponent),
-    canActivate: [UserGuard, AdminGuard]
-  },
-  {
-    path: 'customers',
-    loadComponent: () => import('./customers/customers.component').then(mod => mod.CustomersComponent),
-    canActivate: [UserGuard]
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'superadmin' },
   },
   {
     path: 'inventory/protected-area/:orcs',
     loadComponent: () => import('./inventory/protected-area/protected-area-details/protected-area-details.component').then(mod => mod.ProtectedAreaDetailsComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
     resolve: { protectedArea: ProtectedAreaResolver }
   },
   {
     path: 'inventory/protected-area/:orcs/edit',
     loadComponent: () => import('./inventory/protected-area/protected-area-edit/protected-area-edit.component').then(mod => mod.ProtectedAreaEditComponent),
-    canActivate: [UserGuard],
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'superadmin' },
     resolve: { protectedArea: ProtectedAreaResolver }
   },
 ];

@@ -8,10 +8,11 @@ import { ActivityService } from '../../../services/activity.service';
 import { PolicyService } from '../../../services/policy.service';
 import { ProductService } from '../../../services/product.service';
 import { ProductDateService } from '../../../services/product-date.service';
+import { PermissionDirective } from '../../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-product-details',
-  imports: [DatePipe, CommonModule, ActivityListItemComponent, PolicyListItemComponent],
+  imports: [DatePipe, CommonModule, ActivityListItemComponent, PolicyListItemComponent, PermissionDirective],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.scss'
 })

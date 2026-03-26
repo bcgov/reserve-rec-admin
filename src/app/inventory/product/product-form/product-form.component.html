@@ -102,7 +102,7 @@
             </div>
           </div>
           
-          <div class="row mt-4">
+          <div class="row mt-4" *permissionRequired="'superadmin'">
             <div class="col-12 col-lg-6">
               <ngds-text-input class="mb-4"
                 [control]="form.get('adminNotes')"

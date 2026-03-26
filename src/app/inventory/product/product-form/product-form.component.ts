@@ -10,6 +10,7 @@ import { PolicyService } from '../../../services/policy.service';
 import { ActivityService } from '../../../services/activity.service';
 import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
 import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-list-item.component';
+import { PermissionDirective } from '../../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-product-form',
@@ -21,6 +22,7 @@ import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-li
     ActivityListItemComponent,
     PolicyListItemComponent,
     LoadalComponent,
+    PermissionDirective
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'

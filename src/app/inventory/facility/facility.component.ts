@@ -6,10 +6,11 @@ import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { FacilityService } from '../../services/facility.service';
+import { PermissionDirective } from '../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-facility',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, PermissionDirective],
   templateUrl: './facility.component.html',
   styleUrl: './facility.component.scss',
   providers: [BsModalService],

@@ -49,6 +49,17 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Product failed to get`,
+        ToastTypes.ERROR
+      );
       return null;
     }
   }
@@ -71,6 +82,17 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_LIST);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Product failed to get`,
+        ToastTypes.ERROR
+      );
       return null;
     }
   }
@@ -89,8 +111,15 @@ export class ProductService {
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Product failed to create`,
         ToastTypes.ERROR
       );
@@ -113,7 +142,12 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
         errorMessage,
         `Product failed to update`,
@@ -138,7 +172,12 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
         errorMessage,
         `Product failed to delete`,

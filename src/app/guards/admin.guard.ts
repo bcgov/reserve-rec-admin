@@ -1,20 +1,17 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { PermissionsService } from '../services/permissions.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdminGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private permissionsService: PermissionsService, private router: Router) {}
 
-  async canActivate(): Promise<boolean> {
-    const isAdmin = await this.authService.userIsAdmin();
-    if (isAdmin) {
-      return true; // Allow access if user is a superadmin
-    } else {
-      this.router.navigate(['/unauthorized']); // Not a superadmin, redirect to unauthorized
-      return false;
+  canActivate(): boolean | UrlTree {
+    if (this.permissionsService.isSuperAdmin()) {
+      return true;
     }
+    return this.router.parseUrl('/unauthorized');
   }
 }

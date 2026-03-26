@@ -1,16 +1,17 @@
-import { Component, HostBinding, OnInit, signal } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
+import { PermissionsService } from '../../../services/permissions.service';
+import { PermissionDirective } from '../../directives/permission.directive';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, PermissionDirective]
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent {
   @HostBinding('class.is-toggled')
   public hide = false;
 
@@ -22,19 +23,13 @@ export class SidebarComponent implements OnInit {
     { path: 'customers', data: { label: 'Customers' } }
   ];
   public currentRoute: any;
-  public isAdmin = signal<boolean>(false);
 
   constructor(
     protected router: Router,
-    private authService: AuthService
-  ) {
-    
-  }
+    protected permissionsService: PermissionsService
+  ) {}
 
-  async ngOnInit(): Promise<void> {
-    const isAdmin = await this.authService.userIsAdmin();
-    this.isAdmin.set(isAdmin);
-  }
+  ngOnInit(): void {}
 
   onNavigate(route) {
   }

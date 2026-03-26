@@ -40,6 +40,17 @@ export class ActivityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Activity failed to get`,
+        ToastTypes.ERROR
+      );
       return null;
     }
   }
@@ -60,11 +71,18 @@ export class ActivityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Activity failed to create`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 
@@ -82,12 +100,19 @@ export class ActivityService {
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
-      this.loggerService.error(error);
+      this.loggerService.error(JSON.stringify(error));
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
-        `Activity failed to create`,
+        errorMessage,
+        `Activity failed to update`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 
@@ -101,6 +126,18 @@ export class ActivityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITIES_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Activity failed to get`,
+        ToastTypes.ERROR
+      );
+      return null;
     }
   }
 
@@ -119,11 +156,18 @@ export class ActivityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.ACTIVITY_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Activity failed to delete`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 }

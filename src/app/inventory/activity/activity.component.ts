@@ -7,10 +7,11 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
 import { ActivityService } from '../../services/activity.service';
+import { PermissionDirective } from '../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-activity',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, PermissionDirective],
   templateUrl: './activity.component.html',
   styleUrl: './activity.component.scss',
   providers: [BsModalService]
