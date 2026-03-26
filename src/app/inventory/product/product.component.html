@@ -45,7 +45,7 @@
         <button 
           class="btn btn-outline-secondary rounded-1"
           (click)="navToEdit()"
-          *appPermissionRequired="'limited'"
+          *appPermissionRequired="'limited' ; collection: data?.collectionId"
         >
           <div class="col-auto">
             Edit
