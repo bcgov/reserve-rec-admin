@@ -13,6 +13,7 @@ import { EntityRelationshipSelectorComponent } from '../../../shared/components/
 import { ActivityService } from '../../../services/activity.service';
 import { EntityFormBaseComponent } from '../../../shared/components/entity/entity-base/entity-form-base.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { PermissionDirective } from '../../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-facility-form',
@@ -26,6 +27,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
     ReactiveFormsModule,
     EntityRelationshipSelectorComponent,
     NgbTooltip,
+    PermissionDirective
   ],
   providers: [],
   templateUrl: './facility-form.component.html',

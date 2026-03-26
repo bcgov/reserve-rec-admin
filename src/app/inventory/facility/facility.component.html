@@ -33,12 +33,20 @@
     </div>
     <div class="col-auto mt-3 mt-lg-1 ps-4 pe-4" *ngIf="!isEditing">
       <div class="d-flex justify-content-end align-items-center gap-2">
-        <button class="btn btn-outline-danger rounded-1" (click)="onDelete()">
+        <button
+          class="btn btn-outline-danger rounded-1"
+          (click)="onDelete()"
+          *appPermissionRequired="'superadmin'"
+        >
           <div class="col-auto">
             Delete
           </div>
         </button>
-        <button class="btn btn-outline-secondary rounded-1" (click)="navToEdit()">
+        <button 
+          class="btn btn-outline-secondary rounded-1"
+          (click)="navToEdit()"
+          *appPermissionRequired="'staff'"
+        >
           <div class="col-auto">
             Edit
           </div>

@@ -4,6 +4,7 @@ import { ProductService } from '../../../services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductFormComponent } from '../../product/product-form/product-form.component';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
+import { ToastService, ToastTypes } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-product-create',
@@ -21,7 +22,8 @@ export class ProductCreateComponent {
     protected productService: ProductService,
     protected router: Router,
     protected cdr: ChangeDetectorRef,
-    protected route: ActivatedRoute
+    protected route: ActivatedRoute,
+    protected toastService: ToastService,
   ) {
     if (this.route.parent?.snapshot.data['product']) {
       this.product = this.route.parent?.snapshot.data['product'];
@@ -51,12 +53,25 @@ export class ProductCreateComponent {
       return;
     }
 
-    const collectionId = this.productForm.get('collectionId').value || this.product?.collectionId;
-    const activityType = this.productForm.get('activityType').value || this.product?.activityType;
-    const activityId = this.productForm.get('activityId').value || this.product?.activityId;
+    const collectionId = this.productForm.get('collectionId').value ?? this.product?.collectionId;
+    const activityType = this.productForm.get('activityType').value ?? this.product?.activityType;
+    const activityId = this.productForm.get('activityId').value ?? this.product?.activityId;
 
     if (!collectionId || !activityType || !activityId) {
       console.error('Missing required collection ID, activity type, and/or activity ID');
+      // Figure out which is missing
+      const missingFields = [];
+      if (!collectionId) missingFields.push('collectionId');
+      if (!activityType) missingFields.push('activityType');
+      if (!activityId) missingFields.push('activityId');
+
+      // Show error to user in the app via toastr
+      this.toastService.addMessage(
+        `${missingFields.join(', ')} ${missingFields.length > 1 ? 'are' : 'is'} required to create a product`,
+        `Product failed to create`,
+        ToastTypes.ERROR
+      );
+
       return;
     }
 

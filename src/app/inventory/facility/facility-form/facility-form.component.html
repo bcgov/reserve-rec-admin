@@ -138,6 +138,7 @@
             <div class="col-12 col-lg-6">
               <ngds-text-input class="mb-4"
                 [control]="form.get('adminNotes')"
+                *appPermissionRequired="'staff'"
                 [label]="'Admin notes'"
                 [multiline]="true"
                 [placeholder]="'Type any admin notes for the facility'">

@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Amplify } from "aws-amplify";
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
+import { PermissionsService } from './permissions.service';
 import { signInWithRedirect, fetchUserAttributes, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 import { Router } from '@angular/router';
@@ -10,22 +11,26 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private configService: ConfigService, private loggerService: LoggerService, private router: Router) {
-  }
+  constructor(
+    private configService: ConfigService,
+    private loggerService: LoggerService,
+    private router: Router,
+    private permissionsService: PermissionsService
+  ) {}
 
-  public user = signal<any>(null); // Make sure observable for user updates
-  public session = signal(null);
+  public user = signal<any>(null);
+  public session = signal<any>(null);
   public reDirectValues;
-  public allAccessRoleName = 'superadmin';
+
+  // Expose signals and helpers from PermissionsService for convenience
+  get permissions() { return this.permissionsService.permissions; }
+  get allAccessRoleName() { return this.permissionsService.allAccessRoleName; }
+  isSuperAdmin() { return this.permissionsService.isSuperAdmin(); }
 
   async init() {
     console.log('this.configService.config:', this.configService.config);
     console.time('timer');
-    if (this.configService.config.ENVIRONMENT === 'local' || !this.configService.config['COGNITO_REDIRECT_URI']) {
-      this.reDirectValues = 'http://localhost:4200';
-    } else {
-      this.reDirectValues = this.configService.config['COGNITO_REDIRECT_URI'];
-    }
+    this.reDirectValues = this.configService.config['COGNITO_REDIRECT_URI'];
     Amplify.configure({
       Auth: {
         Cognito: {
@@ -45,6 +50,7 @@ export class AuthService {
       },
     });
     await this.setRefresh();
+    this.listenToAuthEvents();
     return Promise.resolve();
   }
 
@@ -69,6 +75,7 @@ export class AuthService {
           this.loggerService.info('User has signed in successfully.');
           const session = await fetchAuthSession();
           await this.setRefresh();
+          await this.permissionsService.load(this.session().tokens.accessToken.toString());
           this.router.navigate(['/']);
           console.log('Session:', session);
           break;
@@ -78,6 +85,7 @@ export class AuthService {
           this.loggerService.info('User has signed out successfully.');
           this.updateUser(null);
           this.session.set(null);
+          this.permissionsService.clear();
           break;
         }
         case 'tokenRefresh': {
@@ -114,6 +122,7 @@ export class AuthService {
       this.session.set(await fetchAuthSession({ forceRefresh: forceRefresh }));
       if (this.session().tokens) {
         this.loggerService.debug(JSON.stringify(this.session(), null, 2));
+        await this.permissionsService.load(this.session().tokens.accessToken.toString());
         const refreshInterval = ((this.session().tokens.accessToken.payload.exp * 1000) - Date.now()) / 2;
         if (refreshInterval > 0) {
           setTimeout(async () => {
@@ -152,6 +161,7 @@ export class AuthService {
     await signOut();
     this.updateUser(null);
     this.session.set(null);
+    this.permissionsService.clear();
     console.log('User logged out', this.user);
     this.router.navigate(['/']);
   }

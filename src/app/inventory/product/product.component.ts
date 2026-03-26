@@ -6,10 +6,11 @@ import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ProductService } from '../../services/product.service';
+import { PermissionDirective } from '../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-product',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, PermissionDirective],
   templateUrl: './product.component.html',
   styleUrl: './product.component.scss',
   providers: [BsModalService],

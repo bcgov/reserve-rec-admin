@@ -6,10 +6,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Constants } from '../../../app.constants';
 import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
 import { RelationshipService } from '../../../services/relationship.service';
+import { PermissionDirective } from '../../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-facility-details',
-  imports: [MapComponent, DatePipe, CommonModule, ActivityListItemComponent ],
+  imports: [MapComponent, DatePipe, CommonModule, ActivityListItemComponent, PermissionDirective ],
   templateUrl: './facility-details.component.html',
   styleUrl: './facility-details.component.scss'
 })

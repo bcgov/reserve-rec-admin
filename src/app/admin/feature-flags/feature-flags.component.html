@@ -16,7 +16,7 @@
     <div *ngIf="flagData?.metadata" class="alert alert-light mb-4">
       <small>
         <strong>Last updated:</strong> {{ flagData?.metadata?.lastUpdated | date:'medium' }}
-        by {{ flagData?.metadata?.updatedByEmail || flagData?.metadata?.updatedBy }}
+        by {{ flagData?.metadata?.updatedByUsername || flagData?.metadata?.updatedBy }}
       </small>
     </div>
 

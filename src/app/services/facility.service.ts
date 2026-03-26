@@ -33,6 +33,18 @@ export class FacilityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Facility failed to get`,
+        ToastTypes.ERROR
+      );
+      return null;
     }
   }
 
@@ -46,6 +58,18 @@ export class FacilityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITIES_RESULT);
       this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Facility failed to get`,
+        ToastTypes.ERROR
+      );
+      return null;
     }
   }
 
@@ -63,12 +87,19 @@ export class FacilityService {
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
+      this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Facility failed to create`,
         ToastTypes.ERROR
       );
-      this.loggerService.error(error);
+      return null;
     }
   }
 
@@ -87,7 +118,12 @@ export class FacilityService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
       this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
         errorMessage,
         `Facility failed to update`,
@@ -111,12 +147,18 @@ export class FacilityService {
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITY_RESULT);
-      this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.Message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage,
         `Facility failed to delete`,
         ToastTypes.ERROR
       );
+      return null;
     }
   }
 }
