@@ -13,31 +13,31 @@ import { PermissionsService } from '../../services/permissions.service';
  *
  * Usage:
  *   <!-- Minimum tier required, any collection -->
- *   <button *permissionRequired="'staff'">Edit</button>
+ *   <button *appPermissionRequired="'staff'">Edit</button>
  *
  *   <!-- Scoped to a specific collection -->
- *   <button *permissionRequired="'staff'; collection: collectionId">Edit</button>
+ *   <button *appPermissionRequired="'staff'; collection: collectionId">Edit</button>
  *
  *   <!-- No argument — visible to any authenticated user with any permission -->
- *   <div *permissionRequired>...</div>
+ *   <div *appPermissionRequired>...</div>
  *
  * The directive re-evaluates reactively whenever the permissions signal changes
  * (e.g. after login, logout, or token refresh).
  */
 @Directive({
-  selector: '[permissionRequired]',
+  selector: '[appPermissionRequired]',
   standalone: true,
 })
 export class PermissionDirective {
   private requiredTier: string | null = null;
   private collectionId: string | null = null;
 
-  @Input() set permissionRequired(tier: string | null | undefined) {
+  @Input() set appPermissionRequired(tier: string | null | undefined) {
     this.requiredTier = tier ?? null;
     this.update();
   }
 
-  @Input() set permissionRequiredCollection(collectionId: string | null | undefined) {
+  @Input() set appPermissionRequiredCollection(collectionId: string | null | undefined) {
     this.collectionId = collectionId ?? null;
     this.update();
   }

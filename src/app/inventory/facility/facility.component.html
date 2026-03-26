@@ -36,7 +36,7 @@
         <button
           class="btn btn-outline-danger rounded-1"
           (click)="onDelete()"
-          *permissionRequired="'superadmin'"
+          *appPermissionRequired="'superadmin'"
         >
           <div class="col-auto">
             Delete
@@ -45,7 +45,7 @@
         <button 
           class="btn btn-outline-secondary rounded-1"
           (click)="navToEdit()"
-          *permissionRequired="'staff'"
+          *appPermissionRequired="'staff'"
         >
           <div class="col-auto">
             Edit

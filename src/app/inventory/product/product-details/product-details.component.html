@@ -36,7 +36,7 @@
             </div>
           </div>
 
-          <div class="row mt-2" *permissionRequired="'superadmin'">
+          <div class="row mt-2" *appPermissionRequired="'superadmin'">
             <div class="col-12 d-flex align-items-start justify-content-start gap-3">
               <p class="small fw-bold">Admin&nbsp;notes:</p>
               <p class="small">{{ product?.adminNotes || 'No admin notes provided.' }}</p>

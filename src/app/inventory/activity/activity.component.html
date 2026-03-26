@@ -30,7 +30,7 @@
         <button
           class="btn btn-light"
           (click)="navToEdit()"
-          *permissionRequired="'superadmin'"
+          *appPermissionRequired="'superadmin'"
         >
           <div class="col-auto">
             <i class="fa-solid fa-pen-to-square me-1"></i>
@@ -40,7 +40,7 @@
         <button
           class="btn btn-danger"
           (click)="onDelete()"
-          *permissionRequired="'superadmin'"
+          *appPermissionRequired="'superadmin'"
         >
         <div class="col-auto">
           <i class="fa-solid fa-trash-can me-1"></i>

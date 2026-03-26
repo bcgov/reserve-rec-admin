@@ -29,11 +29,7 @@ export class SidebarComponent {
     protected permissionsService: PermissionsService
   ) {}
 
-  ngOnInit(): void {}
-
-  onNavigate(route) {
-  }
-
+  onNavigate(route) {}
 
   getPathFromUrl(url) {
     return url.split('?')[0];
