@@ -98,9 +98,9 @@ jobs:
           DIR_NAME: ${{ github.sha }}
         run: |
           echo "Deploying to $S3_BUCKET/$DIR_NAME"
-          aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME
+          aws s3 sync dist s3://$S3_BUCKET/$DIR_NAME --cache-control "no-cache, no-store, must-revalidate"
           aws s3 rm s3://$S3_BUCKET/ --recursive --exclude "*" --include "latest/*"
-          aws s3 sync dist s3://$S3_BUCKET/latest
+          aws s3 sync dist s3://$S3_BUCKET/latest --cache-control "no-cache, no-store, must-revalidate"
 
       ### Invalidate CloudFront Cache ###
       - name: Invalidate CloudFront Cache
