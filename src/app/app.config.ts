@@ -27,7 +27,9 @@ export function initConfig(
     await authService.init();
     await apiService.init();
     await featureFlagService.init();
-    await websocketService.init(configService.config['WEBSOCKET_URL']);
+    const wsUrl = configService.config['WEBSOCKET_URL'];
+    const wsToken = authService.getAccessToken();
+    await websocketService.init(wsToken ? `${wsUrl}?token=${wsToken}` : wsUrl);
   };
 }
 
