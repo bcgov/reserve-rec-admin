@@ -346,6 +346,9 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   }
 
   async generateMapMarkerHTML(options, data = null) {
+    if (!this.vcr) {
+      return this.oldMapMarkerHTML(options, data);
+    }
     const el2 = this.vcr.createComponent(MapMarkerComponent);
     el2.setInput('markerData', data);
     el2.setInput('markerOptions', options);
