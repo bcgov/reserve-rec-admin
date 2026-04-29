@@ -28,8 +28,10 @@ export function initConfig(
     await apiService.init();
     await featureFlagService.init();
     const wsUrl = configService.config['WEBSOCKET_URL'];
-    const wsToken = authService.jwtToken;
-    await websocketService.init(wsToken ? `${wsUrl}?token=${wsToken}` : wsUrl);
+    if (wsUrl) {
+      const wsToken = authService.jwtToken;
+      await websocketService.init(wsToken ? `${wsUrl}?token=${wsToken}` : wsUrl);
+    }
   };
 }
 
