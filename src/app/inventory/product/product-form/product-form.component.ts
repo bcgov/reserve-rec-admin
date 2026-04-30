@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, ViewChild } from '@angular/core';
 import { Constants } from '../../../app.constants';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, AbstractControl, UntypedFormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -98,7 +98,7 @@ export class ProductFormComponent implements OnInit {
       }],
       isVisible: [this.product?.isVisible || false],
       passesRequired: [this.product?.passesRequired || false],
-      policies: [this.product?.policies || []],
+      policies: [null],
       qrCodeEnabled: [this.product?.qrCodeEnabled || false],
       reservationPolicy: [this.product?.reservationPolicy || null],
       searchTerms: [this.product?.searchTerms || []],
@@ -139,12 +139,14 @@ export class ProductFormComponent implements OnInit {
     // Creating a product: when an activity is selected, update the related fields
     // (activityType, activityId, activitySubType) so they can be saved with the product
     this.form.get('activity')?.valueChanges.subscribe((selectedActivity) => {
+      const activity = selectedActivity?.value || selectedActivity;
       for (const controlName of ['activityType', 'activityId', 'activitySubType']) {
-        if (!selectedActivity) {
-          this.form.get(controlName)?.setValue('', { emitEvent: false });
+        if (!activity) {
+          const emptyValue = controlName === 'activitySubType' ? [] : '';
+          this.form.get(controlName)?.setValue(emptyValue, { emitEvent: false });
           this.form.get(controlName)?.markAsDirty();
         } else {
-          const value = controlName === 'activitySubType' ? selectedActivity[controlName] || [] : selectedActivity[controlName] || '';
+          const value = controlName === 'activitySubType' ? activity[controlName] || [] : activity[controlName] || '';
           this.form.get(controlName)?.setValue(value, { emitEvent: false });
           this.form.get(controlName)?.markAsDirty();
         }
@@ -163,17 +165,23 @@ export class ProductFormComponent implements OnInit {
     this.loadal.show();
     try {
       const activities = await this.activityService.getActivitiesByCollectionId(collectionId);
-      const activityItems = activities?.items || activities || [];
+      const activityItems = Array.isArray(activities?.items)
+        ? activities.items
+        : Array.isArray(activities)
+          ? activities
+          : [];
+
+      const uniqueActivities = this.getUniqueActivities(activityItems);
       
       // Map activities to the format needed for the typeahead selector
-      this.availableActivities = activityItems.map((a: any) => ({
+      this.availableActivities = uniqueActivities.map((a: any) => ({
         display: a.displayName || `${a.activityType} - ${a.activityId}`,
         value: a
       }));
 
       // Reset activity selection when collectionId changes
       for (const controlName of ['activity', 'activityType', 'activityId', 'activitySubType']) {
-        const value = controlName === 'activitySubType' ? [] : '';
+        const value = controlName === 'activitySubType' ? [] : controlName === 'activity' ? null : '';
         this.form.get(controlName)?.setValue(value, { emitEvent: false });
         this.form.get(controlName)?.markAsDirty();
       }
@@ -220,7 +228,9 @@ export class ProductFormComponent implements OnInit {
 
       if (policies?.length > 0) {
         console.log(`Found ${policies.length} policies`);
-        this.policies = policies.map(p => ({
+        // De-duplicate by policyType + policyId so the typeahead does not show repeated versions.
+        const uniquePolicies = this.getUniquePoliciesById(policies);
+        this.policies = uniquePolicies.map(p => ({
           display: p.displayName || p.display,
           value: p
         }));
@@ -266,19 +276,22 @@ export class ProductFormComponent implements OnInit {
 
   // Handling the selection of a policy and adding it below the typeahead input
   addPolicy(policy: any) {
-    if (!policy) return;
+    const selectedPolicy = policy?.value || policy;
+    if (!selectedPolicy?.policyType) {
+      return;
+    }
 
     // Replace any existing policy of the same type (one per type)
-    this.selectedPolicies = this.selectedPolicies.filter(p => p.policyType !== policy.policyType);
-    this.selectedPolicies.push(policy);
+    this.selectedPolicies = this.selectedPolicies.filter(p => p.policyType !== selectedPolicy.policyType);
+    this.selectedPolicies.push(selectedPolicy);
 
     // Sync the typed policy form control (e.g. reservationPolicy, partyPolicy)
-    const controlName = `${policy.policyType}Policy`;
+    const controlName = `${selectedPolicy.policyType}Policy`;
     const control = this.form.get(controlName);
     if (control) {
       // markAsDirty before setValue so the form is already dirty when valueChanges fires
       control.markAsDirty();
-      control.setValue(policy);
+      control.setValue(selectedPolicy);
     }
 
     // Reset the typeahead so it's ready for the next selection
@@ -286,6 +299,46 @@ export class ProductFormComponent implements OnInit {
     // This is the only way I could find to reset the typeahead
     this.policyTypeahead?.matchInputToControl();
 
+  }
+
+  private getUniqueActivities(activities: any[]) {
+    const byKey = new Map<string, any>();
+    for (const activity of activities) {
+      const key = `${activity.collectionId || ''}::${activity.activityType || ''}::${activity.activityId || ''}`;
+      const current = byKey.get(key);
+      if (!current) {
+        byKey.set(key, activity);
+        continue;
+      }
+
+      const currentVersion = Number(current.version || 0);
+      const nextVersion = Number(activity.version || 0);
+      if (nextVersion >= currentVersion) {
+        byKey.set(key, activity);
+      }
+    }
+
+    return Array.from(byKey.values());
+  }
+
+  private getUniquePoliciesById(policies: any[]) {
+    const byKey = new Map<string, any>();
+    for (const policy of policies) {
+      const key = `${policy.policyType || ''}::${policy.policyId || policy.pk || ''}`;
+      const current = byKey.get(key);
+      if (!current) {
+        byKey.set(key, policy);
+        continue;
+      }
+
+      const currentVersion = Number(current.policyIdVersion || current.version || 0);
+      const nextVersion = Number(policy.policyIdVersion || policy.version || 0);
+      if (nextVersion >= currentVersion) {
+        byKey.set(key, policy);
+      }
+    }
+
+    return Array.from(byKey.values());
   }
 
   // Removing a selected policy from the display and clearing the typed policy from the form
