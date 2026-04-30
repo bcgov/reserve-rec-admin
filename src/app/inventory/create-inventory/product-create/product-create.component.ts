@@ -49,7 +49,6 @@ export class ProductCreateComponent {
   }
 
   async submit() {
-    this.loadal.show();
     // Check form validity first
     if (!this.productForm || this.productForm.invalid) {
       const invalidControls = Object.entries(this.productForm?.controls ?? {})

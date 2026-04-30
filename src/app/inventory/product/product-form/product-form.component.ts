@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, AfterViewChecked, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, ViewChild } from '@angular/core';
 import { Constants } from '../../../app.constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, Validators, AbstractControl, UntypedFormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -27,7 +27,7 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
-export class ProductFormComponent implements OnInit, AfterViewChecked {
+export class ProductFormComponent implements OnInit {
   @Input() isEditing: boolean = false;
   @Input() isCreating: boolean = false;
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
@@ -75,10 +75,6 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.loadExistingPolicies();
       }
     }
-  }
-
-  ngAfterViewChecked() {
-    this.cdr.detectChanges();
   }
 
   private initializeForm() {
@@ -177,11 +173,9 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
 
       // Reset activity selection when collectionId changes
       for (const controlName of ['activity', 'activityType', 'activityId', 'activitySubType']) {
-        const value = controlName === 'activitySubType' ? controlName || [] : controlName || '';
-        if (this.form.get(controlName) == 'activity') {
-          this.form.get(controlName)?.setValue(value);
-          this.form.get(controlName)?.markAsDirty();
-        }
+        const value = controlName === 'activitySubType' ? [] : '';
+        this.form.get(controlName)?.setValue(value, { emitEvent: false });
+        this.form.get(controlName)?.markAsDirty();
       }
       
       console.log(`Loaded ${this.availableActivities.length} available activities for collection ${collectionId}`);
