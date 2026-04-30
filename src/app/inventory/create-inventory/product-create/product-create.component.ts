@@ -25,8 +25,15 @@ export class ProductCreateComponent {
     protected route: ActivatedRoute,
     protected toastService: ToastService,
   ) {
+    // Check for route data first
     if (this.route.parent?.snapshot.data['product']) {
       this.product = this.route.parent?.snapshot.data['product'];
+    }
+    
+    // Check for router state (used when navigating from activity details with prepopulated data)
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state?.['product']) {
+      this.product = navigation.extras.state['product'];
     }
   }
 

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-geozone-list-item',
@@ -13,9 +14,11 @@ export class GeozoneListItemComponent {
 
   public constantsData = null;
 
+  constructor(private router: Router) {}
+
   navigateToGeozone(geozone: any) {
     const geozoneUrl = `/inventory/geozone/${geozone.collectionId}/${geozone.geozoneId}`;
-    window.open(geozoneUrl, '_blank');
+    this.router.navigateByUrl(geozoneUrl);
   }
 
 }

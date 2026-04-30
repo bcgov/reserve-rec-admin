@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-list-item',
@@ -13,9 +14,16 @@ export class ProductListItemComponent {
 
   public constantsData = null;
 
+  constructor(private router: Router) {}
+
   navigateToProduct(product: any) {
-    const productUrl = `/inventory/product/${product.collectionId}/${product.activityType}/${product.activityId}/${product.productId}`;
-    window.open(productUrl, '_blank');
+    this.router.navigate([
+      '/inventory/product',
+      product.collectionId,
+      product.activityType,
+      product.activityId,
+      product.productId,
+    ]);
   }
 
 }

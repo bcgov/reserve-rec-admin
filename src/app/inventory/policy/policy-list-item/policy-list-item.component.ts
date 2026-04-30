@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-policy-list-item',
@@ -13,12 +14,14 @@ export class PolicyListItemComponent {
   @Input() isCreating: boolean = false;
   @Output() policyRemoved = new EventEmitter<any>();
 
+  constructor(private router: Router) {}
+
   removePolicy(policy: any) {
     this.policyRemoved.emit(policy);
   }
 
   navigateToPolicy(policy: any) {
     const policyUrl = `/inventory/policy/${policy.collectionId}/${policy.policyType}/${policy.policyId}`;
-    window.open(policyUrl, '_blank');
+    this.router.navigateByUrl(policyUrl);
   }
 }
