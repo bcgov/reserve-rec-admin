@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Constants } from '../../../app.constants';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-list-item',
@@ -14,13 +15,15 @@ export class FacilityListItemComponent implements OnInit {
 
   public constantsData = null;
 
+  constructor(private router: Router) {}
+
   ngOnInit(): void {
     this.constantsData = Constants.facilityTypes[this.facility?.facilityType] || { displayName: 'Unknown', icon: 'question-circle' };
   }
 
   navigateToFacility(facility: any) {
     const facilityUrl = `/inventory/facility/${facility.collectionId}/${facility.facilityType}/${facility.facilityId}`;
-    window.open(facilityUrl, '_blank');
+    this.router.navigateByUrl(facilityUrl);
   }
 
 }
