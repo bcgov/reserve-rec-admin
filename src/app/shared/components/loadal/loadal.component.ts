@@ -1,6 +1,5 @@
-import { AfterViewInit, Component, effect, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import * as bootstrap from 'bootstrap/dist/js/bootstrap.esm.min.js';
-import { LoadingService } from '../../../services/loading.service';
 
 @Component({
   selector: 'app-loadal',
@@ -13,11 +12,9 @@ export class LoadalComponent implements AfterViewInit, OnDestroy {
 
   public loadal;
   private isViewInitialized = false;
+  private showDepth = 0;
 
-  constructor(
-    protected loadingService: LoadingService
-  ) {
-  }
+  constructor() {}
 
   ngAfterViewInit(): void {
     // Disable if working locally
@@ -34,13 +31,15 @@ export class LoadalComponent implements AfterViewInit, OnDestroy {
   }
 
   show() {
-    if (this.isViewInitialized && this.loadal) {
+    this.showDepth += 1;
+    if (this.isViewInitialized && this.loadal && this.showDepth === 1) {
       this.loadal.show();
     }
   }
 
   hide() {
-    if (this.isViewInitialized && this.loadal) {
+    this.showDepth = Math.max(0, this.showDepth - 1);
+    if (this.isViewInitialized && this.loadal && this.showDepth === 0) {
       this.loadal.hide();
     }
   }
@@ -50,6 +49,7 @@ export class LoadalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.showDepth = 0;
     this.hide();
     this.dispose();
   }
