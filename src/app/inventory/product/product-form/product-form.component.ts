@@ -228,8 +228,7 @@ export class ProductFormComponent implements OnInit {
 
       if (policies?.length > 0) {
         console.log(`Found ${policies.length} policies`);
-        // De-duplicate by policyType + policyId so the selector does not show repeated versions.
-        this.allAvailablePolicies = this.getUniquePoliciesById(policies);
+        this.allAvailablePolicies = policies;
         this.refreshPolicyOptions();
       } else {
         console.log('No policies found');
@@ -316,27 +315,13 @@ export class ProductFormComponent implements OnInit {
       this.selectedPolicies.map((p) => `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`)
     );
 
-    const unlinkedPolicies = this.allAvailablePolicies.filter((p) => {
+    this.policies = this.allAvailablePolicies.filter((p) => {
       const key = `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`;
       return !selectedKeys.has(key);
-    });
-
-    const displayCounts = new Map<string, number>();
-    for (const policy of unlinkedPolicies) {
-      const baseDisplay = (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim();
-      displayCounts.set(baseDisplay, (displayCounts.get(baseDisplay) || 0) + 1);
-    }
-
-    this.policies = unlinkedPolicies.map((policy) => {
-      const baseDisplay = (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim();
-      const hasDuplicateDisplay = (displayCounts.get(baseDisplay) || 0) > 1;
-      const qualifier = `${policy?.policyType || 'unknown'}:${policy?.policyId || policy?.pk || 'unknown'}`;
-
-      return {
-        display: hasDuplicateDisplay ? `${baseDisplay} (${qualifier})` : baseDisplay,
-        value: policy
-      };
-    });
+    }).map((policy) => ({
+      display: (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim(),
+      value: policy
+    }));
   }
 
   private getUniqueActivities(activities: any[]) {
@@ -353,26 +338,6 @@ export class ProductFormComponent implements OnInit {
       const nextVersion = Number(activity.version || 0);
       if (nextVersion >= currentVersion) {
         byKey.set(key, activity);
-      }
-    }
-
-    return Array.from(byKey.values());
-  }
-
-  private getUniquePoliciesById(policies: any[]) {
-    const byKey = new Map<string, any>();
-    for (const policy of policies) {
-      const key = `${policy.policyType || ''}::${policy.policyId || policy.pk || ''}`;
-      const current = byKey.get(key);
-      if (!current) {
-        byKey.set(key, policy);
-        continue;
-      }
-
-      const currentVersion = Number(current.policyIdVersion || current.version || 0);
-      const nextVersion = Number(policy.policyIdVersion || policy.version || 0);
-      if (nextVersion >= currentVersion) {
-        byKey.set(key, policy);
       }
     }
 
