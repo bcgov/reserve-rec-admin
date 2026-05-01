@@ -32,7 +32,6 @@ export class ProductFormComponent implements OnInit {
   @Input() isCreating: boolean = false;
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
-  @ViewChild('policyTypeahead') policyTypeahead: any;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   public form;
@@ -42,6 +41,7 @@ export class ProductFormComponent implements OnInit {
   public availableActivities = [];
   public selectedPolicies: any[] = [];
   private initialPolicies: any[] = [];
+  private allAvailablePolicies: any[] = [];
   public policies: { display: string, value: any }[] = [];
   public relatedActivity: any[] = [];
 
@@ -56,7 +56,7 @@ export class ProductFormComponent implements OnInit {
       this.product = this.route.parent.snapshot.data['product'];
     }
     this.initializeForm();
-  };
+  }
 
   ngOnInit() {
     if (!this.isCreating) {
@@ -173,7 +173,7 @@ export class ProductFormComponent implements OnInit {
 
       const uniqueActivities = this.getUniqueActivities(activityItems);
       
-      // Map activities to the format needed for the typeahead selector
+      // Map activities to the format needed for the selector input
       this.availableActivities = uniqueActivities.map((a: any) => ({
         display: a.displayName || `${a.activityType} - ${a.activityId}`,
         value: a
@@ -228,18 +228,17 @@ export class ProductFormComponent implements OnInit {
 
       if (policies?.length > 0) {
         console.log(`Found ${policies.length} policies`);
-        // De-duplicate by policyType + policyId so the typeahead does not show repeated versions.
-        const uniquePolicies = this.getUniquePoliciesById(policies);
-        this.policies = uniquePolicies.map(p => ({
-          display: p.displayName || p.display,
-          value: p
-        }));
+        // De-duplicate by policyType + policyId so the selector does not show repeated versions.
+        this.allAvailablePolicies = this.getUniquePoliciesById(policies);
+        this.refreshPolicyOptions();
       } else {
         console.log('No policies found');
+        this.allAvailablePolicies = [];
         this.policies = [];
       }
     } catch (error) {
       console.error('Error loading policies:', error);
+      this.allAvailablePolicies = [];
       this.policies = [];
     } finally {
       this.loadal.hide();
@@ -262,19 +261,23 @@ export class ProductFormComponent implements OnInit {
           const controlName = `${policy.policyType}Policy`;
           this.form.get(controlName)?.setValue(policy, { emitEvent: false });
         }
+
+        this.refreshPolicyOptions();
       } else {
         console.log('No policies relationships found');
         this.selectedPolicies = [];
+        this.refreshPolicyOptions();
       }
     } catch (error) {
       console.error('Error loading policies relationships:', error);
       this.selectedPolicies = [];
+      this.refreshPolicyOptions();
     } finally {
       this.loadal.hide();
     }
   }
 
-  // Handling the selection of a policy and adding it below the typeahead input
+  // Add selected policy to the linked list and sync typed policy controls.
   addPolicy(policy: any) {
     const selectedPolicy = policy?.value || policy;
     if (!selectedPolicy?.policyType) {
@@ -284,6 +287,7 @@ export class ProductFormComponent implements OnInit {
     // Replace any existing policy of the same type (one per type)
     this.selectedPolicies = this.selectedPolicies.filter(p => p.policyType !== selectedPolicy.policyType);
     this.selectedPolicies.push(selectedPolicy);
+    this.refreshPolicyOptions();
 
     // Sync the typed policy form control (e.g. reservationPolicy, partyPolicy)
     const controlName = `${selectedPolicy.policyType}Policy`;
@@ -294,11 +298,45 @@ export class ProductFormComponent implements OnInit {
       control.setValue(selectedPolicy);
     }
 
-    // Reset the typeahead so it's ready for the next selection
-    this.form.get('policies')?.setValue(null, { emitEvent: false });
-    // This is the only way I could find to reset the typeahead
-    this.policyTypeahead?.matchInputToControl();
+    this.resetPolicySelector();
 
+  }
+
+  private resetPolicySelector() {
+    const policiesControl = this.form.get('policies');
+
+    // Clear the selector control so the next policy can be chosen immediately.
+    policiesControl?.setValue(null, { emitEvent: true });
+    policiesControl?.markAsPristine();
+    policiesControl?.markAsUntouched();
+  }
+
+  private refreshPolicyOptions() {
+    const selectedKeys = new Set(
+      this.selectedPolicies.map((p) => `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`)
+    );
+
+    const unlinkedPolicies = this.allAvailablePolicies.filter((p) => {
+      const key = `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`;
+      return !selectedKeys.has(key);
+    });
+
+    const displayCounts = new Map<string, number>();
+    for (const policy of unlinkedPolicies) {
+      const baseDisplay = (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim();
+      displayCounts.set(baseDisplay, (displayCounts.get(baseDisplay) || 0) + 1);
+    }
+
+    this.policies = unlinkedPolicies.map((policy) => {
+      const baseDisplay = (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim();
+      const hasDuplicateDisplay = (displayCounts.get(baseDisplay) || 0) > 1;
+      const qualifier = `${policy?.policyType || 'unknown'}:${policy?.policyId || policy?.pk || 'unknown'}`;
+
+      return {
+        display: hasDuplicateDisplay ? `${baseDisplay} (${qualifier})` : baseDisplay,
+        value: policy
+      };
+    });
   }
 
   private getUniqueActivities(activities: any[]) {
@@ -341,7 +379,7 @@ export class ProductFormComponent implements OnInit {
     return Array.from(byKey.values());
   }
 
-  // Removing a selected policy from the display and clearing the typed policy from the form
+  // Remove a linked policy and clear its typed policy control.
   removePolicy(policy: any) {
     this.selectedPolicies = this.selectedPolicies.filter(p => p.pk !== policy.pk);
 
@@ -354,6 +392,7 @@ export class ProductFormComponent implements OnInit {
       control.setValue(null);
     }
 
+    this.refreshPolicyOptions();
   }
 
   // Handle search terms updates from the component

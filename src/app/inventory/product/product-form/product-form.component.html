@@ -203,14 +203,14 @@
             <div class="col-12 col-lg-6">
               <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 mb-4">
                 <div class="flex-grow-1">
-                  <ngds-typeahead-input
-                    #policyTypeahead
+                  <ngds-picklist-input
                     [control]="form.get('policies')"
                     [selectionListItems]="policies"
+                    [label]="''"
                     [placeholder]="'Select/add existing policy'"
                     [resetButton]="true"
                   >
-                  </ngds-typeahead-input>
+                  </ngds-picklist-input>
                 </div>
                 <button 
                   class="btn btn-primary"
