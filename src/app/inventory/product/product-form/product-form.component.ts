@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, ViewChild } from '@angular/core';
 import { Constants } from '../../../app.constants';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, AbstractControl, UntypedFormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -32,7 +32,6 @@ export class ProductFormComponent implements OnInit {
   @Input() isCreating: boolean = false;
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
-  @ViewChild('policyTypeahead') policyTypeahead: any;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   public form;
@@ -42,6 +41,7 @@ export class ProductFormComponent implements OnInit {
   public availableActivities = [];
   public selectedPolicies: any[] = [];
   private initialPolicies: any[] = [];
+  private allAvailablePolicies: any[] = [];
   public policies: { display: string, value: any }[] = [];
   public relatedActivity: any[] = [];
 
@@ -56,7 +56,7 @@ export class ProductFormComponent implements OnInit {
       this.product = this.route.parent.snapshot.data['product'];
     }
     this.initializeForm();
-  };
+  }
 
   ngOnInit() {
     if (!this.isCreating) {
@@ -98,7 +98,7 @@ export class ProductFormComponent implements OnInit {
       }],
       isVisible: [this.product?.isVisible || false],
       passesRequired: [this.product?.passesRequired || false],
-      policies: [this.product?.policies || []],
+      policies: [null],
       qrCodeEnabled: [this.product?.qrCodeEnabled || false],
       reservationPolicy: [this.product?.reservationPolicy || null],
       searchTerms: [this.product?.searchTerms || []],
@@ -139,12 +139,14 @@ export class ProductFormComponent implements OnInit {
     // Creating a product: when an activity is selected, update the related fields
     // (activityType, activityId, activitySubType) so they can be saved with the product
     this.form.get('activity')?.valueChanges.subscribe((selectedActivity) => {
+      const activity = selectedActivity?.value || selectedActivity;
       for (const controlName of ['activityType', 'activityId', 'activitySubType']) {
-        if (!selectedActivity) {
-          this.form.get(controlName)?.setValue('', { emitEvent: false });
+        if (!activity) {
+          const emptyValue = controlName === 'activitySubType' ? [] : '';
+          this.form.get(controlName)?.setValue(emptyValue, { emitEvent: false });
           this.form.get(controlName)?.markAsDirty();
         } else {
-          const value = controlName === 'activitySubType' ? selectedActivity[controlName] || [] : selectedActivity[controlName] || '';
+          const value = controlName === 'activitySubType' ? activity[controlName] || [] : activity[controlName] || '';
           this.form.get(controlName)?.setValue(value, { emitEvent: false });
           this.form.get(controlName)?.markAsDirty();
         }
@@ -163,17 +165,23 @@ export class ProductFormComponent implements OnInit {
     this.loadal.show();
     try {
       const activities = await this.activityService.getActivitiesByCollectionId(collectionId);
-      const activityItems = activities?.items || activities || [];
+      const activityItems = Array.isArray(activities?.items)
+        ? activities.items
+        : Array.isArray(activities)
+          ? activities
+          : [];
+
+      const uniqueActivities = this.getUniqueActivities(activityItems);
       
-      // Map activities to the format needed for the typeahead selector
-      this.availableActivities = activityItems.map((a: any) => ({
+      // Map activities to the format needed for the selector input
+      this.availableActivities = uniqueActivities.map((a: any) => ({
         display: a.displayName || `${a.activityType} - ${a.activityId}`,
         value: a
       }));
 
       // Reset activity selection when collectionId changes
       for (const controlName of ['activity', 'activityType', 'activityId', 'activitySubType']) {
-        const value = controlName === 'activitySubType' ? [] : '';
+        const value = controlName === 'activitySubType' ? [] : controlName === 'activity' ? null : '';
         this.form.get(controlName)?.setValue(value, { emitEvent: false });
         this.form.get(controlName)?.markAsDirty();
       }
@@ -220,16 +228,16 @@ export class ProductFormComponent implements OnInit {
 
       if (policies?.length > 0) {
         console.log(`Found ${policies.length} policies`);
-        this.policies = policies.map(p => ({
-          display: p.displayName || p.display,
-          value: p
-        }));
+        this.allAvailablePolicies = policies;
+        this.refreshPolicyOptions();
       } else {
         console.log('No policies found');
+        this.allAvailablePolicies = [];
         this.policies = [];
       }
     } catch (error) {
       console.error('Error loading policies:', error);
+      this.allAvailablePolicies = [];
       this.policies = [];
     } finally {
       this.loadal.hide();
@@ -252,43 +260,91 @@ export class ProductFormComponent implements OnInit {
           const controlName = `${policy.policyType}Policy`;
           this.form.get(controlName)?.setValue(policy, { emitEvent: false });
         }
+
+        this.refreshPolicyOptions();
       } else {
         console.log('No policies relationships found');
         this.selectedPolicies = [];
+        this.refreshPolicyOptions();
       }
     } catch (error) {
       console.error('Error loading policies relationships:', error);
       this.selectedPolicies = [];
+      this.refreshPolicyOptions();
     } finally {
       this.loadal.hide();
     }
   }
 
-  // Handling the selection of a policy and adding it below the typeahead input
+  // Add selected policy to the linked list and sync typed policy controls.
   addPolicy(policy: any) {
-    if (!policy) return;
+    const selectedPolicy = policy?.value || policy;
+    if (!selectedPolicy?.policyType) {
+      return;
+    }
 
     // Replace any existing policy of the same type (one per type)
-    this.selectedPolicies = this.selectedPolicies.filter(p => p.policyType !== policy.policyType);
-    this.selectedPolicies.push(policy);
+    this.selectedPolicies = this.selectedPolicies.filter(p => p.policyType !== selectedPolicy.policyType);
+    this.selectedPolicies.push(selectedPolicy);
+    this.refreshPolicyOptions();
 
     // Sync the typed policy form control (e.g. reservationPolicy, partyPolicy)
-    const controlName = `${policy.policyType}Policy`;
+    const controlName = `${selectedPolicy.policyType}Policy`;
     const control = this.form.get(controlName);
     if (control) {
       // markAsDirty before setValue so the form is already dirty when valueChanges fires
       control.markAsDirty();
-      control.setValue(policy);
+      control.setValue(selectedPolicy);
     }
 
-    // Reset the typeahead so it's ready for the next selection
-    this.form.get('policies')?.setValue(null, { emitEvent: false });
-    // This is the only way I could find to reset the typeahead
-    this.policyTypeahead?.matchInputToControl();
+    this.resetPolicySelector();
 
   }
 
-  // Removing a selected policy from the display and clearing the typed policy from the form
+  private resetPolicySelector() {
+    const policiesControl = this.form.get('policies');
+
+    // Clear the selector control so the next policy can be chosen immediately.
+    policiesControl?.setValue(null, { emitEvent: true });
+    policiesControl?.markAsPristine();
+    policiesControl?.markAsUntouched();
+  }
+
+  private refreshPolicyOptions() {
+    const selectedKeys = new Set(
+      this.selectedPolicies.map((p) => `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`)
+    );
+
+    this.policies = this.allAvailablePolicies.filter((p) => {
+      const key = `${p?.policyType || ''}::${p?.policyId || p?.pk || ''}`;
+      return !selectedKeys.has(key);
+    }).map((policy) => ({
+      display: (policy?.displayName || policy?.display || policy?.policyId || 'Policy').trim(),
+      value: policy
+    }));
+  }
+
+  private getUniqueActivities(activities: any[]) {
+    const byKey = new Map<string, any>();
+    for (const activity of activities) {
+      const key = `${activity.collectionId || ''}::${activity.activityType || ''}::${activity.activityId || ''}`;
+      const current = byKey.get(key);
+      if (!current) {
+        byKey.set(key, activity);
+        continue;
+      }
+
+      const currentVersion = Number(current.version || 0);
+      const nextVersion = Number(activity.version || 0);
+      if (nextVersion >= currentVersion) {
+        byKey.set(key, activity);
+      }
+    }
+
+    return Array.from(byKey.values());
+  }
+
+  // Remove a linked policy and clear its typed policy control.
   removePolicy(policy: any) {
     this.selectedPolicies = this.selectedPolicies.filter(p => p.pk !== policy.pk);
 
@@ -301,6 +357,7 @@ export class ProductFormComponent implements OnInit {
       control.setValue(null);
     }
 
+    this.refreshPolicyOptions();
   }
 
   // Handle search terms updates from the component
