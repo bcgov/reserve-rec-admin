@@ -113,6 +113,15 @@
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h3 class="mb-0">Product Dates</h3>
             <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                (click)="initializeInventoryPoolsForCurrentWeek()"
+                [disabled]="loadingProductDates || initializingInventoryPools"
+              >
+                <i class="fa fa-layer-group me-1"></i>
+                {{ initializingInventoryPools ? 'Initializing pools...' : 'Initialize Pools (Week)' }}
+              </button>
               <button type="button" class="btn btn-outline-secondary btn-sm" (click)="previousWeek()">
                 <i class="fa fa-chevron-left"></i>
               </button>
