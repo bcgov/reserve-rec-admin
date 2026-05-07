@@ -94,6 +94,25 @@ export class ProductEditComponent extends EntityEditBaseComponent implements Aft
     // Handle search terms
     props['searchTerms'] = this.productForm.get('searchTerms')?.value || [];
 
+    // Transform numberOfPasses into assetList, preserving existing primaryKey/allocationType.
+    if (props['numberOfPasses'] !== undefined) {
+      const existing = this.product?.assetList?.[0];
+      props['assetList'] = [{
+        ...existing,
+        quantity: Number(props['numberOfPasses']),
+      }];
+      delete props['numberOfPasses'];
+    }
+
+    // Transform estimationMode into availabilityEstimationPattern, preserving cadence/tiers.
+    if (props['estimationMode']) {
+      props['availabilityEstimationPattern'] = {
+        ...this.product?.availabilityEstimationPattern,
+        estimationMode: props['estimationMode'],
+      };
+      delete props['estimationMode'];
+    }
+
     for (const policy of ['reservationPolicy', 'partyPolicy', 'feePolicy', 'changePolicy']) {
       if (props[policy]) {
         props[policy] = {
