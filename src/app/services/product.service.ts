@@ -187,16 +187,18 @@ export class ProductService {
     }
   }
 
-  async createProductDates(collectionId, activityType, activityId, productId, bodyParams = {}) {
+  async createProductDates(collectionId, activityType, activityId, productId, bodyParams = {}, showSuccessToast = true) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
       const res = (await lastValueFrom(this.apiService.post(`product-dates/${collectionId}/${activityType}/${activityId}/${productId}`, bodyParams)))['data'];
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
-      this.toastService.addMessage(
-        `Product dates successfully created`,
-        '',
-        ToastTypes.SUCCESS
-      );
+      if (showSuccessToast) {
+        this.toastService.addMessage(
+          `Product dates successfully created`,
+          '',
+          ToastTypes.SUCCESS
+        );
+      }
       return res;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
@@ -205,6 +207,37 @@ export class ProductService {
       this.toastService.addMessage(
         errorMessage,
         `Product dates failed to create`,
+        ToastTypes.ERROR
+      );
+      return null;
+    }
+  }
+
+  async createInventoryPools(collectionId, activityType, activityId, productId, startDate, endDate, skipWarnings = false, showSuccessToast = true) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
+      const queryParams = {
+        startDate,
+        endDate,
+        skipWarnings,
+      };
+      const res = (await lastValueFrom(this.apiService.post(`inventory-pools/${collectionId}/${activityType}/${activityId}/${productId}`, {}, queryParams)))['data'];
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      if (showSuccessToast) {
+        this.toastService.addMessage(
+          `Inventory pools successfully created`,
+          '',
+          ToastTypes.SUCCESS
+        );
+      }
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      this.loggerService.error(error);
+      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
+      this.toastService.addMessage(
+        errorMessage,
+        `Inventory pools failed to create`,
         ToastTypes.ERROR
       );
       return null;

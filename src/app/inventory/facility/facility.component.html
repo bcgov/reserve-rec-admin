@@ -12,14 +12,6 @@
             <h4 class="mb-0">{{data?.schema | titlecase }}</h4>
           </div>
         </div>
-        <div class="col-auto">
-          <div *ngIf="data && data?.isOpen" class="badge bg-success d-flex justify-content-between align-items-center rounded-pill px-3">
-            <h4 class="mb-0">Open</h4>
-          </div>
-          <div *ngIf="data && !data?.isOpen" class="badge bg-danger d-flex justify-content-between align-items-center rounded-pill px-3">
-            <h4 class="mb-0">Closed</h4>
-          </div>
-        </div>
       </div>
       <div class="row mb-4">
         <div class="mt-3">
