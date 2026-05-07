@@ -65,7 +65,7 @@ export class SearchResultComponent {
         route = `inventory/activity/${data?.collectionId}/${data?.activityType}/${data?.activityId}`;
         break;
       case 'product':
-        route = `inventory/product/${data.id}`;
+        route = `inventory/product/${data?.collectionId}/${data?.activityType}/${data?.activityId}/${data?.productId}`;
         break;
       case 'geozone':
         route = `inventory/geozone/${data?.collectionId}/${data?.geozoneId}`;
