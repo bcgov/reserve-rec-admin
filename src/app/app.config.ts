@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection, inject, provideAppInitializer } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { routes } from './app-routing.module';
 import { ConfigService } from './services/config.service';
@@ -39,7 +39,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, withInMemoryScrolling({
+      scrollPositionRestoration: 'enabled',  // top on forward nav, restore on back
+      anchorScrolling: 'enabled',
+    })),
     provideAppInitializer(() => {
         const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService), inject(FeatureFlagService));
         return initializerFn();
