@@ -100,6 +100,11 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
     this.form.get('activityType').valueChanges.subscribe(() => {
       this.updateFilteredActivitySubTypes();
     });
+
+    // Populate the sub-type dropdown for the existing activityType when editing.
+    // Without this, the form has the activitySubType value set but the picklist
+    // has no options to display it against, so the field appears empty.
+    this.updateFilteredActivitySubTypes();
   }
 
 
