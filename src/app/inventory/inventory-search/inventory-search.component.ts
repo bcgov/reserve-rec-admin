@@ -221,8 +221,12 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   }
 
   getFacilitySubTypeOptions() {
-    const facilityType = this.form.get('filters.facilityType').value;
-    return Object.entries(Constants.facilityTypes[facilityType].subtypes);
+    const facilityType = this.form.get('filters.facilityType')?.value;
+    // Note: Constants uses camelCase `subTypes`. The previous lowercase
+    // access (`.subtypes`) returned undefined, and Object.entries(undefined)
+    // throws — this fired during change detection if a facility-type filter
+    // was set, leaving the page stuck behind the loading overlay.
+    return Object.entries(Constants.facilityTypes[facilityType]?.subTypes || {});
   }
 
   getActivitySubTypeOptions() {
