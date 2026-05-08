@@ -156,3 +156,23 @@ export class Utils {
     return str;
   }
 }
+
+/**
+ * Pulls a human-readable string out of an error of unknown shape.
+ * Without this, `${error}` on an HttpErrorResponse renders as
+ * "[object Object]" in toasts (issue #190 — session timeout case).
+ */
+export function errorMessage(error: any, fallback = 'An unexpected error occurred'): string {
+  if (!error) return fallback;
+  if (typeof error === 'string') return error;
+  // HttpErrorResponse or generic object — walk the usual nested shapes
+  return (
+    error?.error?.msg ||
+    error?.error?.error ||
+    error?.error?.Message ||
+    error?.error?.message ||
+    error?.message ||
+    error?.statusText ||
+    fallback
+  );
+}

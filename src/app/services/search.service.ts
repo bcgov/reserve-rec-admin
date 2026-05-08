@@ -6,6 +6,7 @@ import { LoggerService } from './logger.service';
 import { ApiService } from './api.service';
 import { LoadingService } from './loading.service';
 import { ToastService, ToastTypes } from './toast.service';
+import { errorMessage } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +46,7 @@ export class SearchService {
       return res; // Return the results for further processing if needed
     } catch (error) {
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage(error),
         `Search error`,
         ToastTypes.ERROR
       );
