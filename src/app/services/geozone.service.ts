@@ -6,6 +6,7 @@ import { LoadingService } from './loading.service';
 import { ApiService } from './api.service';
 import { LoggerService } from './logger.service';
 import { ToastService, ToastTypes } from './toast.service';
+import { errorMessage } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -65,7 +66,7 @@ export class GeozoneService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage(error),
         `Geozone failed to create`,
         ToastTypes.ERROR
       );
@@ -87,7 +88,7 @@ export class GeozoneService {
       return res;
     } catch (error) {
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage(error),
         `Geozone failed to update`,
         ToastTypes.ERROR
       );
@@ -112,7 +113,7 @@ export class GeozoneService {
       this.loadingService.removeFromFetchList(Constants.dataIds.GEOZONE_RESULT);
       this.loggerService.error(error);
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage(error),
         `Geozone failed to delete`,
         ToastTypes.ERROR
       );

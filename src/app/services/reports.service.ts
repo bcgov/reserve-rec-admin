@@ -5,6 +5,7 @@ import { ApiService } from './api.service';
 import { LoggerService } from './logger.service';
 import { ToastService, ToastTypes } from './toast.service';
 import { lastValueFrom } from 'rxjs';
+import { errorMessage } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +38,7 @@ export class ReportsService {
       this.loadingService.removeFromFetchList(dataTag);
       this.loggerService.error(error);
       this.toastService.addMessage(
-        `${error}`,
+        errorMessage(error),
         'Failed to fetch daily passes report',
         ToastTypes.ERROR
       );
