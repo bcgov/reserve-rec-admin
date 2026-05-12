@@ -62,6 +62,8 @@ export class ProductCreateComponent {
     const collectionId = this.productForm.get('collectionId').value ?? this.product?.collectionId;
     const activityType = this.productForm.get('activityType').value ?? this.product?.activityType;
     const activityId = this.productForm.get('activityId').value ?? this.product?.activityId;
+    const rangeStart = this.productForm.get('rangeStart').value;
+    const rangeEnd = this.productForm.get('rangeEnd').value;
 
     if (!collectionId || !activityType || !activityId) {
       console.error('Missing required collection ID, activity type, and/or activity ID');
@@ -83,14 +85,51 @@ export class ProductCreateComponent {
 
     this.loadal.show();
     try {
+      // Step 1: Create the product
       const props = this.formatFormForSubmission();
       const res = await this.productService.createProduct(collectionId, props);
       const productId = res?.[0]?.data?.productId;
-      if (productId) {
-        this.navigateToProduct(collectionId, activityType, activityId, productId);
+      
+      if (!productId) {
+        throw new Error('No product ID returned from creation');
       }
+
+      // Step 2: Create product dates
+      const productDatesResult = await this.productService.createProductDates(
+        collectionId,
+        activityType,
+        activityId,
+        productId,
+        { startDate: rangeStart, endDate: rangeEnd },
+        true // showSuccessToast
+      );
+
+      if (!productDatesResult) {
+        console.error('Product dates creation failed, stopping workflow');
+        return;
+      }
+
+      // Step 3: Create inventory pools
+      const inventoryPoolsResult = await this.productService.createInventoryPools(
+        collectionId,
+        activityType,
+        activityId,
+        productId,
+        rangeStart,
+        rangeEnd,
+        true, // skipWarnings
+        true  // showSuccessToast
+      );
+
+      if (!inventoryPoolsResult) {
+        console.error('Inventory pools creation failed');
+        // Still navigate even if inventory pools fail - product and dates were created
+      }
+
+      // Step 4: Navigate to product details
+      this.navigateToProduct(collectionId, activityType, activityId, productId);
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('Error in product creation workflow:', error);
     } finally {
       this.loadal.hide();
     }

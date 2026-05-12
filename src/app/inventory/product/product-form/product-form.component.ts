@@ -100,7 +100,7 @@ export class ProductFormComponent implements OnInit {
       passesRequired: [this.product?.passesRequired || false],
       policies: [null],
       qrCodeEnabled: [this.product?.qrCodeEnabled || false],
-      reservationPolicy: [this.product?.reservationPolicy || null],
+      reservationPolicy: [this.product?.reservationPolicy || null, [Validators.required]],
       searchTerms: [this.product?.searchTerms || []],
       timezone: [this.product?.timezone, {
         nonNullable: true,
@@ -108,15 +108,15 @@ export class ProductFormComponent implements OnInit {
       }],
 
       // Policies (because alphabetizing them is confusing?)
-      changePolicy: [this.product?.changePolicy || null],
+      changePolicy: [this.product?.changePolicy || null, [Validators.required]],
       description: [this.product?.description || ''],
-      feePolicy: [this.product?.feePolicy || null],
-      partyPolicy: [this.product?.partyPolicy || null],
+      feePolicy: [this.product?.feePolicy || null, [Validators.required]],
+      partyPolicy: [this.product?.partyPolicy || null, [Validators.required]],
 
       // New required fields
       numberOfPasses: [this.product?.assetList?.[0]?.quantity || 1, [Validators.required, Validators.min(1)]],
-      rangeStart: [this.product?.rangeStart || ''],
-      rangeEnd: [this.product?.rangeEnd || ''],
+      rangeStart: [this.product?.rangeStart || '', [Validators.required]],
+      rangeEnd: [this.product?.rangeEnd || '', [Validators.required]],
       estimationMode: [this.product?.availabilityEstimationPattern?.estimationMode || 'exact', [Validators.required]],
     }, {
       validators: [this.displayNameValidator]
