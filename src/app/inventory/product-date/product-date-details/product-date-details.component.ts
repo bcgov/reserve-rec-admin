@@ -159,7 +159,7 @@ export class ProductDateDetailsComponent {
     return this.productDate?.reservationContext;
   }
 
-  getPolicyDetails(policy: any): Array<{ key: string; value: any }> {
+  getPolicyDetails(policy: any): { key: string; value: any }[] {
     if (!policy) return [];
     
     return Object.entries(policy)
@@ -170,9 +170,9 @@ export class ProductDateDetailsComponent {
       }));
   }
 
-  getReservationPolicyDetails(): Array<{ key: string; value: any }> {
+  getReservationPolicyDetails(): { key: string; value: any }[] {
     const policy = this.productDate?.reservationPolicy;
-    const details: Array<{ key: string; value: any }> = [];
+    const details: { key: string; value: any }[] = [];
 
     // Add pk and sk at the top
     if (this.productDate?.pk) {
