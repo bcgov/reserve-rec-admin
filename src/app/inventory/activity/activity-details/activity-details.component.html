@@ -150,7 +150,16 @@
       </div>
     </div>
     <div class="col-md-6">
-      <h4 class="mb-3">Products Details</h4>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Products Details</h4>
+        <button 
+          class="btn btn-primary btn-sm"
+          (click)="createProductWithContext()"
+          title="Create a new product for this activity">
+          <i class="fa fa-plus me-1"></i>
+          Create Product
+        </button>
+      </div>
       
       <!-- Loading state -->
       <div *ngIf="loadingRelationships" class="text-center my-3">

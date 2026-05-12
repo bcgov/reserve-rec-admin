@@ -42,6 +42,7 @@ export class ActivityDetailsComponent {
   constructor(
     private relationshipService: RelationshipService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {
     // Subscribe to route data changes to handle updates
     this.route.data.subscribe(async (data) => {
@@ -213,5 +214,20 @@ export class ActivityDetailsComponent {
       console.error('Error loading product relationships:', error);
       this.relatedProducts = [];
     }
+  }
+
+  // Navigate to product creation page with prepopulated activity data
+  createProductWithContext() {
+    const productData = {
+      collectionId: this.activity?.collectionId,
+      activityId: this.activity?.activityId,
+      activityType: this.activity?.activityType,
+      activitySubType: this.activity?.activitySubType,
+      activity: this.activity
+    };
+
+    this.router.navigate(['/inventory/create/product'], {
+      state: { product: productData }
+    });
   }
 }

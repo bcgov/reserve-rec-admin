@@ -28,7 +28,6 @@ export class ProductDetailsComponent {
   public loadingRelationships: boolean = false;
   public productDates: any[] = [];
   public loadingProductDates: boolean = false;
-  public initializingInventoryPools: boolean = false;
   public currentWeekStart: Date = new Date();
 
   get currentWeekEnd(): Date {
@@ -211,68 +210,7 @@ export class ProductDetailsComponent {
     ]);
   }
 
-  /**
-   * Initialize ProductDates for this product
-   * Creates ProductDate and AvailabilitySignal records for each day in the product's date range
-   */
-  async initializeProductDates() {
-    if (!this.product?.collectionId || !this.product?.activityType || !this.product?.activityId || !this.product?.productId) {
-      console.error('Cannot initialize product dates: Missing product identifiers');
-      return;
-    }
 
-    try {
-      const startDate = this.product?.rangeStart || null;
-      const endDate = this.product?.rangeEnd || startDate;
-      const bodyParams = startDate ? { startDate, endDate } : {};
-
-      const result = await this.productService.createProductDates(
-        this.product.collectionId,
-        this.product.activityType,
-        this.product.activityId,
-        this.product.productId,
-        bodyParams
-      );
-
-      if (result) {
-        console.log('Successfully initialized product dates:', result);
-        await this.loadProductDatesForWeek();
-      }
-    } catch (error) {
-      console.error('Error initializing product dates:', error);
-    }
-  }
-
-  async initializeInventoryPoolsForCurrentWeek() {
-    if (!this.product?.collectionId || !this.product?.activityType || !this.product?.activityId || !this.product?.productId) {
-      console.error('Cannot initialize inventory pools: Missing product identifiers');
-      return;
-    }
-
-    const startDate = this.toLocalISODate(this.currentWeekStart);
-    const endDate = this.toLocalISODate(this.currentWeekEnd);
-
-    this.initializingInventoryPools = true;
-    try {
-      const result = await this.productService.createInventoryPools(
-        this.product.collectionId,
-        this.product.activityType,
-        this.product.activityId,
-        this.product.productId,
-        startDate,
-        endDate,
-        true
-      );
-
-      if (result !== null) {
-        console.log(`Successfully initialized inventory pools for week ${startDate} to ${endDate}`);
-      }
-    } catch (error) {
-      console.error('Error initializing inventory pools:', error);
-    } finally {
-      this.initializingInventoryPools = false;
-    }
-  }
 
   /**
    * Load and fetch geozone entities that are related to this activity

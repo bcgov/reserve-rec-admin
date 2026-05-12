@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-12">
 
-      <div class="mb-3">
+      <div class="mb-3 d-flex justify-content-between align-items-center">
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
           <i class="fa fa-arrow-left me-2"></i>Back to Product
         </button>
@@ -58,131 +58,231 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <h4 class="mb-3">Inventory</h4>
-                <ng-container *ngFor="let asset of productDate.assetList">
-                  <div class="row mb-2">
-                    <div class="col-4"><strong>Quantity:</strong></div>
-                    <div class="col-auto"><span>{{ asset.quantity }}</span></div>
+                <h4 class="mb-3">
+                  Inventory
+                  <button *ngIf="!isEditing" type="button" class="btn btn-primary btn-sm float-end" (click)="toggleEdit()">
+                    <i class="fa fa-edit me-2"></i>Edit Quantities
+                  </button>
+                </h4>
+
+                <ng-container *ngIf="!isEditing">
+                  <ng-container *ngFor="let asset of productDate.assetList">
+                    <div class="row mb-2">
+                      <div class="col-4"><strong>Quantity:</strong></div>
+                      <div class="col-auto"><span>{{ asset.quantity }}</span></div>
+                    </div>
+                    <div class="row mb-2" *ngIf="asset.type">
+                      <div class="col-4"><strong>Asset Type:</strong></div>
+                      <div class="col-auto"><span>{{ asset.type }}</span></div>
+                    </div>
+                    <div class="row mb-2" *ngIf="asset.id">
+                      <div class="col-4"><strong>Asset ID:</strong></div>
+                      <div class="col-auto"><span class="text-muted small">{{ asset.id }}</span></div>
+                    </div>
+                  </ng-container>
+                  <p *ngIf="!productDate.assetList?.length" class="text-muted small">No inventory data.</p>
+                </ng-container>
+
+                <ng-container *ngIf="isEditing && editForm" [formGroup]="editForm">
+                  <div *ngFor="let asset of productDate.assetList; let i = index" class="mb-3 p-2 border rounded bg-light">
+                    <div class="row mb-2">
+                      <div class="col-12">
+                        <strong>{{ asset.type || asset.id || 'Asset ' + (i + 1) }}</strong>
+                      </div>
+                    </div>
+                    <div class="row mb-2" *ngIf="asset.id">
+                      <div class="col-4"><small class="text-muted">Asset ID:</small></div>
+                      <div class="col-auto"><small>{{ asset.id }}</small></div>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-12">
+                        <label [for]="'quantity_' + i" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" [id]="'quantity_' + i" [formControlName]="'asset_' + i + '_quantity'" min="0">
+                      </div>
+                    </div>
                   </div>
-                  <div class="row mb-2" *ngIf="asset.type">
-                    <div class="col-4"><strong>Asset Type:</strong></div>
-                    <div class="col-auto"><span>{{ asset.type }}</span></div>
-                  </div>
-                  <div class="row mb-2" *ngIf="asset.id">
-                    <div class="col-4"><strong>Asset ID:</strong></div>
-                    <div class="col-auto"><span class="text-muted small">{{ asset.id }}</span></div>
+
+                  <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-success btn-sm" (click)="saveChanges()" [disabled]="saving || editForm.invalid">
+                      <i class="fa fa-save me-2"></i>{{ saving ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleEdit()" [disabled]="saving">
+                      <i class="fa fa-times me-2"></i>Cancel
+                    </button>
                   </div>
                 </ng-container>
-                <p *ngIf="!productDate.assetList?.length" class="text-muted small">No inventory data.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Reservation Context -->
+        <!-- Reservation Context & Policy -->
         <div class="card mb-4">
           <div class="card-body p-4">
-            <h4 class="mb-3">Reservation Context</h4>
+            <h4 class="mb-3">Reservation Policy & Context</h4>
 
-            <div class="d-flex gap-2 mb-4">
-              <span class="badge px-3 py-2 fs-6"
-                [ngClass]="reservationContext?.isDiscoverable ? 'bg-success' : 'bg-secondary'">
-                <i class="fa me-1" [ngClass]="reservationContext?.isDiscoverable ? 'fa-eye' : 'fa-eye-slash'"></i>
-                {{ reservationContext?.isDiscoverable ? 'Discoverable' : 'Not Discoverable' }}
-              </span>
-              <span class="badge px-3 py-2 fs-6"
-                [ngClass]="reservationContext?.isReservable ? 'bg-success' : 'bg-secondary'">
-                <i class="fa fa-calendar-check me-1"></i>
-                {{ reservationContext?.isReservable ? 'Reservable' : 'Not Reservable' }}
-              </span>
-            </div>
+            <ng-container *ngIf="!isEditing">
+              <div class="d-flex gap-2 mb-4">
+                <span class="badge px-3 py-2 fs-6"
+                  [ngClass]="reservationContext?.isDiscoverable ? 'bg-success' : 'bg-secondary'">
+                  <i class="fa me-1" [ngClass]="reservationContext?.isDiscoverable ? 'fa-eye' : 'fa-eye-slash'"></i>
+                  {{ reservationContext?.isDiscoverable ? 'Discoverable' : 'Not Discoverable' }}
+                </span>
+                <span class="badge px-3 py-2 fs-6"
+                  [ngClass]="reservationContext?.isReservable ? 'bg-success' : 'bg-secondary'">
+                  <i class="fa fa-calendar-check me-1"></i>
+                  {{ reservationContext?.isReservable ? 'Reservable' : 'Not Reservable' }}
+                </span>
+              </div>
 
-            <div class="row mb-2">
-              <div class="col-3"><strong>Min Daily Inventory:</strong></div>
-              <div class="col-auto"><span>{{ reservationContext?.minDailyInventory ?? '—' }}</span></div>
-            </div>
-            <div class="row mb-4">
-              <div class="col-3"><strong>Max Daily Inventory:</strong></div>
-              <div class="col-auto"><span>{{ reservationContext?.maxDailyInventory ?? '—' }}</span></div>
-            </div>
-
-            <h5 class="mb-3">Temporal Windows</h5>
-            <p *ngIf="!temporalWindowsList.length" class="text-muted small">No temporal windows defined.</p>
-            <div class="row g-3">
-              <div *ngFor="let window of temporalWindowsList" class="col-md-6">
-                <div class="border rounded p-3 h-100 bg-light">
-                  <p class="fw-bold mb-2">
-                    <i class="fa fa-clock me-2 text-primary"></i>{{ window.label || window.id }}
-                  </p>
-                  <div class="row mb-1">
-                    <div class="col-3 text-muted small">Opens:</div>
-                    <div class="col-auto small">
-                      <span *ngIf="window.open">{{ window.open | date:'medium' }}</span>
-                      <span *ngIf="!window.open" class="text-muted">—</span>
-                    </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fa fa-sliders me-2 text-primary"></i>Inventory Settings</h6>
+                  <div class="row mb-2">
+                    <div class="col-5"><strong>Min Daily:</strong></div>
+                    <div class="col-auto"><span>{{ reservationContext?.minDailyInventory ?? '—' }}</span></div>
                   </div>
                   <div class="row">
-                    <div class="col-3 text-muted small">Closes:</div>
-                    <div class="col-auto small">
-                      <span *ngIf="window.close">{{ window.close | date:'medium' }}</span>
-                      <span *ngIf="!window.close" class="text-muted">—</span>
+                    <div class="col-5"><strong>Max Daily:</strong></div>
+                    <div class="col-auto"><span>{{ reservationContext?.maxDailyInventory ?? '—' }}</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <h6 class="mb-2"><i class="fa fa-clock me-2 text-primary"></i>Policy Details</h6>
+              <div class="table-responsive small">
+                <table class="table table-sm table-borderless mb-0">
+                  <tbody>
+                    <tr *ngFor="let detail of getReservationPolicyDetails()">
+                      <td class="text-muted" style="width: 35%"><strong>{{ detail.key }}:</strong></td>
+                      <td>
+                        <ng-container *ngIf="isObject(detail.value)">
+                          <pre class="mb-0 bg-light p-2 rounded" style="font-size: 0.8rem;">{{ detail.value | json }}</pre>
+                        </ng-container>
+                        <ng-container *ngIf="!isObject(detail.value)">
+                          {{ formatValue(detail.value) }}
+                        </ng-container>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h5 class="mb-3 mt-4">Temporal Windows</h5>
+              <p *ngIf="!temporalWindowsList.length" class="text-muted small">No temporal windows defined.</p>
+              <div class="row g-3">
+                <div *ngFor="let window of temporalWindowsList" class="col-md-6">
+                  <div class="border rounded p-3 h-100 bg-light">
+                    <p class="fw-bold mb-2">
+                      <i class="fa fa-clock me-2 text-primary"></i>{{ window.label || window.id }}
+                    </p>
+                    <div class="row mb-1">
+                      <div class="col-3 text-muted small">Opens:</div>
+                      <div class="col-auto small">
+                        <span *ngIf="window.open">{{ window.open | date:'medium' }}</span>
+                        <span *ngIf="!window.open" class="text-muted">—</span>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-3 text-muted small">Closes:</div>
+                      <div class="col-auto small">
+                        <span *ngIf="window.close">{{ window.close | date:'medium' }}</span>
+                        <span *ngIf="!window.close" class="text-muted">—</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </ng-container>
           </div>
         </div>
 
         <!-- Policies -->
         <div class="card mb-4">
           <div class="card-body p-4">
-            <h4 class="mb-3">Policies</h4>
-            <div class="row g-3">
-              <div class="col-md-4" *ngIf="productDate.partyPolicy">
-                <div class="border rounded p-3 h-100">
-                  <h6 class="mb-2"><i class="fa fa-users me-2 text-primary"></i>Party Policy</h6>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">Name:</div>
-                    <div class="col-auto small">{{ productDate.partyPolicy?.displayName || '—' }}</div>
+            <h4 class="mb-3">Attached Policies</h4>
+
+            <ng-container *ngIf="productDate.partyPolicy || productDate.changePolicy || productDate.feePolicy; else noPolicies">
+              <div class="row g-4">
+                <!-- Party Policy -->
+                <div class="col-md-6" *ngIf="productDate.partyPolicy">
+                  <div class="border rounded p-3 h-100">
+                    <h6 class="mb-3"><i class="fa fa-users me-2 text-primary"></i>Party Policy</h6>
+                    <div class="table-responsive small">
+                      <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                          <tr *ngFor="let detail of getPolicyDetails(productDate.partyPolicy)">
+                            <td class="text-muted" style="width: 40%"><strong>{{ detail.key }}:</strong></td>
+                            <td>
+                              <ng-container *ngIf="isObject(detail.value)">
+                                <pre class="mb-0 bg-light p-2 rounded" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">{{ detail.value | json }}</pre>
+                              </ng-container>
+                              <ng-container *ngIf="!isObject(detail.value)">
+                                {{ formatValue(detail.value) }}
+                              </ng-container>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">ID:</div>
-                    <div class="col-auto small text-muted">{{ productDate.partyPolicy?.policyId || '—' }}</div>
+                </div>
+
+                <!-- Change Policy -->
+                <div class="col-md-6" *ngIf="productDate.changePolicy">
+                  <div class="border rounded p-3 h-100">
+                    <h6 class="mb-3"><i class="fa fa-edit me-2 text-primary"></i>Change Policy</h6>
+                    <div class="table-responsive small">
+                      <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                          <tr *ngFor="let detail of getPolicyDetails(productDate.changePolicy)">
+                            <td class="text-muted" style="width: 40%"><strong>{{ detail.key }}:</strong></td>
+                            <td>
+                              <ng-container *ngIf="isObject(detail.value)">
+                                <pre class="mb-0 bg-light p-2 rounded" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">{{ detail.value | json }}</pre>
+                              </ng-container>
+                              <ng-container *ngIf="!isObject(detail.value)">
+                                {{ formatValue(detail.value) }}
+                              </ng-container>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fee Policy -->
+                <div class="col-md-6" *ngIf="productDate.feePolicy">
+                  <div class="border rounded p-3 h-100">
+                    <h6 class="mb-3"><i class="fa fa-dollar-sign me-2 text-primary"></i>Fee Policy</h6>
+                    <div class="table-responsive small">
+                      <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                          <tr *ngFor="let detail of getPolicyDetails(productDate.feePolicy)">
+                            <td class="text-muted" style="width: 40%"><strong>{{ detail.key }}:</strong></td>
+                            <td>
+                              <ng-container *ngIf="isObject(detail.value)">
+                                <pre class="mb-0 bg-light p-2 rounded" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">{{ detail.value | json }}</pre>
+                              </ng-container>
+                              <ng-container *ngIf="!isObject(detail.value)">
+                                {{ formatValue(detail.value) }}
+                              </ng-container>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-4" *ngIf="productDate.changePolicy">
-                <div class="border rounded p-3 h-100">
-                  <h6 class="mb-2"><i class="fa fa-edit me-2 text-primary"></i>Change Policy</h6>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">Name:</div>
-                    <div class="col-auto small">{{ productDate.changePolicy?.displayName || '—' }}</div>
-                  </div>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">ID:</div>
-                    <div class="col-auto small text-muted">{{ productDate.changePolicy?.policyId || '—' }}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4" *ngIf="productDate.feePolicy">
-                <div class="border rounded p-3 h-100">
-                  <h6 class="mb-2"><i class="fa fa-dollar-sign me-2 text-primary"></i>Fee Policy</h6>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">Name:</div>
-                    <div class="col-auto small">{{ productDate.feePolicy?.displayName || '—' }}</div>
-                  </div>
-                  <div class="row mb-1">
-                    <div class="col-4 small text-muted">ID:</div>
-                    <div class="col-auto small text-muted">{{ productDate.feePolicy?.policyId || '—' }}</div>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="!productDate.partyPolicy && !productDate.changePolicy && !productDate.feePolicy"
-                class="col-12 text-muted small">
-                No policy data available.
-              </div>
-            </div>
+            </ng-container>
+
+            <ng-template #noPolicies>
+              <p class="text-muted small">No policy data available.</p>
+            </ng-template>
           </div>
         </div>
 

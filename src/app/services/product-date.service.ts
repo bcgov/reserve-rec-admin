@@ -34,4 +34,30 @@ export class ProductDateService {
       return null;
     }
   }
+
+  async updateProductDate(collectionId: string, activityType: string, activityId: string | number, productId: string | number, date: string, productDate: any) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+      const res = (await lastValueFrom(this.apiService.put(`product-dates/${collectionId}/${activityType}/${activityId}/${productId}/${date}`, productDate)))['data'];
+      this.dataService.setItemValue(Constants.dataIds.PRODUCT_DATE_LIST, res);
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+      this.loggerService.error(error);
+      throw error;
+    }
+  }
+
+  async updateInventoryPools(collectionId: string, activityType: string, activityId: string | number, productId: string | number, date: string, assets: any[]) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+      await lastValueFrom(this.apiService.put(`inventory-pools/${collectionId}/${activityType}/${activityId}/${productId}/${date}`, { assets }));
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_DATE_LIST);
+      this.loggerService.error(error);
+      throw error;
+    }
+  }
 }
