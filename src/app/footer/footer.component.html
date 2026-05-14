@@ -1,18 +1,40 @@
 <footer class="footer-admin">
-    <div>
-      <ul class="justify-content-center gov-links pt-3 pb-3">
-        <li><a href="#" id="home">Home</a></li>
-        <li><a href="http://www2.gov.bc.ca/gov/content/home/copyright" id="copyright" target="_blank">Copyright</a></li>
-        <li>
-          <a href="http://www2.gov.bc.ca/gov/content/home/disclaimer" id="disclaimer" target="_blank">Disclaimer</a>
-        </li>
-        <li><a href="http://www2.gov.bc.ca/gov/content/home/privacy" id="privacy" target="_blank">Privacy</a></li>
-        <li>
-          <a href="http://www2.gov.bc.ca/gov/content/home/accessibility" id="accessibility" target="_blank"
-            >Accessibility</a
-          >
-        </li>
-      </ul>
-    </div>
-  </footer>
-  
+  <div class="top-box-content py-4 mx-auto text-center border-top border-warning">
+    <h5 class="visually-hidden">Land acknowledgement</h5>
+    <p class="mx-0 mb-2">We acknowledge all First Nations on whose territories BC Parks were established.
+    </p>
+    <p>
+      We honour their connection to the land and respect the importance of their diverse teachings, traditions, and
+      practices within these territories.
+    </p>
+  </div>
+  <div class="d-flex justify-content-end align-items-center me-3">
+    <ul class="d-flex gov-links pt-3 pb-3">
+      <span class="quick-links me-5">Quick links:</span>
+      <li class="me-5 fw-bold">
+        <a 
+          [href]="envName==='prod' ? 'https://attendance-revenue.bcparks.ca/' : '#notProd'"
+          target="_blank"
+        >
+          Attendance & Revenue
+        </a>
+      </li>
+      <li class="me-5 fw-bold">
+        <a 
+          [href]="envName==='prod' ? 'https://reserve-admin.bcparks.ca/dayuse/' : '#notProd'"
+          target="_blank"
+        >
+          Day Use Pass Admin
+        </a>
+      </li>
+      <li class="me-5 fw-bold">
+        <a 
+          href="https://bcparks.ca/contact/"
+          target="_blank"
+        >
+          Contact Us
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>

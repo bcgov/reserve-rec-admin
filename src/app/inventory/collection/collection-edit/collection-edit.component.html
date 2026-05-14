@@ -1,0 +1,28 @@
+<app-loadal #loadal></app-loadal>
+<app-collection-form
+  [collection]="collection"
+  (formValue)="updateCollectionForm($event)">
+</app-collection-form>
+<div class="row d-flex justify-content-end">
+  <div class="col-auto p-4">
+    <div class="d-flex justify-content-end align-items-center gap-2">
+      <button
+        class="btn btn-outline-danger rounded-1"
+        (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-secondary rounded-1"
+        (click)="resetForm()"
+        [disabled]="!collectionForm?.dirty">
+        Reset
+      </button>
+      <button
+        class="btn btn-primary rounded-1"
+        (click)="submit()"
+        [disabled]="!collectionForm?.valid || !collectionForm?.dirty">
+        Save
+      </button>
+    </div>
+  </div>
+</div>

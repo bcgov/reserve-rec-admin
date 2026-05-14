@@ -1,0 +1,65 @@
+<section class="container pt-3 pb-3" *ngIf="collection">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-body p-4">
+          <h3 class="mb-4">Details</h3>
+
+          <div class="row mt-2 mb-4">
+            <div class="col-12 d-flex align-items-center justify-content-start gap-3">
+              <i *ngIf="collection?.isVisible" class="fa-solid fa-eye fa-lg"></i>
+              <i *ngIf="!collection?.isVisible" class="fa-solid fa-eye-slash fa-lg"></i>
+              <p class="mb-0 small">{{ collection?.isVisible ? 'Visible in admin' : 'Not visible in admin' }}</p>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Description:</p>
+              <p class="small">{{ collection?.description || 'No description provided.' }}</p>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Timezone:</p>
+              <p class="small">{{ collection?.timezone || 'No timezone provided.' }}</p>
+            </div>
+          </div>
+
+          <div class="row mt-2" *ngIf="collection?.memberCollectionIds?.length">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Member&nbsp;Collections:</p>
+              <div class="d-flex flex-wrap gap-1">
+                <span *ngFor="let memberId of collection.memberCollectionIds" class="badge bg-secondary">{{ memberId }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Search&nbsp;terms:</p>
+              <p class="small">{{ collection?.searchTerms?.length ? collection.searchTerms.join(', ') : 'No search terms provided.' }}</p>
+            </div>
+          </div>
+
+          <div class="row mt-2" *appPermissionRequired="'staff'">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Admin&nbsp;notes:</p>
+              <p class="small">{{ collection?.adminNotes || 'No admin notes provided.' }}</p>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12 d-flex align-items-start justify-content-start gap-3">
+              <p class="small fw-bold">Created on:</p>
+              <p class="small">{{ collection?.creationDate | date:'YYYY-LL-dd, h:mma' }}</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -20,8 +20,6 @@ export class SearchResultComponent {
 
   getBadgeClass(schema) {
     switch (schema) {
-      case 'protectedArea':
-        return 'bg-success';
       case 'facility':
         return 'bg-primary';
       case 'activity':
@@ -37,8 +35,6 @@ export class SearchResultComponent {
 
   getBadgeIcon(schema) {
     switch (schema) {
-      case 'protectedArea':
-        return 'fa-solid fa-tree';
       case 'facility':
         return 'fa-solid fa-location-dot';
       case 'activity':
@@ -55,9 +51,6 @@ export class SearchResultComponent {
   onSelect(data) {
     let route: any = null;
     switch (data?.schema) {
-      case 'protectedArea':
-        route = `inventory/protected-area/${data?.orcs}`;
-        break;
       case 'facility':
         route = `inventory/facility/${data?.collectionId}/${data?.facilityType}/${data?.facilityId}`;
         break;
@@ -69,6 +62,9 @@ export class SearchResultComponent {
         break;
       case 'geozone':
         route = `inventory/geozone/${data?.collectionId}/${data?.geozoneId}`;
+        break;
+      case 'collection':
+        route = `inventory/collection/${data?.collectionId}`;
         break;
       default:
         console.warn('Unknown schema type:', data?.schema);

@@ -60,7 +60,7 @@ export class FacilityComponent {
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
-  // it constructs a confirmation modal with the details of the protected area and its status.
+  // it constructs a confirmation modal with details and its status.
   displayConfirmationModal(collectionId, facilityType, facilityId) {
     const details: ModalRowSpec[] = [
       { label: 'Facility Name', value: this.data?.displayName },

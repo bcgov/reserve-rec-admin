@@ -72,7 +72,7 @@ export class ActivityComponent implements OnDestroy {
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
-  // it constructs a confirmation modal with the details of the protected area and its status.
+  // it constructs a confirmation modal with details and its status.
   displayConfirmationModal(collectionId, activityType, activityId) {
     const details: ModalRowSpec[] = [
       { label: 'Activity Name', value: this.data?.displayName },

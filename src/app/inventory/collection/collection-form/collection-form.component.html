@@ -1,0 +1,95 @@
+<app-loadal #loadal></app-loadal>
+<section class="container pt-3 pb-3">
+  <div class="row">
+    <div class="col-12">
+
+      <div *ngIf="isCreating" class="card mb-4">
+        <div class="card-body p-4">
+          <h3 class="mb-3">Partition information</h3>
+          <div class="row">
+            <span class="small text-muted mb-2">Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.</span>
+            <div class="col-12 col-lg-6">
+              <div class="mb-3">
+                <ngds-text-input
+                  [control]="form.get('collectionId')"
+                  [label]="'Collection ID'"
+                  [placeholder]="'e.g. bcparks_7'"
+                  [resetButton]="true"
+                  [disabled]="!!collection?.collectionId"
+                >
+                </ngds-text-input>
+                <div
+                *ngIf="form.hasError('invalidCollectionId') && (form.get('collectionId')?.touched)"
+                class="alert alert-danger small p-2 mt-2"
+                >
+                  <strong>Invalid:</strong> please update the Collection ID; the Collection ID must be fewer than 40 characters with alphanumeric characters and underscores only (e.g. bcparks_123).
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-5">
+        <div class="card-body p-4">
+          <h3 class="mb-4">Details</h3>
+
+          <div class="row mt-2">
+            <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
+              <div class="toggle-wrapper">
+                <ngds-toggle-input
+                  [class]="'label-top'"
+                  [control]="form.get('isVisible')"
+                  [switch]="true"
+                  [label]="'Visibility'"
+                ></ngds-toggle-input>
+              </div>
+              <span class="small">{{ form.get('isVisible')?.value ? 'Visible in admin' : 'Not visible in admin' }}</span>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 col-lg-6">
+              <ngds-text-input class="mb-4"
+                [control]="form.get('displayName')"
+                [label]="'Display name'"
+                [placeholder]="'Type a display name for the collection'"
+                [resetButton]="true">
+              </ngds-text-input>
+            </div>
+          </div>
+
+          <div class="row mt-4 pb-2">
+            <div class="col-12 col-lg-6">
+              <ngds-text-input class="mb-4"
+                [control]="form.get('description')"
+                [label]="'Description'"
+                [multiline]="true"
+                [placeholder]="'Type a description for the collection'">
+              </ngds-text-input>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 col-lg-6">
+              <ngds-text-input class="mb-4"
+                [control]="form.get('adminNotes')"
+                *appPermissionRequired="'staff'"
+                [label]="'Admin notes'"
+                [multiline]="true"
+                [placeholder]="'Type any admin notes for the collection'">
+              </ngds-text-input>
+            </div>
+          </div>
+
+          <app-search-terms
+            [searchTerms]="form.get('searchTerms')?.value || []"
+            (searchTermsChange)="onSearchTermsChange($event)"
+          ></app-search-terms>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

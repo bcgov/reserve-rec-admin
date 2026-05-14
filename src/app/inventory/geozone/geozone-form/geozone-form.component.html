@@ -24,14 +24,13 @@
     <div class="mb-2">
       Make sure the <strong>Collection ID</strong> is correct, as it cannot be changed later.
     </div>
-    <ngds-text-input
+    <app-collection-selector
       [control]="form.get('collectionId')"
+      [disabled]="!!geozone?.collectionId"
       [label]="'Collection ID'"
-      [placeholder]="'Enter Collection ID'"
-      [resetButton]="true"
-      [disabled]="geozone?.collectionId"
+      [hint]="'Select the collection this geozone belongs to. Cannot be changed after creation.'"
     >
-    </ngds-text-input>
+    </app-collection-selector>
   </div>
 </section>
 <hr>

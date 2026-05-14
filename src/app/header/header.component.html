@@ -20,11 +20,11 @@
             <div class="d-none d-lg-inline">
               <button *ngIf="!isAuthenticed"
                       type="button"
-                      class="btn btn-primary"
+                      class="account-btn btn text-primary bg-light fw-bold rounded-1"
                       (click)="onLoginLogoutClick('login')">Log In</button>
               <button *ngIf="isAuthenticed"
                       type="button"
-                      class="btn btn-primary"
+                      class="account-btn btn text-primary bg-light fw-bold rounded-1"
                       (click)="onLoginLogoutClick('logout')">Log Out</button>
             </div>
         </div>

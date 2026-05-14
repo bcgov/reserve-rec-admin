@@ -33,13 +33,13 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   public searchFiltersOpen = false; // Flag to indicate if search filters are open
 
   public markerSchemaOptions = {
+    collection: {
+      color: '#23a93b',
+      icon: 'fa-solid fa-folder'
+    },
     geozone: {
       color: '#F8BB47',
       icon: 'fa-solid fa-map-location-dot'
-    },
-    protectedArea: {
-      color: '#42814A',
-      icon: 'fa-solid fa-tree'
     },
     facility: {
       color: '#013366',
@@ -52,7 +52,7 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
   };
 
   public schemaOptions = [
-    { display: 'Protected Area', value: 'protectedArea' },
+    { display: 'Collection', value: 'collection' },
     { display: 'Geozone', value: 'geozone' },
     { display: 'Facility', value: 'facility' },
     { display: 'Activity', value: 'activity' },

@@ -1,10 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ConfigService } from '../services/config.service';
-import { SidebarService } from '../services/sidebar.service';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { signInWithRedirect, getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -24,6 +18,4 @@ export class LoginComponent {
     // Redirect to the logout page
     this.router.navigate(['/logout']);
   }
-
-
 }
