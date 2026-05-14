@@ -177,34 +177,6 @@ export class AuthService {
     }
   }
 
-  async getAdminRole() {
-    try {
-      const user = await this.getCurrentUser();
-      console.log("The user is: ", user);
-      if (user && user['custom:adminRole']) {
-        return user['custom:adminRole'];
-      }
-      return null;
-    } catch (error) {
-      this.loggerService.error(`Error fetching admin role: ${error}`);
-      return null;
-    }
-  }
-
-  async userIsAdmin() {
-    try {
-      const role = await this.getAdminRole();
-      console.log("The role is: ", role);
-      if (role == this.allAccessRoleName) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      this.loggerService.error(`Error checking if user is admin: ${error}`);
-      return false;
-    }
-  }
-
   configEnv() {
     return this.configService.config;
   }

@@ -3,7 +3,7 @@ import { UserGuard } from './guards/user.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
-import { ProtectedAreaResolver } from './resolvers/protected-area.resolver';
+import { CollectionResolver } from './resolvers/collection.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
 import { ActivityResolver } from './resolvers/activity.resolver';
 import { policyResolver } from './resolvers/policy.resolver';
@@ -71,6 +71,12 @@ export const routes: Routes = [
     data: { requiredPermission: 'superadmin' },
     children: [
       {
+        path: 'collection',
+        loadComponent: () => import('./inventory/create-inventory/collection-create/collection-create.component').then(mod => mod.CollectionCreateComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'superadmin' },
+      },
+      {
         path: 'geozone',
         loadComponent: () => import('./inventory/create-inventory/geozone-create/geozone-create.component').then(mod => mod.GeozoneCreateComponent),
         canActivate: [UserGuard, PermissionsGuard],
@@ -107,6 +113,29 @@ export const routes: Routes = [
         data: { requiredPermission: 'superadmin' },
       },
     ],
+  },
+  {
+    path: 'inventory/collection/:collectionId',
+    loadComponent: () => import('./inventory/collection/collection.component').then(mod => mod.CollectionComponent),
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'limited' },
+    resolve: { collection: CollectionResolver },
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./inventory/collection/collection-details/collection-details.component').then(mod => mod.CollectionDetailsComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'limited' }
+      },
+      {
+        path: 'edit',
+        loadComponent: () => import('./inventory/collection/collection-edit/collection-edit.component').then(mod => mod.CollectionEditComponent),
+        canActivate: [UserGuard, PermissionsGuard],
+        data: { requiredPermission: 'staff' }
+
+      }
+    ]
   },
   {
     path: 'inventory/geozone/:collectionId/:geozoneId',
@@ -248,19 +277,5 @@ export const routes: Routes = [
     loadComponent: () => import('./admin/waiting-room/waiting-room-admin.component').then(mod => mod.WaitingRoomAdminComponent),
     canActivate: [UserGuard, PermissionsGuard],
     data: { requiredPermission: 'superadmin' },
-  },
-  {
-    path: 'inventory/protected-area/:orcs',
-    loadComponent: () => import('./inventory/protected-area/protected-area-details/protected-area-details.component').then(mod => mod.ProtectedAreaDetailsComponent),
-    canActivate: [UserGuard, PermissionsGuard],
-    data: { requiredPermission: 'limited' },
-    resolve: { protectedArea: ProtectedAreaResolver }
-  },
-  {
-    path: 'inventory/protected-area/:orcs/edit',
-    loadComponent: () => import('./inventory/protected-area/protected-area-edit/protected-area-edit.component').then(mod => mod.ProtectedAreaEditComponent),
-    canActivate: [UserGuard, PermissionsGuard],
-    data: { requiredPermission: 'superadmin' },
-    resolve: { protectedArea: ProtectedAreaResolver }
   },
 ];

@@ -2,6 +2,8 @@ export class Constants {
   public static readonly dataIds = {
     SEARCH_RESULTS: 'searchResults',
     PASSIVE_SEARCH_RESULTS: 'passiveSearchResults',
+    COLLECTION_RESULT: 'collectionResult',
+    COLLECTIONS_RESULT: 'collectionsResult',
     GEOZONE_RESULT: 'geozoneResult',
     GEOZONES_RESULT: 'geozonesResult',
     ACTIVITY_RESULT: 'activityResult',
@@ -9,8 +11,6 @@ export class Constants {
     EDIT_ACTIVITY: 'editActivity',
     FACILITY_RESULT: 'facilityResult',
     FACILITIES_RESULT: 'facilitiesResult',
-    PROTECTED_AREA_RESULT: 'protectedAreaResult',
-    PROTECTED_AREAS_RESULT: 'protectedAreasResult',
     POLICY_RESULT: 'policyResult',
     PRODUCT_RESULT: 'productResult',
     PRODUCT_LIST: 'productList',

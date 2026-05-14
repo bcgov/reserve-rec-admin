@@ -4,18 +4,17 @@
     <div class="col-12">
       <div *ngIf="isCreating" class="card mb-4">
         <div class="card-body p-4">
-          <h3 class="mb-4">Partition information</h3>
-          <div class="row mt-4">
+          <h3>Partition information</h3>
+          <div class="row">
+            <span class="small text-muted mb-2">Make sure the <strong>Collection ID</strong> and <strong>Product type</strong> are correct, as they cannot be changed later.</span>
             <div class="col-12 col-lg-6">
               <div class="mb-3">
-                <ngds-text-input
+                <app-collection-selector
                   [control]="form.get('collectionId')"
+                  [disabled]="!!facility?.collectionId"
                   [label]="'Collection ID'"
-                  [placeholder]="'Enter Collection ID'"
-                  [resetButton]="true"
-                  [disabled]="facility?.collectionId"
                 >
-                </ngds-text-input>
+                </app-collection-selector>
               </div>
               <div class="mb-3">
                 <ngds-picklist-input

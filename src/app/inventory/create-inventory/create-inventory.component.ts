@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CreateInventorySelectorComponent } from './create-inventory-selector/create-inventory-selector.component';
 import { CommonModule } from '@angular/common';
+import { PermissionDirective } from '../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-create-inventory',
-  imports: [RouterOutlet, CreateInventorySelectorComponent, CommonModule],
+  imports: [RouterOutlet, CreateInventorySelectorComponent, CommonModule, PermissionDirective],
   templateUrl: './create-inventory.component.html',
   styleUrl: './create-inventory.component.scss'
 })

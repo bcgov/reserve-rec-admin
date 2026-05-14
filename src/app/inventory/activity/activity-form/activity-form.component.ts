@@ -15,10 +15,11 @@ import { LoadalComponent } from '../../../shared/components/loadal/loadal.compon
 import { ActivatedRoute, Router } from '@angular/router';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
+import { CollectionSelectorComponent } from '../../../shared/components/collection-selector/collection-selector.component';
 
 @Component({
   selector: 'app-activity-form',
-  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent],
+  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent, CollectionSelectorComponent],
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })

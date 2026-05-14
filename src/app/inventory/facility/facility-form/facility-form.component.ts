@@ -8,6 +8,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, UntypedFormGroup, Va
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
+import { CollectionSelectorComponent } from '../../../shared/components/collection-selector/collection-selector.component';
 import { WysiwygInputComponent } from '../../../shared/components/wysiwyg-editor/wysiwyg-editor.component';
 import { EntityRelationshipSelectorComponent } from '../../../shared/components/entity/entity-relationship-selector/entity-relationship-selector.component';
 import { ActivityService } from '../../../services/activity.service';
@@ -23,6 +24,7 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
     LoadalComponent,
     CommonModule,
     SearchTermsComponent,
+    CollectionSelectorComponent,
     WysiwygInputComponent,
     ReactiveFormsModule,
     EntityRelationshipSelectorComponent,

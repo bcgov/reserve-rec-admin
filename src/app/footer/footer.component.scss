@@ -1,5 +1,12 @@
 @use "../../assets/styles/index" as *;
 
+.top-box-content {
+    background-color: #2464A4;
+    color: white;
+    position: relative; 
+    z-index: 2;
+}
+
 .footer-admin {
   background-color: $primary-nav;
   color: white;
@@ -18,29 +25,5 @@ a:hover {
 }
 
 .gov-links {
-  font-size: 0.875rem;
-  line-height: 1rem;
   list-style-type: none;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-
-  li {
-    display: inline-block;
-
-    &:after {
-      position: relative;
-      top: -1px;
-      display: inline-block;
-      margin-left: 0.5rem;
-      margin-right: 0.25rem;
-      content: "|";
-    }
-
-    &:last-child {
-      &:after {
-        display: none;
-      }
-    }
-  }
 }

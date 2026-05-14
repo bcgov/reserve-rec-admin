@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { ReportsService } from '../../services/reports.service';
-import { ProtectedAreaService } from '../../services/protected-area.service';
 import { FacilityService } from '../../services/facility.service';
+import { CollectionService } from '../../services/collection.service';
 import { LoadingService } from '../../services/loading.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
@@ -36,7 +36,7 @@ interface DailyPassRecord {
   templateUrl: './daily-passes-report.component.html',
   styleUrl: './daily-passes-report.component.scss'
 })
-export class DailyPassesReportComponent implements OnInit {
+export class DailyPassesReportComponent implements OnInit, AfterViewChecked {
   form = this.fb.group({
     collectionId: ['', Validators.required],
     facilityId: [''],
@@ -47,7 +47,7 @@ export class DailyPassesReportComponent implements OnInit {
   facilityOptions: { display: string; value: string }[] = [];
 
   // Dropdown options
-  protectedAreas: any[] = [];
+  collections: any[] = [];
   facilities: any[] = [];
 
   // State
@@ -58,15 +58,16 @@ export class DailyPassesReportComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private reportsService: ReportsService,
-    private protectedAreaService: ProtectedAreaService,
     private facilityService: FacilityService,
+    private collectionService: CollectionService,
     public loadingService: LoadingService,
     private toastService: ToastService,
-    private loggerService: LoggerService
+    private loggerService: LoggerService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.loadProtectedAreas();
+    this.loadCollections();
     // Set default date to today
     this.form.patchValue({ arrivalDate: this.formatDateForInput(new Date()) });
 
@@ -77,13 +78,19 @@ export class DailyPassesReportComponent implements OnInit {
     });
   }
 
-  async loadProtectedAreas() {
+  ngAfterViewChecked(): void {
+    //Called after every check of the component's view. Applies to components only.
+    //Add 'implements AfterViewChecked' to the class.
+    this.cdr.detectChanges();
+  }
+
+  async loadCollections() {
     try {
-      const res: any = await this.protectedAreaService.getProtectedAreas();
-      this.protectedAreas = res?.data?.items || [];
-      this.parkOptions = this.protectedAreas.map(park => ({
+      const res = await this.collectionService.getAllCollections();
+      this.collections = res?.items || [];
+      this.parkOptions = this.collections.map(park => ({
         display: park.displayName,
-        value: `bcparks_${park.orcs}`
+        value: park.collectionId
       }));
     } catch (error) {
       this.loggerService.error(error);
@@ -240,10 +247,9 @@ export class DailyPassesReportComponent implements OnInit {
   }
 
   private getSelectedParkName(): string {
-    // Extract ORCS from collectionId (e.g., "bcparks_1" -> "1")
+    // Extract collectionId from collection
     const collectionId = this.form.get('collectionId')?.value || '';
-    const orcs = collectionId.replace('bcparks_', '');
-    const park = this.protectedAreas.find(p => p.orcs === orcs);
+    const park = this.collections.find(p => p.collection === collectionId);
     if (park) {
       return park.displayName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }

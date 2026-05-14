@@ -1,28 +1,31 @@
 /*
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ProtectedAreaDetailsComponent } from './protected-area-details.component';
+
+import { CollectionComponent } from './collection.component';
+import { ConfigService } from '../../services/config.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 
-describe('ProtectedAreaDetailsComponent', () => {
-  let component: ProtectedAreaDetailsComponent;
-  let fixture: ComponentFixture<ProtectedAreaDetailsComponent>;
+describe('CollectionComponent', () => {
+  let component: CollectionComponent;
+  let fixture: ComponentFixture<CollectionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProtectedAreaDetailsComponent],
+      imports: [CollectionComponent],
       providers: [
+        ConfigService,
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        provideToastr(),
+        provideToastr()
       ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProtectedAreaDetailsComponent);
+    fixture = TestBed.createComponent(CollectionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -33,6 +36,6 @@ describe('ProtectedAreaDetailsComponent', () => {
 });
 */
 
-xdescribe('protected-area-details.component legacy placeholder', () => {
+xdescribe('collection.component legacy placeholder', () => {
   it('skipped', () => {});
 });

@@ -1,74 +1,78 @@
 <section class="container justify-content-center my-5">
   <div *ngIf="showSelectionOptions()">
-  <h3>Create New Inventory</h3>
+  <h3>Create new inventory</h3>
     <div class="mb-3">
-      Select the type of inventory item you want to create:
+      Select the type of inventory item you'd like to create:
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-      <div class="col">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+      <div class="col mt-5" *appPermissionRequired="'superadmin'">
         <app-create-inventory-selector
-          title="GEOZONE"
-          titleClasses="bg-warning rounded-pill text-dark"
-          description="Geozones are geospatial regions defined by a bounding box that group together activities and facilities that are interrelated."
-          icon="fa-solid fa-map-location-dot"
-          link="/inventory/create/geozone"
+          title="Collection"
+          titleClasses="bg-secondary rounded-pill"
+          description="Collections are a stable identifier that links all geozones, facilities, activities, and corresponding entities within an operational grouping."
+          icon="fa-solid fa-folder"
+          link="/inventory/create/collection"
         ></app-create-inventory-selector>
       </div>
-      <div class="col">
+      <div class="col mt-5">
         <app-create-inventory-selector
-          title="FACILITY"
-          titleClasses="bg-primary rounded-pill"
+        title="Geozone"
+        titleClasses="bg-secondary rounded-pill"
+        description="Geozones are geospatial regions defined by a bounding box that group together activities and facilities that are interrelated."
+        icon="fa-solid fa-map-location-dot"
+        link="/inventory/create/geozone"
+        ></app-create-inventory-selector>
+      </div>
+      <div class="col mt-5">
+        <app-create-inventory-selector
+          title="Facility"
+          titleClasses="bg-secondary rounded-pill"
           description="Facilities are specific geospatial locations defined by a latitude and longitude and can represent the location of campgrounds, trails, structures, natural features, and other amenities."
           icon="fa-solid fa-location-dot"
           link="/inventory/create/facility"
         ></app-create-inventory-selector>
       </div>
-      <div class="col">
+      <div class="col mt-5">
         <app-create-inventory-selector
-          title="ACTIVITY"
-          titleClasses="bg-danger rounded-pill"
-          description="Activities are types of experiences that are offered at facilities or within geozones, such as camping, day use experiences, boating, and more."
+          title="Activity"
+          titleClasses="bg-secondary rounded-pill"
+          description="Activities are specific experiences that are offered at facilities or within geozones, such as camping, day use experiences, boating, and more."
           icon="fa-solid fa-campground"
           link="/inventory/create/activity"
         ></app-create-inventory-selector>
       </div>
-    </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-      <div class="col">
+      <div class="col mt-5">
         <app-create-inventory-selector
-          title="PRODUCT"
-          titleClasses="bg-info rounded-pill text-dark"
-          description="Products are bookable items or passes associated with activities at BC Parks locations. They combine activities with policies and define pricing and capacity."
+          title="Product"
+          titleClasses="bg-secondary rounded-pill"
+          description="Products are activities that can be booked such as campsites, or permits."
           icon="fa-solid fa-ticket"
           link="/inventory/create/product"
-          [disabled]="false"
         ></app-create-inventory-selector>
       </div>
-      <div class="col">
+      <div class="col mt-5">
         <app-create-inventory-selector
-          title="POLICY"
+          title="Policy"
           titleClasses="bg-secondary rounded-pill"
-          description="Policies are simple rulesets govern how an activity can be booked, such as cancellation policies, booking windows, fee structures, party sizes, and more."
+          description="Policies are simple rulesets that govern how a product can be booked, such as cancellation policies, booking windows, fee structures, party sizes, and more."
           icon="fa-solid fa-file-pen"
           link="/inventory/create/policy"
-          [disabled]="false"
         ></app-create-inventory-selector>
       </div>
     </div>
     <hr />
-    <h3>Create/Manage Relationships</h3>
+    <h3 class="mt-4">Create/Manage Relationships</h3>
     <div class="mb-3">
       Select the type of entity relationship item you want to create or manage:
     </div>
     <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-      <div class="col">
+      <div class="col mt-5">
         <app-create-inventory-selector
-          title="RELATIONSHIPS"
+          title="Relationships"
           titleClasses="bg-secondary rounded-pill"
           description="Entity relationships define associations between different inventory items, such as linking products to activities or activities to geozones."
           icon="fa-solid fa-circle-nodes"
           link="/inventory/create/relationships"
-          [disabled]="false"
         ></app-create-inventory-selector>
       </div>
     </div>

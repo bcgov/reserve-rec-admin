@@ -1,56 +1,59 @@
-import { ChangeDetectorRef, Component, signal, WritableSignal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { CommonModule, UpperCasePipe } from '@angular/common';
 import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
-import { BsModalService } from 'ngx-bootstrap/modal';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
-import { GeozoneService } from '../../services/geozone.service';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { CollectionService } from '../../services/collection.service';
+import { PermissionDirective } from '../../shared/directives/permission.directive';
 
 @Component({
-  selector: 'app-geozone',
-  imports: [RouterOutlet, UpperCasePipe, CommonModule],
-  templateUrl: './geozone.component.html',
-  styleUrl: './geozone.component.scss',
+  selector: 'app-collection',
+  imports: [RouterOutlet, CommonModule, PermissionDirective],
+  templateUrl: './collection.component.html',
+  styleUrl: './collection.component.scss',
   providers: [BsModalService],
 })
-export class GeozoneComponent {
+export class CollectionComponent {
   public data;
 
   constructor(
     protected route: ActivatedRoute,
     protected router: Router,
     protected cdr: ChangeDetectorRef,
-    private geozoneService: GeozoneService,
+    private collectionService: CollectionService,
     private modalService: BsModalService,
   ) {
     this.route.data.subscribe((data) => {
-      if (data?.['geozone']) {
-        this.data = data?.['geozone'];
+      if (data?.['collection']) {
+        this.data = data?.['collection'];
       }
     });
   }
+  
+  get isEditing(): boolean {
+    return this.router.url.endsWith('/edit');
+  }
 
   navToEdit() {
-    if (this.data?.collectionId && this.data?.geozoneId) {
-      this.router.navigate([`/inventory/geozone/${this.data.collectionId}/${this.data.geozoneId}/edit`]);
+    if (this.data?.collectionId) {
+      this.router.navigate([`/inventory/collection/${this.data.collectionId}/edit`]);
     }
     this.cdr.detectChanges();
   }
 
   onDelete() {
     const collectionId = this.data?.collectionId;
-    const geozoneId = this.data?.geozoneId;
 
-    this.displayConfirmationModal(collectionId, geozoneId);
+    this.displayConfirmationModal(collectionId);
   }
 
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with details and its status.
-  displayConfirmationModal(collectionId, geozoneId) {
+  displayConfirmationModal(collectionId) {
     const details: ModalRowSpec[] = [
-      { label: 'Geozone Name', value: this.data?.displayName },
-      { label: 'Geozone Collection ID', value: collectionId },
-      { label: 'Geozone ID', value: geozoneId }
+      { label: 'Collection Name', value: this.data?.displayName },
+      { label: 'Collection Collection ID', value: collectionId },
     ];
 
     // Show the modal with the confirmation details.
@@ -68,7 +71,7 @@ export class GeozoneComponent {
     // Listen for confirmation and cancellation events from the modal.
     const modalContent = modalRef.content as ConfirmationModalComponent;
     modalContent.confirmButton.subscribe(() => {
-      this.geozoneService.deleteGeozone(collectionId, geozoneId)
+      this.collectionService.deleteCollection(collectionId)
       modalRef.hide();
       this.router.navigate(['/inventory']);
     });

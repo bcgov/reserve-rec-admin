@@ -9,10 +9,11 @@ import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
+import { CollectionSelectorComponent } from '../../../shared/components/collection-selector/collection-selector.component';
 
 @Component({
   selector: 'app-geozone-form',
-  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule, SearchTermsComponent],
+  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule, SearchTermsComponent, CollectionSelectorComponent],
   templateUrl: './geozone-form.component.html',
   styleUrl: './geozone-form.component.scss'
 })
