@@ -13,15 +13,12 @@
 </app-collection-form>
 <section>
   <div class="d-flex flex-column align-items-center justify-content-center mt-2 mb-5">
-    <button class="d-flex justify-content-center gap-2 btn btn-outline-success btn-lg" (click)="submit()" [disabled]="!collectionForm?.valid || isSubmitting">
-    <span>{{ isSubmitting ? 'Creating...' : 'Create Collection' }}</span>
-      <div 
-        class="spinner-border"
-        role="status"
+    <button class="btn btn-outline-success btn-lg" (click)="submit()" [disabled]="!collectionForm?.valid || isSubmitting">
+      <i 
         *ngIf="isSubmitting"
-      >
-        <span class="sr-only">Creating...</span>
-      </div>
+        class="fa fa-spinner fa-spin me-2"
+      ></i>
+      <span>{{ isSubmitting ? 'Creating...' : 'Create Collection' }}</span>
     </button>
   </div>
 </section>
