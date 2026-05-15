@@ -4,20 +4,20 @@ import { ProductService } from '../../../services/product.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-product-edit',
-  imports: [ProductFormComponent, LoadalComponent],
+  imports: [ProductFormComponent, NgIf],
   templateUrl: './product-edit.component.html',
   styleUrl: './product-edit.component.scss'
 })
 export class ProductEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
   @ViewChild(ProductFormComponent) productFormComponent!: ProductFormComponent;
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
 
   public productForm;
   public product;
+  public isSubmitting = false;
 
   constructor(
     protected productService: ProductService,
@@ -51,7 +51,7 @@ export class ProductEditComponent extends EntityEditBaseComponent implements Aft
       return;
     }
 
-    this.loadal.show();
+    this.isSubmitting = true;
     try {
       const props = this.formatFormForSubmission();
 
@@ -68,7 +68,7 @@ export class ProductEditComponent extends EntityEditBaseComponent implements Aft
     } catch (error) {
       console.error('Error updating product:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
     }
   }
 

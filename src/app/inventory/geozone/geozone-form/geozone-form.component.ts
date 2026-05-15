@@ -4,7 +4,6 @@ import { GeozoneService } from '../../../services/geozone.service';
 import { LoadingService } from '../../../services/loading.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapComponent } from '../../../map/map.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { Constants } from '../../../app.constants';
@@ -13,13 +12,12 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
 
 @Component({
   selector: 'app-geozone-form',
-  imports: [MapComponent, LoadalComponent, NgdsFormsModule, CommonModule, SearchTermsComponent, CollectionSelectorComponent],
+  imports: [MapComponent, NgdsFormsModule, CommonModule, SearchTermsComponent, CollectionSelectorComponent],
   templateUrl: './geozone-form.component.html',
   styleUrl: './geozone-form.component.scss'
 })
 export class GeozoneFormComponent implements OnInit, AfterViewInit, AfterViewChecked {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();

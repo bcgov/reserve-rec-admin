@@ -1,35 +1,39 @@
-import { Component, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CollectionService } from '../../../services/collection.service';
 import { CollectionFormComponent } from '../../collection/collection-form/collection-form.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { UntypedFormGroup } from '@angular/forms';
 import { ToastService, ToastTypes } from '../../../services/toast.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-collection-create',
-  imports: [CollectionFormComponent, LoadalComponent],
+  imports: [CollectionFormComponent, NgIf],
   templateUrl: './collection-create.component.html',
   styleUrl: './collection-create.component.scss'
 })
-export class CollectionCreateComponent {
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent
-
+export class CollectionCreateComponent implements AfterViewChecked {
   public collectionForm: UntypedFormGroup;
   public collection;
+  public isSubmitting = false;
 
   constructor(
     protected collectionService: CollectionService,
     protected router: Router,
-    protected toastService: ToastService
+    protected toastService: ToastService,
+    private cdr: ChangeDetectorRef
   ) { }
+
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges()
+  }
 
   updateCollectionForm(event) {
     this.collectionForm = event;
   }
 
   async submit() {
-    this.loadal.show();
+    this.isSubmitting = true;
     try {
       const props = this.formatFormForSubmission();
       const res = await this.collectionService.createCollection(props);
@@ -40,7 +44,7 @@ export class CollectionCreateComponent {
     } catch (error) {
       console.error('Error creating collection:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
     }
   }
 

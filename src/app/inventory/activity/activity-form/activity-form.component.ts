@@ -11,7 +11,6 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../services/loading.service';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
@@ -19,12 +18,11 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
 
 @Component({
   selector: 'app-activity-form',
-  imports: [NgdsFormsModule, CommonModule, LoadalComponent, SearchTermsComponent, CollectionSelectorComponent],
+  imports: [NgdsFormsModule, CommonModule, SearchTermsComponent, CollectionSelectorComponent],
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })
 export class ActivityFormComponent implements OnInit, AfterViewChecked {
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();

@@ -27,12 +27,11 @@
           <ngds-picklist-input
             [control]="form.get('facilityId')"
             [label]="'Facility (Optional)'"
-            [placeholder]="'All facilities'"
+            [placeholder]="facilitiesLoading ? 'Loading facilities...' : 'Select a facilty'"
             [selectionListItems]="facilityOptions"
             [resetButton]="true"
-            [disabled]="!form.get('collectionId')?.value || facilitiesLoading"
+            [disabled]="!!facilitiesLoading"
           ></ngds-picklist-input>
-          <small *ngIf="facilitiesLoading" class="text-muted">Loading facilities...</small>
         </div>
 
         <!-- Date Selection -->

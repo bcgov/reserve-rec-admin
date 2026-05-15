@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, EventEmitter, Output, Input, OnInit, View
 import { Constants } from '../../../app.constants';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, AbstractControl, UntypedFormGroup, ReactiveFormsModule } from '@angular/forms';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CommonModule } from '@angular/common';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
@@ -23,7 +22,6 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
     CollectionSelectorComponent,
     ActivityListItemComponent,
     PolicyListItemComponent,
-    LoadalComponent,
     PermissionDirective
   ],
   templateUrl: './product-form.component.html',
@@ -33,7 +31,6 @@ export class ProductFormComponent implements OnInit {
   @Input() isEditing: boolean = false;
   @Input() isCreating: boolean = false;
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   public form;
@@ -46,6 +43,8 @@ export class ProductFormComponent implements OnInit {
   private allAvailablePolicies: any[] = [];
   public policies: { display: string, value: any }[] = [];
   public relatedActivity: any[] = [];
+  public loadingActivities = false;
+  public loadingPolicies = false;
 
   constructor(
     protected cdr: ChangeDetectorRef,
@@ -90,9 +89,7 @@ export class ProductFormComponent implements OnInit {
       activitySubType: [this.product?.activitySubType || []],
       adminNotes: [this.product?.adminNotes || ''],
       collectionId: [this.product?.collectionId || 'bcparks_', {
-        nonNullable: true,
-        validators: [Validators.required],
-        updateOn: 'blur'
+        validators: [Validators.required]
       }],
       displayName: [this.product?.displayName || 'New Product', {
         nonNullable: true,
@@ -164,7 +161,7 @@ export class ProductFormComponent implements OnInit {
       return;
     }
 
-    this.loadal.show();
+    this.loadingActivities = true;
     try {
       const activities = await this.activityService.getActivitiesByCollectionId(collectionId);
       const activityItems = Array.isArray(activities?.items)
@@ -181,9 +178,9 @@ export class ProductFormComponent implements OnInit {
         value: a
       }));
 
-      // Reset activity selection when collectionId changes
-      for (const controlName of ['activity', 'activityType', 'activityId', 'activitySubType']) {
-        const value = controlName === 'activitySubType' ? [] : controlName === 'activity' ? null : '';
+      this.form.get('activity')?.reset(null, { emitEvent: false });
+      for (const controlName of ['activityType', 'activityId', 'activitySubType']) {
+        const value = controlName === 'activitySubType' ? [] : '';
         this.form.get(controlName)?.setValue(value, { emitEvent: false });
         this.form.get(controlName)?.markAsDirty();
       }
@@ -192,7 +189,10 @@ export class ProductFormComponent implements OnInit {
     } catch (error) {
       console.error('Error loading available activities:', error);
     } finally {
-      this.loadal.hide();
+      this.loadingActivities = false;
+      // Use a timeout to mark activity as untouched, to ensure after activities are loaded
+      // that the ngds-typeahead doesn't show that "this is required" (because it blurs after load)
+      setTimeout(() => this.form.get('activity')?.markAsUntouched(), 0);
     }
   }
 
@@ -202,7 +202,7 @@ export class ProductFormComponent implements OnInit {
 
   // Product already exists: load and fetch activity entities that are related to this product
   async loadActivityRelationships() {
-    this.loadal.show();
+    this.loadingActivities = true;
     try {
       const activity = await this.activityService.getActivity(this.product.collectionId, this.product.activityType, this.product.activityId);
 
@@ -218,13 +218,13 @@ export class ProductFormComponent implements OnInit {
       console.error('Error loading activity relationships:', error);
       this.relatedActivity = [];
     } finally {
-      this.loadal.hide();
+      this.loadingActivities = false;
     }
   }
 
   // Creating product: load all policies that are available (for now, these are all of our policies anyway)
   async loadAvailablePolicies() {
-    this.loadal.show();
+    this.loadingPolicies = true;
     try {
       const policies = await this.policyService.getAllPolicies();
 
@@ -242,13 +242,13 @@ export class ProductFormComponent implements OnInit {
       this.allAvailablePolicies = [];
       this.policies = [];
     } finally {
-      this.loadal.hide();
+      this.loadingPolicies = false;
     }
   }
 
   // Product already exists: load and fetch policies that are tied to this product using product pk/sk on policy GET
   async loadExistingPolicies() {
-    this.loadal.show();
+    this.loadingPolicies = true;
     try {
       const productPolicies = await this.policyService.getPoliciesByProduct(this.product.pk, this.product.sk)
 
@@ -274,7 +274,7 @@ export class ProductFormComponent implements OnInit {
       this.selectedPolicies = [];
       this.refreshPolicyOptions();
     } finally {
-      this.loadal.hide();
+      this.loadingPolicies = false;
     }
   }
 

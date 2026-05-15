@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef, effect, signal, untracked, input } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, effect, signal, untracked, input, AfterViewChecked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { EntityRelationshipSelectorComponent } from '../../../shared/components/entity/entity-relationship-selector/entity-relationship-selector.component';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivityService } from '../../../services/activity.service';
@@ -15,13 +14,11 @@ import { Constants } from '../../../app.constants';
 @Component({
   selector: 'app-relationship-create',
   standalone: true,
-  imports: [CommonModule, NgdsFormsModule, LoadalComponent, EntityRelationshipSelectorComponent],
+  imports: [CommonModule, NgdsFormsModule, EntityRelationshipSelectorComponent],
   templateUrl: './relationship-create.component.html',
   styleUrls: ['./relationship-create.component.scss']
 })
-export class RelationshipCreateComponent {
-  @ViewChild('loadal') loadal!: LoadalComponent;
-
+export class RelationshipCreateComponent implements AfterViewChecked {
   public form: UntypedFormGroup;
 
   // Use signals to track and subscribe to changes
@@ -141,6 +138,10 @@ export class RelationshipCreateComponent {
         });
       }
     });
+  }
+
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges()      
   }
 
   initializeForm() {
