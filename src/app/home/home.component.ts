@@ -33,13 +33,10 @@ export class HomeComponent implements OnInit, AfterViewChecked, OnDestroy {
       console.log(e);
     } finally {
       this.checkingSession = false;
-      this.cdr.detectChanges();
     }
   }
 
   ngAfterViewChecked(): void {
-    //Called after every check of the component's view. Applies to components only.
-    //Add 'implements AfterViewChecked' to the class.
     this.cdr.detectChanges()
   }
 
