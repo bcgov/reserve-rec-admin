@@ -5,13 +5,12 @@ import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CollectionService } from '../../../services/collection.service';
 import { Constants } from '../../../app.constants';
 import { SearchTermsComponent } from '../../../shared/components/search-terms/search-terms.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { LoadingService } from '../../../services/loading.service';
 import { PermissionDirective } from '../../../shared/directives/permission.directive';
 
 @Component({
   selector: 'app-collection-form',
-  imports: [CommonModule, ReactiveFormsModule, NgdsFormsModule, SearchTermsComponent, LoadalComponent, PermissionDirective],
+  imports: [CommonModule, ReactiveFormsModule, NgdsFormsModule, SearchTermsComponent, PermissionDirective],
   templateUrl: './collection-form.component.html',
   styleUrl: './collection-form.component.scss'
 })

@@ -1,22 +1,21 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { FacilityService } from '../../../services/facility.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilityFormComponent } from '../../facility/facility-form/facility-form.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-facility-create',
-  imports: [FacilityFormComponent, LoadalComponent],
+  imports: [FacilityFormComponent, NgIf],
   templateUrl: './facility-create.component.html',
   styleUrl: './facility-create.component.scss'
 })
 export class FacilityCreateComponent {
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
-
   public facilityForm: UntypedFormGroup;
   public facility;
   public isCreating: boolean = true;
+  public isSubmitting = false;
 
   constructor(
     protected facilityService: FacilityService,
@@ -60,7 +59,7 @@ export class FacilityCreateComponent {
       return;
     }
 
-    this.loadal.show();
+    this.isSubmitting = true;
     try {
       const props = this.formatFormForSubmission();
       const res = await this.facilityService.createFacility(collectionId, facilityType, props);
@@ -72,7 +71,7 @@ export class FacilityCreateComponent {
     } catch (error) {
       console.error('Error creating facility:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
     }
   }
 

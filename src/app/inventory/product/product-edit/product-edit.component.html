@@ -1,4 +1,3 @@
-<app-loadal #loadal></app-loadal>
 <app-product-form [isEditing]="true" (formValue)="updateProductForm($event)">
 </app-product-form>
 <div class="row d-flex justify-content-end">
@@ -18,8 +17,9 @@
       <button
         class="btn btn-primary rounded-1"
         (click)="submit()"
-        [disabled]="!productForm?.valid || !productForm?.dirty">
-        Save
+        [disabled]="!productForm?.valid || !productForm?.dirty || isSubmitting">
+        <i *ngIf="isSubmitting" class="fa fa-spinner fa-spin me-2"></i>
+        {{ isSubmitting ? 'Saving...' : 'Save' }}
       </button>
     </div>
   </div>

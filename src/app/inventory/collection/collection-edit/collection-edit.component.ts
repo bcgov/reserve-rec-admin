@@ -4,20 +4,20 @@ import { CollectionService } from '../../../services/collection.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-collection-edit',
-  imports: [CollectionFormComponent, LoadalComponent],
+  imports: [CollectionFormComponent, NgIf],
   templateUrl: './collection-edit.component.html',
   styleUrl: './collection-edit.component.scss'
 })
 export class CollectionEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
   @ViewChild(CollectionFormComponent) collectionFormComponent!: CollectionFormComponent;
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
 
   public collectionForm;
   public collection;
+  public isSubmitting = false;
 
   constructor(
     protected collectionService: CollectionService,
@@ -53,7 +53,7 @@ export class CollectionEditComponent extends EntityEditBaseComponent implements 
 
     const collectionId = this.collection?.collectionId;
 
-    this.loadal.show();
+    this.isSubmitting = true;
     try {
       const props = this.formatFormForSubmission();
 
@@ -65,7 +65,7 @@ export class CollectionEditComponent extends EntityEditBaseComponent implements 
     } catch (error) {
       console.error('Error updating collection:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
     }
   }
 

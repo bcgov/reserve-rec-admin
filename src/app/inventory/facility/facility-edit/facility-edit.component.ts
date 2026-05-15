@@ -4,20 +4,20 @@ import { FacilityService } from '../../../services/facility.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityEditBaseComponent } from '../../../shared/components/entity/entity-base/entity-edit-base.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-facility-edit',
-  imports: [FacilityFormComponent, LoadalComponent],
+  imports: [FacilityFormComponent, NgIf],
   templateUrl: './facility-edit.component.html',
   styleUrl: './facility-edit.component.scss'
 })
 export class FacilityEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
   @ViewChild(FacilityFormComponent) facilityFormComponent!: FacilityFormComponent;
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
 
   public facilityForm;
   public facility;
+  public isSubmitting = false;
 
   constructor(
     protected facilityService: FacilityService,
@@ -55,7 +55,7 @@ export class FacilityEditComponent extends EntityEditBaseComponent implements Af
     const facilityType = this.facility?.facilityType;
     const facilityId = this.facility?.facilityId;
 
-    this.loadal.show();
+    this.isSubmitting = true;
     try {
       const props = this.formatFormForSubmission();
 
@@ -74,7 +74,7 @@ export class FacilityEditComponent extends EntityEditBaseComponent implements Af
     } catch (error) {
       console.error('Error updating facility:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
     }
   }
 

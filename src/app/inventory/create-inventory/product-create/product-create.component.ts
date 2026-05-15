@@ -1,22 +1,22 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ProductService } from '../../../services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductFormComponent } from '../../product/product-form/product-form.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { ToastService, ToastTypes } from '../../../services/toast.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-product-create',
-  imports: [ProductFormComponent, LoadalComponent],
+  imports: [ProductFormComponent, NgIf],
   templateUrl: './product-create.component.html',
   styleUrl: './product-create.component.scss'
 })
 export class ProductCreateComponent {
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
-
   public productForm: UntypedFormGroup;
   public product;
+  public isSubmitting = false;
+  public submitStep: string | null = null;
 
   constructor(
     protected productService: ProductService,
@@ -83,7 +83,8 @@ export class ProductCreateComponent {
       return;
     }
 
-    this.loadal.show();
+    this.isSubmitting = true;
+    this.submitStep = 'Creating product...';
     try {
       // Step 1: Create the product
       const props = this.formatFormForSubmission();
@@ -95,6 +96,7 @@ export class ProductCreateComponent {
       }
 
       // Step 2: Create product dates
+      this.submitStep = 'Setting up product dates...';
       const productDatesResult = await this.productService.createProductDates(
         collectionId,
         activityType,
@@ -110,6 +112,7 @@ export class ProductCreateComponent {
       }
 
       // Step 3: Create inventory pools
+      this.submitStep = 'Building inventory pools...';
       const inventoryPoolsResult = await this.productService.createInventoryPools(
         collectionId,
         activityType,
@@ -131,7 +134,8 @@ export class ProductCreateComponent {
     } catch (error) {
       console.error('Error in product creation workflow:', error);
     } finally {
-      this.loadal.hide();
+      this.isSubmitting = false;
+      this.submitStep = null;
     }
   }
 

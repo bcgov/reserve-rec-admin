@@ -29,10 +29,8 @@
   </div>
 
   <!-- Loading Spinner -->
-  <div *ngIf="loading && customers.length === 0" class="text-center py-5">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+  <div *ngIf="loading && customers.length === 0" class="text-center mb-3 text-muted">
+    <i class="fa fa-spinner fa-spin me-2"></i>
   </div>
 
   <!-- No Results -->

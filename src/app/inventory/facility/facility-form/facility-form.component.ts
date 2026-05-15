@@ -1,6 +1,5 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, effect, EventEmitter, Input, OnInit, Output, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
 import { MapComponent } from '../../../map/map.component';
-import { LoadalComponent } from '../../../shared/components/loadal/loadal.component';
 import { Constants } from '../../../app.constants';
 import { LoadingService } from '../../../services/loading.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,7 +20,6 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
   imports: [
     NgdsFormsModule,
     MapComponent,
-    LoadalComponent,
     CommonModule,
     SearchTermsComponent,
     CollectionSelectorComponent,
@@ -37,7 +35,6 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
 })
 export class FacilityFormComponent extends EntityFormBaseComponent implements OnInit, AfterViewChecked {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
-  @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @ViewChild('activityItemTemplate') activityItemTemplate: TemplateRef<any>;
@@ -259,7 +256,7 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
       },
       fetchFn: async (searchFields) => {
         if (this.form.get('collectionId')?.value) {
-          this.loadal.show();
+          this.activitiesLoading = true;
           try {
             const result = await this.activityService.getActivitiesByCollectionId(
               searchFields.collectionId
@@ -269,7 +266,7 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
           } catch (error) {
             console.error('Error loading activities:', error);
           } finally {
-            this.loadal.hide();
+            this.activitiesLoading = false;
           }
         }
       },
