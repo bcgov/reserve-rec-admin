@@ -12,16 +12,14 @@
       <h5 class="mb-0">Report Filters</h5>
     </div>
     <div class="card-body">
-      <form [formGroup]="form" class="row g-3" (ngSubmit)="exportReport()">
+      <form [formGroup]="form" class="row g-3">
         <!-- Park Selection -->
         <div class="col-md-4">
-          <ngds-picklist-input
+          <app-collection-selector
             [control]="form.get('collectionId')"
-            [label]="'Park'"
-            [placeholder]="'Select a park...'"
-            [selectionListItems]="parkOptions"
-            [resetButton]="true"
-          ></ngds-picklist-input>
+            [label]="'Collection ID'"
+          >
+          </app-collection-selector>
         </div>
 
         <!-- Facility Selection (Optional) -->

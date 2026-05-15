@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { CollectionService } from '../../../services/collection.service';
 import { Constants } from '../../../app.constants';
@@ -13,7 +13,7 @@ import { DataService } from '../../../services/data.service';
   styleUrl: './collection-selector.component.scss'
 })
 export class CollectionSelectorComponent implements OnInit {
-  @Input() control: UntypedFormControl;
+  @Input() control: AbstractControl | null;
   @Input() disabled = false;
   @Input() label = 'Collection';
   @Input() hint = '';

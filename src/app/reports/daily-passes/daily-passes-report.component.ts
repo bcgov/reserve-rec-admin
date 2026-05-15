@@ -8,6 +8,7 @@ import { CollectionService } from '../../services/collection.service';
 import { LoadingService } from '../../services/loading.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
+import { CollectionSelectorComponent } from '../../shared/components/collection-selector/collection-selector.component';
 
 interface DailyPassRecord {
   accountName: string;
@@ -32,13 +33,13 @@ interface DailyPassRecord {
 
 @Component({
   selector: 'app-daily-passes-report',
-  imports: [CommonModule, ReactiveFormsModule, NgdsFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgdsFormsModule, CollectionSelectorComponent],
   templateUrl: './daily-passes-report.component.html',
   styleUrl: './daily-passes-report.component.scss'
 })
 export class DailyPassesReportComponent implements OnInit, AfterViewChecked {
   form = this.fb.group({
-    collectionId: ['', Validators.required],
+    collectionId: this.fb.control('', { nonNullable: true, validators: [Validators.required], updateOn: 'blur' }),
     facilityId: [''],
     arrivalDate: ['', Validators.required]
   });

@@ -11,6 +11,7 @@ import { ActivityService } from '../../../services/activity.service';
 import { ActivityListItemComponent } from '../../activity/activity-list-item/activity-list-item.component';
 import { PolicyListItemComponent } from '../../policy/policy-list-item/policy-list-item.component';
 import { PermissionDirective } from '../../../shared/directives/permission.directive';
+import { CollectionSelectorComponent } from '../../../shared/components/collection-selector/collection-selector.component';
 
 @Component({
   selector: 'app-product-form',
@@ -19,6 +20,7 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
     NgdsFormsModule,
     ReactiveFormsModule,
     SearchTermsComponent,
+    CollectionSelectorComponent,
     ActivityListItemComponent,
     PolicyListItemComponent,
     LoadalComponent,
