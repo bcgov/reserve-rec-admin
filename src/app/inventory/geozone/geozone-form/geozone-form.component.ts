@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, signal, ViewChild, WritableSignal } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { GeozoneService } from '../../../services/geozone.service';
 import { LoadingService } from '../../../services/loading.service';
@@ -17,7 +17,7 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
   templateUrl: './geozone-form.component.html',
   styleUrl: './geozone-form.component.scss'
 })
-export class GeozoneFormComponent implements OnInit, AfterViewInit {
+export class GeozoneFormComponent implements OnInit, AfterViewInit, AfterViewChecked {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
   @ViewChild('loadal', { static: true }) loadal!: LoadalComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
@@ -121,6 +121,12 @@ export class GeozoneFormComponent implements OnInit, AfterViewInit {
         this.mapComponent?.updateMap();
       }
     });
+  }
+
+  ngAfterViewChecked(): void {
+    //Called after every check of the component's view. Applies to components only.
+    //Add 'implements AfterViewChecked' to the class.
+    this.cdr.detectChanges()
   }
 
   private initializeForm() {

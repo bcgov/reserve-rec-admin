@@ -8,14 +8,12 @@
           <div class="row mt-4">
             <div class="col-12 col-lg-6">
               <div class="mb-3">
-                <ngds-text-input
+                <app-collection-selector
                   [control]="form.get('collectionId')"
+                  [disabled]="!!product?.collectionId"
                   [label]="'Collection ID'"
-                  [placeholder]="'Enter Collection ID'"
-                  [resetButton]="true"
-                  [disabled]="product?.collectionId"
                 >
-                </ngds-text-input>
+                </app-collection-selector>
               </div>
               <div class="mb-3">
                 <ngds-typeahead-input

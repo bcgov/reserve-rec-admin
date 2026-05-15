@@ -120,8 +120,10 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
     }));
   }
 
-  ngAfterViewChecked() {
-    this.cdr.detectChanges();
+  ngAfterViewChecked(): void {
+    //Called after every check of the component's view. Applies to components only.
+    //Add 'implements AfterViewChecked' to the class.
+    this.cdr.detectChanges()
   }
 
   // Update filtered activity sub types when activity type changes

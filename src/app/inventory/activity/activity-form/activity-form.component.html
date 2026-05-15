@@ -41,7 +41,7 @@
       <div class="row">
         <div class="col">
           <app-collection-selector
-            [control]="$any(form.get('collectionId'))"
+            [control]="form.get('collectionId')"
             [disabled]="!!activity?.collectionId"
             [label]="'Collection ID'"
             [hint]="'Select the collection this activity belongs to. Cannot be changed after creation.'"
