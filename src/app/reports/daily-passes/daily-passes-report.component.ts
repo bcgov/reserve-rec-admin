@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -37,7 +37,7 @@ interface DailyPassRecord {
   templateUrl: './daily-passes-report.component.html',
   styleUrl: './daily-passes-report.component.scss'
 })
-export class DailyPassesReportComponent implements OnInit, AfterViewChecked {
+export class DailyPassesReportComponent implements OnInit, AfterViewChecked, OnDestroy {
   form = this.fb.group({
     collectionId: this.fb.control('', { nonNullable: true, validators: [Validators.required], updateOn: 'blur' }),
     facilityId: [''],
@@ -80,8 +80,6 @@ export class DailyPassesReportComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    //Called after every check of the component's view. Applies to components only.
-    //Add 'implements AfterViewChecked' to the class.
     this.cdr.detectChanges();
   }
 
@@ -262,5 +260,10 @@ export class DailyPassesReportComponent implements OnInit, AfterViewChecked {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  ngOnDestroy(): void {
+    this.cdr.detectChanges()
+    this.cdr.detach()
   }
 }
