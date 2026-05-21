@@ -80,4 +80,8 @@
     <hr/>
   </div>
 </section>
-<router-outlet></router-outlet>
+<!-- *ngIf on the outlet itself ensures a previously-mounted child is fully
+     destroyed when the URL goes back to /inventory/create (no child), and
+     a fresh outlet is created when a new child slug is picked. Defends
+     against the stale-child rendering described in #189. -->
+<router-outlet *ngIf="!showSelectionOptions()"></router-outlet>
