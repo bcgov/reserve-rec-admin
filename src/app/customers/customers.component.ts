@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { LoadingService } from '../services/loading.service';
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
-export class CustomersComponent implements OnInit, AfterViewChecked {
+export class CustomersComponent implements OnInit {
   customers: any[] = [];
   currentOffset = 0;
   pageSize = 20;
@@ -42,17 +42,10 @@ export class CustomersComponent implements OnInit, AfterViewChecked {
     private customerService: CustomerService,
     private logger: LoggerService,
     private loadingService: LoadingService,
-    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
     await this.loadCustomers();
-  }
-
-  ngAfterViewChecked(): void {
-    //Called after every check of the component's view. Applies to components only.
-    //Add 'implements AfterViewChecked' to the class.
-    this.cdr.detectChanges()
   }
 
   async loadCustomers(append = false) {

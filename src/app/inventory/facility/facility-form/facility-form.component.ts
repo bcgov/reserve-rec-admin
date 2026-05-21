@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, effect, EventEmitter, Input, OnInit, Output, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectorRef, Component, effect, EventEmitter, Input, OnInit, Output, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
 import { MapComponent } from '../../../map/map.component';
 import { Constants } from '../../../app.constants';
 import { LoadingService } from '../../../services/loading.service';
@@ -33,7 +33,7 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
   templateUrl: './facility-form.component.html',
   styleUrl: './facility-form.component.scss'
 })
-export class FacilityFormComponent extends EntityFormBaseComponent implements OnInit, AfterViewChecked {
+export class FacilityFormComponent extends EntityFormBaseComponent implements OnInit {
   @ViewChild('mapComponent', { static: true }) mapComponent!: MapComponent;
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
@@ -175,10 +175,6 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
         this.mapComponent?.updateMap();
       }
     });
-  }
-
-  ngAfterViewChecked() {
-    this.cdr.detectChanges();
   }
 
   updateLocationMarkers() {

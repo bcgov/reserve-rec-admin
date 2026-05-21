@@ -3,7 +3,6 @@ import {
   Component,
   OnInit,
   ViewChild,
-  AfterViewChecked,
   Output,
   EventEmitter
 } from '@angular/core';
@@ -22,7 +21,7 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })
-export class ActivityFormComponent implements OnInit, AfterViewChecked {
+export class ActivityFormComponent implements OnInit {
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
@@ -116,10 +115,6 @@ export class ActivityFormComponent implements OnInit, AfterViewChecked {
       pk: entity.pk,
       sk: entity.sk
     }));
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()
   }
 
   // Update filtered activity sub types when activity type changes

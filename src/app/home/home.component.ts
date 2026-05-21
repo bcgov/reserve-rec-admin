@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -17,7 +17,7 @@ import { LoginComponent } from '../login/login.component';
 
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy {
   isAuthenticed = false;
   isAdmin = false;
   checkingSession = true;
@@ -34,10 +34,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, OnDestroy {
     } finally {
       this.checkingSession = false;
     }
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()
   }
 
   goToLogin() {

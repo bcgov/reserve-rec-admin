@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild, WritableSignal, effect, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { Subscription } from 'rxjs';
 import { Constants } from '../../app.constants';

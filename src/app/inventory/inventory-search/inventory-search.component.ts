@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { ChangeDetectorRef, Component, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, ViewContainerRef, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -16,7 +16,7 @@ import { MapMarkerComponent } from './map-marker/map-marker.component';
   templateUrl: './inventory-search.component.html',
   styleUrl: './inventory-search.component.scss'
 })
-export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class InventorySearchComponent implements OnInit, OnDestroy {
   @ViewChild('mapComponent') mapComponent!: MapComponent;
   @ViewChild('markerRenderZone', { read: ViewContainerRef }) vcr!: ViewContainerRef;
   @ViewChild('searchOverlay') searchOverlay!: ElementRef; // Adjust type as necessary
@@ -194,12 +194,6 @@ export class InventorySearchComponent implements OnInit, AfterViewChecked, OnDes
       element: await this.generateMapMarkerHTML(options, data)
     };
     return markerOptions;
-  }
-
-  ngAfterViewChecked(): void {
-    // This is a workaround to ensure change detection runs after the view has been checked.
-    // Missing this check seems to be a by-product of lazy loading.
-    this.cdr.detectChanges();
   }
 
   resetFilters(schemaChange = false) {

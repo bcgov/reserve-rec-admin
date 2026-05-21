@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { ProductService } from '../../../services/product.service';
 import { RelationshipService } from '../../../services/relationship.service';
@@ -12,7 +12,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './product-edit.component.html',
   styleUrl: './product-edit.component.scss'
 })
-export class ProductEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
+export class ProductEditComponent extends EntityEditBaseComponent {
   @ViewChild(ProductFormComponent) productFormComponent!: ProductFormComponent;
 
   public productForm;
@@ -30,10 +30,6 @@ export class ProductEditComponent extends EntityEditBaseComponent implements Aft
     if (this.route.parent?.snapshot.data['product']) {
       this.product = this.route.parent?.snapshot.data['product'];
     }
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges();
   }
 
   updateProductForm(event) {

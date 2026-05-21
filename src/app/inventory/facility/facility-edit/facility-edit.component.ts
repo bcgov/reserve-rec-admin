@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FacilityFormComponent } from '../facility-form/facility-form.component';
 import { FacilityService } from '../../../services/facility.service';
 import { RelationshipService } from '../../../services/relationship.service';
@@ -12,7 +12,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './facility-edit.component.html',
   styleUrl: './facility-edit.component.scss'
 })
-export class FacilityEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
+export class FacilityEditComponent extends EntityEditBaseComponent {
   @ViewChild(FacilityFormComponent) facilityFormComponent!: FacilityFormComponent;
 
   public facilityForm;
@@ -30,10 +30,6 @@ export class FacilityEditComponent extends EntityEditBaseComponent implements Af
     if (this.route.parent?.snapshot.data['facility']) {
       this.facility = this.route.parent?.snapshot.data['facility'];
     }
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges();
   }
 
   updateFacilityForm(event) {

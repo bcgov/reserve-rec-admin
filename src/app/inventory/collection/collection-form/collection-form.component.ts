@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -14,7 +14,7 @@ import { PermissionDirective } from '../../../shared/directives/permission.direc
   templateUrl: './collection-form.component.html',
   styleUrl: './collection-form.component.scss'
 })
-export class CollectionFormComponent implements OnInit, AfterViewChecked {
+export class CollectionFormComponent implements OnInit {
   @Input() collection: any = null;
   @Input() isCreating: boolean = false;
   @Output() formValue = new EventEmitter<UntypedFormGroup>();
@@ -38,10 +38,6 @@ export class CollectionFormComponent implements OnInit, AfterViewChecked {
       this.formValue.emit(this.form);
     });
     this.formValue.emit(this.form);
-  }
-
-  ngAfterViewChecked() {
-    this.cdr.detectChanges();
   }
 
   buildForm() {
