@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -12,7 +12,7 @@ import { DataService } from '../../../services/data.service';
   templateUrl: './collection-selector.component.html',
   styleUrl: './collection-selector.component.scss'
 })
-export class CollectionSelectorComponent implements OnInit, AfterViewChecked {
+export class CollectionSelectorComponent implements OnInit {
   @Input() control: AbstractControl;
   @Input() disabled = false;
   @Input() label = 'Collection';
@@ -24,7 +24,6 @@ export class CollectionSelectorComponent implements OnInit, AfterViewChecked {
   constructor(
     protected collectionService: CollectionService,
     protected dataService: DataService,
-    private cdr: ChangeDetectorRef
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -45,10 +44,6 @@ export class CollectionSelectorComponent implements OnInit, AfterViewChecked {
       this.control?.markAsUntouched();
       this.control?.markAsPristine();
     }
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()
   }
 
   setOptions(collections: any[]) {

@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { CollectionFormComponent } from '../collection-form/collection-form.component';
 import { CollectionService } from '../../../services/collection.service';
 import { RelationshipService } from '../../../services/relationship.service';
@@ -12,7 +12,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './collection-edit.component.html',
   styleUrl: './collection-edit.component.scss'
 })
-export class CollectionEditComponent extends EntityEditBaseComponent implements AfterViewChecked {
+export class CollectionEditComponent extends EntityEditBaseComponent {
   @ViewChild(CollectionFormComponent) collectionFormComponent!: CollectionFormComponent;
 
   public collectionForm;
@@ -30,10 +30,6 @@ export class CollectionEditComponent extends EntityEditBaseComponent implements 
     if (this.route.parent?.snapshot.data['collection']) {
       this.collection = this.route.parent?.snapshot.data['collection'];
     }
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges();
   }
 
   updateCollectionForm(event) {

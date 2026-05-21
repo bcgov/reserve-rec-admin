@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -23,7 +23,7 @@ interface FlagDefinition {
   templateUrl: './feature-flags.component.html',
   styleUrls: ['./feature-flags.component.scss']
 })
-export class FeatureFlagsComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class FeatureFlagsComponent implements OnInit, OnDestroy {
   loading = true;
   saving = false;
 
@@ -51,10 +51,6 @@ export class FeatureFlagsComponent implements OnInit, AfterViewChecked, OnDestro
   async ngOnInit(): Promise<void> {
     await this.loadFlags();
     this.loading = false;
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()
   }
 
   async loadFlags(): Promise<void> {

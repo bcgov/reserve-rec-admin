@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, effect, signal, untracked, input, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, effect, signal, untracked, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -18,7 +18,7 @@ import { Constants } from '../../../app.constants';
   templateUrl: './relationship-create.component.html',
   styleUrls: ['./relationship-create.component.scss']
 })
-export class RelationshipCreateComponent implements AfterViewChecked {
+export class RelationshipCreateComponent {
   public form: UntypedFormGroup;
 
   // Use signals to track and subscribe to changes
@@ -138,10 +138,6 @@ export class RelationshipCreateComponent implements AfterViewChecked {
         });
       }
     });
-  }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()      
   }
 
   initializeForm() {

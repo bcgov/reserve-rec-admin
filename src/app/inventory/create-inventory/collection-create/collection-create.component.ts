@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CollectionService } from '../../../services/collection.service';
 import { CollectionFormComponent } from '../../collection/collection-form/collection-form.component';
@@ -12,7 +12,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './collection-create.component.html',
   styleUrl: './collection-create.component.scss'
 })
-export class CollectionCreateComponent implements AfterViewChecked {
+export class CollectionCreateComponent {
   public collectionForm: UntypedFormGroup;
   public collection;
   public isSubmitting = false;
@@ -21,12 +21,7 @@ export class CollectionCreateComponent implements AfterViewChecked {
     protected collectionService: CollectionService,
     protected router: Router,
     protected toastService: ToastService,
-    private cdr: ChangeDetectorRef
   ) { }
-
-  ngAfterViewChecked(): void {
-    this.cdr.detectChanges()
-  }
 
   updateCollectionForm(event) {
     this.collectionForm = event;
