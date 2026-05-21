@@ -7,16 +7,31 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ProductService } from '../../services/product.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-product',
-  imports: [RouterOutlet, CommonModule, PermissionDirective],
+  imports: [RouterOutlet, CommonModule, PermissionDirective, BreadcrumbComponent],
   templateUrl: './product.component.html',
   styleUrl: './product.component.scss',
   providers: [BsModalService],
 })
 export class ProductComponent {
   public data;
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+      {
+        label: this.data?.displayName || 'Product',
+        link: this.isEditing && this.data?.collectionId && this.data?.activityType && this.data?.activityId && this.data?.productId
+          ? [`/inventory/product/${this.data.collectionId}/${this.data.activityType}/${this.data.activityId}/${this.data.productId}`]
+          : undefined,
+      },
+    ];
+    if (this.isEditing) items.push({ label: 'Edit' });
+    return items;
+  }
 
   constructor(
     protected route: ActivatedRoute,

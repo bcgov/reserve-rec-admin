@@ -6,16 +6,26 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { CollectionService } from '../../services/collection.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-collection',
-  imports: [RouterOutlet, CommonModule, PermissionDirective],
+  imports: [RouterOutlet, CommonModule, PermissionDirective, BreadcrumbComponent],
   templateUrl: './collection.component.html',
   styleUrl: './collection.component.scss',
   providers: [BsModalService],
 })
 export class CollectionComponent {
   public data;
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+      { label: this.data?.displayName || 'Collection', link: this.isEditing && this.data?.collectionId ? [`/inventory/collection/${this.data.collectionId}`] : undefined },
+    ];
+    if (this.isEditing) items.push({ label: 'Edit' });
+    return items;
+  }
 
   constructor(
     protected route: ActivatedRoute,

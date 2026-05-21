@@ -7,16 +7,31 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { FacilityService } from '../../services/facility.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-facility',
-  imports: [RouterOutlet, CommonModule, PermissionDirective],
+  imports: [RouterOutlet, CommonModule, PermissionDirective, BreadcrumbComponent],
   templateUrl: './facility.component.html',
   styleUrl: './facility.component.scss',
   providers: [BsModalService],
 })
 export class FacilityComponent {
   public data;
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+      {
+        label: this.data?.displayName || 'Facility',
+        link: this.isEditing && this.data?.collectionId && this.data?.facilityType && this.data?.facilityId
+          ? [`/inventory/facility/${this.data.collectionId}/${this.data.facilityType}/${this.data.facilityId}`]
+          : undefined,
+      },
+    ];
+    if (this.isEditing) items.push({ label: 'Edit' });
+    return items;
+  }
 
   constructor(
     protected route: ActivatedRoute,

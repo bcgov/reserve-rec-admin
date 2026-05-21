@@ -5,10 +5,11 @@ import { FormBuilder, ReactiveFormsModule, UntypedFormGroup, Validators } from '
 import { ProductDateService } from '../../../services/product-date.service';
 import { ProductService } from '../../../services/product.service';
 import { ActivityService } from '../../../services/activity.service';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-product-date-details',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbComponent],
   templateUrl: './product-date-details.component.html',
   styleUrl: './product-date-details.component.scss'
 })
@@ -24,6 +25,20 @@ export class ProductDateDetailsComponent {
   public activityId: string;
   public productId: string;
   public date: string;
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+    ];
+    if (this.productName && this.collectionId && this.activityType && this.activityId && this.productId) {
+      items.push({
+        label: this.productName,
+        link: [`/inventory/product/${this.collectionId}/${this.activityType}/${this.activityId}/${this.productId}`],
+      });
+    }
+    items.push({ label: this.date || 'Product date' });
+    return items;
+  }
 
   public productName: string | null = null;
   public activityName: string | null = null;
