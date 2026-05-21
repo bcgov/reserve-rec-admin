@@ -50,6 +50,17 @@ export class AuthService {
       },
     });
     await this.setRefresh();
+    // Hub's 'signedIn' event only fires on the initial OAuth callback, not on
+    // page refresh. Without this, this.user() stays null after refresh and the
+    // sidebar (gated by *ngIf="authService.user()") disappears — #277.
+    if (this.session()?.tokens) {
+      try {
+        const userAttributes = await fetchUserAttributes();
+        this.updateUser(userAttributes);
+      } catch (error) {
+        this.loggerService.error(`Failed to load user attributes on init: ${error}`);
+      }
+    }
     this.listenToAuthEvents();
     return Promise.resolve();
   }
