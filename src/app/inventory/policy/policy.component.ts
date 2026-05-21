@@ -4,16 +4,24 @@ import { PolicyService } from '../../services/policy.service';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Constants } from '../../app.constants';
 import { CommonModule } from '@angular/common';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-policy',
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, BreadcrumbComponent],
   templateUrl: './policy.component.html',
   styleUrl: './policy.component.scss',
   providers: [BsModalService]
 })
 export class PolicyComponent implements AfterViewInit {
   public data;
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    return [
+      { label: 'Inventory', link: ['/inventory'] },
+      { label: this.data?.displayName || 'Policy' },
+    ];
+  }
 
   constructor(
     protected router: Router,

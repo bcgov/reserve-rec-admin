@@ -5,16 +5,33 @@ import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { GeozoneService } from '../../services/geozone.service';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-geozone',
-  imports: [RouterOutlet, UpperCasePipe, CommonModule],
+  imports: [RouterOutlet, UpperCasePipe, CommonModule, BreadcrumbComponent],
   templateUrl: './geozone.component.html',
   styleUrl: './geozone.component.scss',
   providers: [BsModalService],
 })
 export class GeozoneComponent {
   public data;
+
+  get isEditing(): boolean { return this.router.url.endsWith('/edit'); }
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+      {
+        label: this.data?.displayName || 'Geozone',
+        link: this.isEditing && this.data?.collectionId && this.data?.geozoneId
+          ? [`/inventory/geozone/${this.data.collectionId}/${this.data.geozoneId}`]
+          : undefined,
+      },
+    ];
+    if (this.isEditing) items.push({ label: 'Edit' });
+    return items;
+  }
 
   constructor(
     protected route: ActivatedRoute,

@@ -8,10 +8,11 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
 import { ActivityService } from '../../services/activity.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-activity',
-  imports: [RouterOutlet, CommonModule, PermissionDirective],
+  imports: [RouterOutlet, CommonModule, PermissionDirective, BreadcrumbComponent],
   templateUrl: './activity.component.html',
   styleUrl: './activity.component.scss',
   providers: [BsModalService]
@@ -19,6 +20,22 @@ import { PermissionDirective } from '../../shared/directives/permission.directiv
 export class ActivityComponent implements OnDestroy {
   public data;
   private subscription: Subscription;
+
+  get isEditing(): boolean { return this.router.url.endsWith('/edit'); }
+
+  get breadcrumbs(): BreadcrumbItem[] {
+    const items: BreadcrumbItem[] = [
+      { label: 'Inventory', link: ['/inventory'] },
+      {
+        label: this.data?.displayName || 'Activity',
+        link: this.isEditing && this.data?.collectionId && this.data?.activityType && this.data?.activityId
+          ? [`/inventory/activity/${this.data.collectionId}/${this.data.activityType}/${this.data.activityId}`]
+          : undefined,
+      },
+    ];
+    if (this.isEditing) items.push({ label: 'Edit' });
+    return items;
+  }
 
   constructor(
     protected route: ActivatedRoute,
