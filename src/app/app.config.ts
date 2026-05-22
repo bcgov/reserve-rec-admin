@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection, inject, provideAppInitializer } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, RouteReuseStrategy } from '@angular/router';
+import { NoReuseRouteStrategy } from './no-reuse-route-strategy';
 
 import { routes } from './app-routing.module';
 import { ConfigService } from './services/config.service';
@@ -47,6 +48,7 @@ export const appConfig: ApplicationConfig = {
         const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService), inject(FeatureFlagService));
         return initializerFn();
       }),
+    { provide: RouteReuseStrategy, useClass: NoReuseRouteStrategy },
     ConfigService,
     AutoFetchService,
     ToastService,
