@@ -8,6 +8,7 @@ import { FacilityResolver } from './resolvers/facility.resolver';
 import { ActivityResolver } from './resolvers/activity.resolver';
 import { policyResolver } from './resolvers/policy.resolver';
 import { ProductResolver } from './resolvers/product.resolver';
+import { CreateInventoryHomeComponent } from './inventory/create-inventory/create-inventory-home/create-inventory-home.component';
 
 export const routes: Routes = [
   {
@@ -70,6 +71,11 @@ export const routes: Routes = [
     canActivate: [UserGuard, PermissionsGuard],
     data: { requiredPermission: 'superadmin' },
     children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        component: CreateInventoryHomeComponent,
+      },
       {
         path: 'collection',
         loadComponent: () => import('./inventory/create-inventory/collection-create/collection-create.component').then(mod => mod.CollectionCreateComponent),
