@@ -46,7 +46,12 @@ export class ActivityFormComponent implements OnInit {
 
   ngOnInit() {
     this.activityTypes = this.activityTypes.filter(type => type.value !== 'noType');
-    this.activitySubTypes = [];
+
+    // Populate sub-type options BEFORE creating the form. The ngds picklist
+    // resets its bound control if the control's value isn't in the options
+    // when its @Input first binds — which wipes activitySubType on edit if
+    // we populate options after form init. See #221.
+    this.activitySubTypes = this.subTypeOptionsFor(this.activity?.activityType);
 
     this.initializeForm();
 
@@ -95,14 +100,10 @@ export class ActivityFormComponent implements OnInit {
     });
 
 
-    this.form.get('activityType').valueChanges.subscribe(() => {
-      this.updateFilteredActivitySubTypes();
+    this.form.get('activityType').valueChanges.subscribe((newType) => {
+      this.activitySubTypes = this.subTypeOptionsFor(newType);
+      this.cdr.detectChanges();
     });
-
-    // Populate the sub-type dropdown for the existing activityType when editing.
-    // Without this, the form has the activitySubType value set but the picklist
-    // has no options to display it against, so the field appears empty.
-    this.updateFilteredActivitySubTypes();
   }
 
 
@@ -117,20 +118,17 @@ export class ActivityFormComponent implements OnInit {
     }));
   }
 
-  // Update filtered activity sub types when activity type changes
-  updateFilteredActivitySubTypes() {
-    const selectedType = this.form.get('activityType')?.value;
-    if (selectedType) {
-      this.activitySubTypes = Object.entries(Constants.activityTypes[selectedType]?.subTypes || {}).map(([key, value]: [any, any]) => {
-        return {
-          display: value?.display,
-          value: value?.value
-        };
-      });
-    } else {
-      this.activitySubTypes = [];
+  // Build the sub-type options for a given activity type (used both during
+  // initial form setup and when the user changes activity type).
+  private subTypeOptionsFor(activityType: string | undefined): { display: string; value: string }[] {
+    if (!activityType) {
+      return [];
     }
-    this.cdr.detectChanges();
+    const subTypes = Constants.activityTypes[activityType]?.subTypes || {};
+    return Object.entries(subTypes).map(([, value]: [any, any]) => ({
+      display: value?.display,
+      value: value?.value,
+    }));
   }
 
   // Handle search terms updates from the component
