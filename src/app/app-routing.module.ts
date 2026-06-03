@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
-import { AdminGuard } from './guards/admin.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { CollectionResolver } from './resolvers/collection.resolver';
@@ -37,6 +36,18 @@ export const routes: Routes = [
     loadComponent: () => import('./sales/sales.component').then(mod => mod.SalesComponent),
     canActivate: [UserGuard, PermissionsGuard],
     data: { requiredPermission: 'limited' },
+    children: [
+      {
+        path: 'qr-scanner',
+        pathMatch: 'full',
+        loadComponent: () => import('./sales/qr-scanner/qr-scanner-page.component').then(mod => mod.QrScannerPageComponent),
+      },
+      {
+        path: 'pass-search',
+        pathMatch: 'full',
+        loadComponent: () => import('./sales/pass-search/pass-search.component').then(mod => mod.PassSearchComponent),
+      }
+    ]
   },
   {
     path: 'customers',
