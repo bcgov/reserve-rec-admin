@@ -1,0 +1,41 @@
+.booking-card {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-left-width: 4px;
+
+  &.card-border-reserved {
+    border-left-color: #f0a500;
+  }
+
+  &.card-border-active {
+    border-left-color: var(--bs-success);
+  }
+
+  &.card-border-cancelled {
+    border-left-color: var(--bs-danger);
+  }
+}
+
+.badge {
+  color: #2D2D2D !important;
+}
+
+.badge-status-reserved {
+  background-color: #f0a500;
+  color: #fff;
+}
+
+.badge-status-active {
+  background-color: var(--bs-success);
+  color: #fff;
+}
+
+.badge-status-cancelled {
+  background-color: var(--bs-danger);
+  color: #fff;
+}
+
+.search-pass {
+  min-height: 60vh;
+  
+}

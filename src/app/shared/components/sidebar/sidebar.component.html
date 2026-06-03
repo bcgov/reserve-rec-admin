@@ -2,7 +2,7 @@
   <div class="d-flex flex-column h-100 pb-3">
       <ul class="list-unstyled components ms-3 pe-3">
         <li><a routerLink="/dashboard" *appPermissionRequired="'limited'"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
-        <li><a routerLink="/sales" *appPermissionRequired="'superadmin'"><i class="fa-solid fa-cash-register"></i> Sales</a></li>
+        <li><a routerLink="/sales/pass-search" *appPermissionRequired="'staff'"><i class="fa-solid fa-cash-register"></i> Sales</a></li>
         <li><a routerLink="/reports" *appPermissionRequired="'limited'"><i class="fa-solid fa-chart-bar"></i> Reports</a></li>
         <li><a routerLink="/inventory" *appPermissionRequired="'limited'"><i class="fa-solid fa-user"></i> Inventory</a></li>
         <li><a routerLink="/customers" *appPermissionRequired="'staff'"><i class="fa-solid fa-users"></i> Customers</a></li>

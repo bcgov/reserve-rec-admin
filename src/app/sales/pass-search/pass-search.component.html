@@ -1,0 +1,175 @@
+<div class="container-fluid p-0">
+
+  <!-- Keyword Search Row -->
+  <div class="row justify-content-center g-3 m-0 p-3 pb-4 bg-white border border-top-0 mb-4">
+    <div class="col-12 col-md-8">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by name, confirmation ID, etc."
+          [(ngModel)]="keyword"
+          (keyup.enter)="search()"
+          [disabled]="isLoading">
+        <button class="btn btn-primary d-none d-md-block" type="button" (click)="search()" [disabled]="isLoading">
+          Search
+        </button>
+      </div>
+    </div>
+    <div class="col-12 d-md-none">
+      <button class="btn btn-primary w-100 py-2" type="button" (click)="search()" [disabled]="isLoading">
+        Search
+      </button>
+    </div>
+    <div class="col-12 col-md-4 d-flex justify-content-md-end">
+      <button
+        class="btn btn-outline-primary d-flex flex-grow-1 flex-md-grow-0 justify-content-center align-items-center py-2"
+        type="button"
+        (click)="toggleFilterPanel()"
+        [disabled]="isLoading">
+        <i class="fa-regular me-2" [ngClass]="showFilterPanel ? 'fa-square-minus' : 'fa-square-plus'"></i>
+        Filters
+      </button>
+    </div>
+
+    <!-- Filter Panel -->
+    <div *ngIf="showFilterPanel" class="col-12">
+      <div class="row pt-3">
+        <div class="col-12"><hr class="mt-1 mb-4"></div>
+        <div class="col-12 col-md-3">
+          <span class="form-label small">Email</span>
+          <input
+            type="email"
+            class="form-control"
+            placeholder="name@example.com"
+            [(ngModel)]="filterCriteria.email"
+            (ngModelChange)="applyLocalFilters()">
+        </div>
+        <div class="col-12 col-md-3">
+          <span class="form-label small">Check-in status</span>
+          <select class="form-select" [(ngModel)]="filterCriteria.checkinStatus" (ngModelChange)="applyLocalFilters()">
+            <option value="">All statuses</option>
+            <option value="reserved">Reserved</option>
+            <option value="active">Active</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <span class="form-label small">Start date</span>
+          <input type="date" class="form-control" [(ngModel)]="filterCriteria.startDate" (ngModelChange)="applyLocalFilters()">
+        </div>
+        <div class="col-12 col-md-3">
+          <span class="form-label small">End date</span>
+          <input type="date" class="form-control" [(ngModel)]="filterCriteria.endDate" (ngModelChange)="applyLocalFilters()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Applied Bar -->
+    <div *ngIf="filtersApplied" class="col-12">
+      <div class="filters-applied-bar d-flex justify-content-between align-items-center px-3 py-2 bg-info mb-3">
+        <span class="small">Filters applied</span>
+        <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" (click)="clearAllFilters()">
+          Clear all filters <i class="fa-solid fa-xmark ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="row" *ngIf="isLoading">
+    <div class="col text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && bookings.length === 0" class="bg-dark-subtle d-flex justify-content-center align-items-center search-pass">
+    <span class="text-muted">Search for a pass to check-in</span>
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="!isLoading">
+
+    <!-- Pass Cards -->
+    <div
+      *ngFor="let booking of filteredBookings"
+      class="booking-card mb-3 mx-lg-4 rounded"
+      [ngClass]="getCardBorderClass(booking)">
+      <div class="p-3">
+
+        <!-- Header Row -->
+        <div class="d-flex align-items-start justify-content-between mb-2">
+          <div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 mb-3">
+              <strong>{{ getBookingName(booking) }}</strong>
+              <span class="badge rounded-5 fw-bold mx-1" [ngClass]="getStatusBadgeClass(booking)">{{ getDisplayStatus(booking) }}</span>
+              <span class="badge rounded-5 fw-bold bg-info mx-1">{{ getActivityTypeLabel(booking.activityType) }}</span>
+              <span class="badge rounded-5 fw-bold bg-secondary mx-1" *ngIf="booking.entryPoint?.category">{{ booking.entryPoint.category }}</span>
+            </div>
+            <div class="text-muted small">{{ getBookingEmail(booking) }}</div>
+          </div>
+          <div class="ms-3 flex-shrink-0">
+            <button
+              *ngIf="!isCheckedIn(booking)"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="checkinBooking(booking)"
+              [disabled]="isLoading">
+              Check-in
+            </button>
+            <button
+              *ngIf="isCheckedIn(booking)"
+              class="btn btn-sm btn-success"
+              disabled>
+              <i class="fa-solid fa-circle-check me-1"></i>Checked-in
+            </button>
+          </div>
+        </div>
+
+        <!-- Pass Details -->
+        <div class="mb-2">{{ booking.displayName || booking.activityType }}</div>
+        <div class="text-muted small mb-1" *ngIf="getLocation(booking)">{{ getLocation(booking) }}</div>
+        <div class="text-muted small mb-2">Party size: {{ getPartySize(booking) }}</div>
+
+        <hr class="my-4">
+
+        <!-- Footer Row -->
+        <div class="d-flex flex-wrap gap-5 text-muted small">
+          <span>Pass active: {{ booking.startDate }}</span>
+          <span>Booked: {{ formatBookedDate(booking.bookingCompletionTime) }}</span>
+          <span>Confirmation ID: {{ booking.bookingId }}</span>
+          <span *ngIf="isCheckedIn(booking)">Checked-in: {{ formatCheckinTime(booking.checkedInAt) }}</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- No Results (filtered) -->
+    <div *ngIf="filteredBookings.length === 0 && bookings.length > 0" class="text-center py-5">
+      <i class="fa-regular fa-folder-open" style="font-size: 3rem; color: #ccc;"></i>
+      <h5 class="text-muted mt-3">No results match your filters</h5>
+      <p class="text-muted">Try adjusting or clearing your filters</p>
+    </div>
+
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1 && !isLoading" class="d-flex align-items-center justify-content-center px-4 py-3">
+    <div class="row" *ngIf="isLoadingMore">
+      <div class="col text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading...</p>
+      </div>
+    </div>
+    <button
+      *ngIf="!isLoadingMore && currentPage < totalPages - 1"
+      class="btn btn-outline-primary"
+      (click)="goToPage(currentPage + 1)">
+      Load more
+    </button>
+  </div>
+</div>
