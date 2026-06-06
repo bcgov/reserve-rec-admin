@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -21,7 +22,7 @@ import { CollectionSelectorComponent } from '../../../shared/components/collecti
   templateUrl: './activity-form.component.html',
   styleUrls: ['./activity-form.component.scss']
 })
-export class ActivityFormComponent implements OnInit {
+export class ActivityFormComponent implements OnInit, AfterViewInit {
   @ViewChild('searchTerms', { static: false }) searchTermsComponent!: SearchTermsComponent;
 
   @Output() formValue: EventEmitter<any> = new EventEmitter<any>();
@@ -60,6 +61,20 @@ export class ActivityFormComponent implements OnInit {
       this.cdr.detectChanges();
     });
 
+  }
+
+  ngAfterViewInit() {
+    // The ngds picklist resets its bound control during its own
+    // ngAfterViewInit if the saved value isn't in its options at that exact
+    // moment (it defers the options→value reconciliation to after view init,
+    // and an empty options array in that window wipes the value). The parent's
+    // ngAfterViewInit runs after the child's, so re-apply the saved sub-type
+    // here to restore it. See #221.
+    const savedSubType = this.activity?.activitySubType;
+    if (savedSubType && this.form.get('activitySubType')?.value !== savedSubType) {
+      this.form.get('activitySubType')?.setValue(savedSubType);
+      this.cdr.detectChanges();
+    }
   }
 
   private initializeForm() {
