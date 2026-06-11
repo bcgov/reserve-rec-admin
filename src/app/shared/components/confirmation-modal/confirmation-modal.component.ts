@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Optional } from '@angular/core';
+import { BsModalRef } from 'ngx-bootstrap/modal';
 import { Utils } from '../../../utils/utils';
 import { NgFor, NgIf } from '@angular/common';
 
@@ -29,6 +30,19 @@ export class ConfirmationModalComponent {
   @Output() cancelButton = new EventEmitter<void>();
 
   public utils = new Utils();
+
+  // The modal is shown via BsModalService, so it can close itself. Optional so
+  // the component still works if ever rendered outside the modal service.
+  constructor(@Optional() private bsModalRef?: BsModalRef) {}
+
+  // Close the modal on cancel and notify any subscribers. Previously cancel only
+  // emitted the event, so callers that didn't subscribe to cancelButton (e.g.
+  // the waiting-room Mode 2 deactivate dialog) had a Cancel button that did
+  // nothing. See #262.
+  onCancel(): void {
+    this.cancelButton.emit();
+    this.bsModalRef?.hide();
+  }
 
   // This constructs the modal from the provided rows using the ModalRowSpec format.
   // It filters out rows with undefined or null values and formats them
