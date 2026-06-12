@@ -87,6 +87,9 @@ export class CollectionEditComponent extends EntityEditBaseComponent {
     // Handle search terms
     props['searchTerms'] = this.collectionForm.get('searchTerms')?.value || [];
 
+    // Always include timezone so collections created before the field existed get backfilled
+    props['timezone'] = this.collectionForm.get('timezone')?.value;
+
     // Delete relationship form values (managed by RelationshipService post-submit)
     delete props['collectionId']; // Remove collectionId from the props
     return props;
