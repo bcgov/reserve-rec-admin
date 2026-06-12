@@ -10,6 +10,6 @@
   </div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="{{ cancelClass }}" (click)="cancelButton.emit()">{{ cancelText }}</button>
+  <button type="button" class="{{ cancelClass }}" (click)="onCancel()">{{ cancelText }}</button>
   <button type="button" class="{{ confirmClass }}" (click)="confirmButton.emit()">{{ confirmText }}</button>
 </div>
