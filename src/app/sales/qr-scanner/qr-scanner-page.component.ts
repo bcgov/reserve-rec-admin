@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
@@ -6,37 +6,36 @@ import { ApiService } from '../../services/api.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
 import { QrScannerComponent, QRScanResult } from '../../shared/components/qr-scanner/qr-scanner.component';
+import { PassDetailsComponent } from '../pass-details/pass-details.component';
 
 @Component({
   selector: 'app-qr-scanner-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, QrScannerComponent],
+  imports: [CommonModule, FormsModule, QrScannerComponent, PassDetailsComponent],
   templateUrl: './qr-scanner-page.component.html',
   styleUrl: './qr-scanner-page.component.scss'
 })
-export class QrScannerPageComponent {
+export class QrScannerPageComponent implements OnInit {
   isLoading = false;
   
   showQRScanner = false;
-  qrVerificationResult: any = null;
+  qrBookingResult: any = null;
   showVerificationResult = false;
+
+  // Sandbox testing tools
+  isSandboxMode = false;
+  manualBookingId = '';
 
   constructor(
     private apiService: ApiService,
     private toastService: ToastService,
     private loggerService: LoggerService
-  ) {
+  ) {}
 
-  }
-
-  // Utility methods for display
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch {
-      return dateString;
-    }
+  ngOnInit(): void {
+    // Check if we are in a development/sandbox environment
+    const env = (window as any).__env?.ENVIRONMENT;
+    this.isSandboxMode = env === 'sandbox' || env === 'local' || env === 'dev';
   }
 
   private handleError(message: string, error: any) {
@@ -51,7 +50,7 @@ export class QrScannerPageComponent {
   // QR Code Scanner Methods
   openQRScanner() {
     this.showQRScanner = true;
-    this.qrVerificationResult = null;
+    this.qrBookingResult = null;
     this.showVerificationResult = false;
   }
 
@@ -69,21 +68,23 @@ export class QrScannerPageComponent {
         this.apiService.get(`verify/${result.bookingId}/${result.hash}`, {})
       );
 
-      this.qrVerificationResult = verificationResponse['data'];
+      this.qrBookingResult = verificationResponse['data'];
       this.showVerificationResult = true;
 
-      this.toastService.addMessage(
-        'QR code scanned successfully',
-        'Success',
-        ToastTypes.SUCCESS
-      );
     } catch (error: any) {
-      this.handleError('Failed to verify QR code', error);
+      this.loggerService.error(error);
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
-        error?.message || 'QR code verification failed',
-        'Verification Error',
+        errorMessage,
+        `QR code verification failed`,
         ToastTypes.ERROR
       );
+      return null;
     } finally {
       this.isLoading = false;
     }
@@ -97,49 +98,25 @@ export class QrScannerPageComponent {
     );
   }
 
+  async verifyManualBooking() {
+    if (!this.manualBookingId) {
+      this.toastService.addMessage('Please enter a booking ID', 'Input Required', ToastTypes.WARNING);
+      return;
+    }
+
+    // Trigger verification using the sandbox bypass hash
+    const result: QRScanResult = {
+      bookingId: this.manualBookingId.trim(),
+      hash: 'SANDBOX-BYPASS-01',
+      url: 'manual-entry'
+    };
+
+    await this.onQRScanSuccess(result);
+  }
+
   closeVerificationResult() {
     this.showVerificationResult = false;
-    this.qrVerificationResult = null;
-  }
-
-  getVerificationStatus(): 'valid' | 'invalid' | 'expired' | 'cancelled' {
-    if (!this.qrVerificationResult) return 'invalid';
-
-    const verification = this.qrVerificationResult.verification;
-    if (verification?.isCancelled) return 'cancelled';
-    if (verification?.isExpired) return 'expired';
-    if (verification?.isConfirmed && this.qrVerificationResult.isValid) return 'valid';
-
-    return 'invalid';
-  }
-
-  getStatusIcon(): string {
-    const status = this.getVerificationStatus();
-    switch (status) {
-      case 'valid': return 'fa-circle-check';
-      case 'expired': return 'fa-clock';
-      case 'cancelled': return 'fa-ban';
-      default: return 'fa-exclamation-triangle';
-    }
-  }
-
-  getStatusClass(): string {
-    const status = this.getVerificationStatus();
-    switch (status) {
-      case 'valid': return 'alert-success';
-      case 'expired': return 'alert-warning';
-      case 'cancelled': return 'alert-danger';
-      default: return 'alert-danger';
-    }
-  }
-
-  getStatusMessage(): string {
-    const status = this.getVerificationStatus();
-    switch (status) {
-      case 'valid': return 'This booking is valid and confirmed';
-      case 'expired': return 'This booking has expired';
-      case 'cancelled': return 'This booking has been cancelled';
-      default: return 'This booking is not valid';
-    }
+    this.qrBookingResult = null;
+    this.showQRScanner = true; // Go back to scanner
   }
 }

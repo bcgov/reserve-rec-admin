@@ -1,0 +1,53 @@
+// Card Base & Dynamic Borders
+.booking-card {
+  border-left-width: 4px !important;
+  
+  &.border-reserved { border-left-color: #f0a500 !important; }
+  &.border-active { border-left-color: var(--bs-success) !important; }
+  &.border-expired { border-left-color: #252423 !important; }
+  &.border-cancelled { border-left-color: var(--bs-danger) !important; }
+}
+
+// Dynamic Backgrounds
+.bg-reserved { 
+  background-color: #f0a500 !important; 
+  color: #2d2d2d !important; 
+}
+
+// Active/Cancelled/Expired use standard bg-success/bg-danger
+.bg-active { background-color: var(--bs-success) !important; color: #fff !important; }
+.bg-expired { background-color: #252423 !important; color: #fff !important; }
+.bg-cancelled { background-color: var(--bs-danger) !important; color: #fff !important; }
+
+// Custom Badge Colors
+.badge-meta {
+  background-color: #d4e1ef;
+  color: #2d2d2d;
+}
+
+.chip-checked-in {
+  background-color: #e6f4ea;
+  border: 1px solid #4b8b55;
+  color: #2f7c3f;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.chip-not-checked-in-yet {
+  background-color: var(--bs-warning);
+  border: 1px solid var(--bs-warning);
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .booking-card {
+    border-left-width: 0px !important;
+  }
+}

@@ -21,12 +21,14 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   @Output() scanSuccess = new EventEmitter<QRScanResult>();
   @Output() scanError = new EventEmitter<string>();
   @Output() closeScanner = new EventEmitter<void>();
+  @Output() foundBooking = new EventEmitter<boolean>();
 
   html5QrCode: Html5Qrcode | null = null;
   cameras: any[] = [];
   selectedCameraId: string | null = null;
   isScanning = false;
   isCameraLoading = false;
+  isScanSuccess = false;
   error: string | null = null;
   lastScannedUrl: string | null = null;
 
@@ -106,6 +108,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('Error starting scanner:', error);
       this.error = `Failed to start scanner: ${error.message || 'Unknown error'}`;
+    } finally {
       this.isScanning = false;
     }
   }
@@ -141,6 +144,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     if (result) {
       // Stop scanning after successful scan
       this.stopScanning();
+      this.isScanSuccess = true;
       this.scanSuccess.emit(result);
     } else {
       this.error = 'Invalid QR code format. Expected a booking verification URL.';
@@ -157,7 +161,8 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   parseVerificationUrl(url: string): QRScanResult | null {
     try {
       // Match pattern: https://{domain}/verify/{bookingId}/{hash}
-      const pattern = /\/verify\/([a-f0-9-]{36})\/([a-f0-9]{16})/i;
+      // Updated to allow sandbox bypass hash (SANDBOX-BYPASS-01)
+      const pattern = /\/verify\/([a-f0-9-]{36})\/([a-f0-9]{16}|SANDBOX-BYPASS-01)/i;
       const match = url.match(pattern);
       
       if (match) {

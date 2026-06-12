@@ -14,7 +14,7 @@ import { PermissionDirective } from '../../directives/permission.directive';
 export class SidebarComponent {
   @HostBinding('class.is-toggled')
   public hide = false;
-
+  
   public routes = [
     { path: 'dashboard', data: { label: 'Dashboard' } },
     { path: 'inventory', data: { label: 'Inventory' } },
