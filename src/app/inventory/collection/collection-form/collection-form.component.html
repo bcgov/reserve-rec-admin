@@ -71,6 +71,19 @@
 
           <div class="row mt-4">
             <div class="col-12 col-lg-6">
+              <ngds-picklist-input class="mb-4"
+                [control]="form.get('timezone')"
+                [label]="'Timezone'"
+                [selectionListItems]="timezones"
+                [autoSelectFirstItem]="true"
+                [placeholder]="'Select timezone'"
+                [resetButton]="true">
+              </ngds-picklist-input>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 col-lg-6">
               <ngds-text-input class="mb-4"
                 [control]="form.get('adminNotes')"
                 *appPermissionRequired="'staff'"
