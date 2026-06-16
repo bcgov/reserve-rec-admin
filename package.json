@@ -23,6 +23,10 @@
     "sandbox:destroy": "cdk destroy -c @context=dev -c sandboxName=${SANDBOX_NAME} --all --force"
   },
   "private": true,
+    "resolutions": {
+    "esbuild": "0.28.1",
+    "esbuild-wasm": "0.28.1"
+  },
   "dependencies": {
     "@angular/animations": "^19.2.18",
     "@angular/common": "^19.2.16",
