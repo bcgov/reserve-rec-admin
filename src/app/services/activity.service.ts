@@ -43,7 +43,7 @@ export class ActivityService {
       const errorMessage = 
         (error as any)?.error?.msg ||
         (error as any)?.error?.error ||
-        (error as any)?.error?.Message ||
+        (error as any)?.error?.message ||
         (error as any)?.message ||
         'Unknown error';
       this.toastService.addMessage(
@@ -74,7 +74,7 @@ export class ActivityService {
       const errorMessage = 
         (error as any)?.error?.msg ||
         (error as any)?.error?.error ||
-        (error as any)?.error?.Message ||
+        (error as any)?.error?.message ||
         (error as any)?.message ||
         'Unknown error';
       this.toastService.addMessage(
@@ -104,7 +104,7 @@ export class ActivityService {
       const errorMessage = 
         (error as any)?.error?.msg ||
         (error as any)?.error?.error ||
-        (error as any)?.error?.Message ||
+        (error as any)?.error?.message ||
         (error as any)?.message ||
         'Unknown error';
       this.toastService.addMessage(
@@ -129,7 +129,7 @@ export class ActivityService {
       const errorMessage = 
         (error as any)?.error?.msg ||
         (error as any)?.error?.error ||
-        (error as any)?.error?.Message ||
+        (error as any)?.error?.message ||
         (error as any)?.message ||
         'Unknown error';
       this.toastService.addMessage(
@@ -159,7 +159,7 @@ export class ActivityService {
       const errorMessage = 
         (error as any)?.error?.msg ||
         (error as any)?.error?.error ||
-        (error as any)?.error?.Message ||
+        (error as any)?.error?.message ||
         (error as any)?.message ||
         'Unknown error';
       this.toastService.addMessage(
