@@ -47,9 +47,11 @@ export class CollectionSelectorComponent implements OnInit {
   }
 
   setOptions(collections: any[]) {
-    this.collectionOptions = collections.map(c => ({
-      display: c.displayName ? `${c.displayName} (${c.collectionId})` : c.collectionId,
-      value: c.collectionId,
-    }));
+    this.collectionOptions = collections
+      .filter(c => c.isVisible !== false)
+      .map(c => ({
+        display: c.displayName ? `${c.displayName} (${c.collectionId})` : c.collectionId,
+        value: c.collectionId,
+      }));
   }
 }
