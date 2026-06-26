@@ -76,6 +76,7 @@ export class CollectionService {
       this.loadingService.addToFetchList(Constants.dataIds.COLLECTION_RESULT);
       const res = (await lastValueFrom(this.apiService.put(`collections/${collectionId}`, props)))['data'];
       this.dataService.setItemValue(Constants.dataIds.COLLECTION_RESULT, res);
+      this.dataService.clearItemValue(Constants.dataIds.COLLECTIONS_RESULT);
       this.loadingService.removeFromFetchList(Constants.dataIds.COLLECTION_RESULT);
       this.toastService.addMessage(
         `Collection successfully updated`,
