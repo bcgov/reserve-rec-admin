@@ -1,4 +1,4 @@
-<nav class="h-100 bg-secondary text-white" id="sidebar">
+<nav class="h-100 bg-secondary text-white" id="sidebar" [class.is-open]="isOpen">
   <div class="d-flex flex-column h-100 pb-3">
       <ul class="list-unstyled components ms-3 pe-3">
         <li><a routerLink="/dashboard" *appPermissionRequired="'limited'"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
@@ -12,5 +12,9 @@
           <li><a routerLink="/admin/waiting-room"><i class="fa-solid fa-door-open"></i> Waiting Room</a></li>
         </ng-container>
       </ul>
+      <button type="button"
+              *ngIf="authService.user()"
+              class="logout-btn account-btn btn text-primary bg-light fw-bold rounded-1"
+              (click)="logout()">Log Out</button>
   </div>
 </nav>

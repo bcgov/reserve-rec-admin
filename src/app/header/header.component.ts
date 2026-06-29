@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { ConfigService } from '../services/config.service';
 import { SidebarService } from '../services/sidebar.service';
 import { AuthService } from '../services/auth.service';
@@ -18,14 +17,10 @@ import { Router } from '@angular/router';
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() showSideBar = true;
 
-  private subscriptions = new Subscription();
   public isAuthenticed = false;
   public session;
   public envName: string;
   public showBanner = true;
-  public welcomeMsg: string;
-  public isAuthorized: boolean;
-  public routes: any[] = [];
   private sessionPollId: ReturnType<typeof setInterval> | null = null;
   private destroyed = false;
 
@@ -36,12 +31,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
   ) {
-    this.subscriptions.add(
-      sidebarService.routes.subscribe((routes) => {
-        this.routes = routes;
-      })
-    );
-
     this.envName = this.configService.config['ENVIRONMENT'];
     if (this.envName === 'prod') {
       this.showBanner = false;
@@ -110,6 +99,5 @@ export class HeaderComponent implements OnInit, OnDestroy {
       clearInterval(this.sessionPollId);
       this.sessionPollId = null;
     }
-    this.subscriptions.unsubscribe();
   }
 }
