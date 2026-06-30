@@ -45,3 +45,5 @@ Thumbs.db
 .cdk.staging
 cdk.out
 
+# env
+src/env.js

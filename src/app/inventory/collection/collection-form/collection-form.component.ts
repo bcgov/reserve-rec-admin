@@ -50,6 +50,7 @@ export class CollectionFormComponent implements OnInit {
       isVisible: [false],
       searchTerms: [[]],
       adminNotes: [''],
+      timezone: ['America/Vancouver'],
     }, {
       validators: this.isCreating ? [this.collectionIdValidator] : []
     });
@@ -64,6 +65,7 @@ export class CollectionFormComponent implements OnInit {
       isVisible: collection.isVisible ?? false,
       searchTerms: collection.searchTerms || [],
       adminNotes: collection.adminNotes || '',
+      timezone: collection.timezone || 'America/Vancouver',
     });
   }
 

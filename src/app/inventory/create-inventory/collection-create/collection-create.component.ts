@@ -53,6 +53,10 @@ export class CollectionCreateComponent {
       }
       return false;
     }).filter(Boolean).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+    // Always include timezone (the defaulted control may be pristine)
+    props['timezone'] = this.collectionForm.get('timezone')?.value;
+
     return props;
   }
 

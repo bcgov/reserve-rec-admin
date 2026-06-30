@@ -7,6 +7,7 @@ import { ApiService } from './api.service';
 import { LoadingService } from './loading.service';
 import { ToastService, ToastTypes } from './toast.service';
 import { errorMessage } from '../utils/utils';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +19,18 @@ export class SearchService {
     private loggerService: LoggerService,
     private apiService: ApiService,
     private loadingService: LoadingService,
-    protected toastService: ToastService
+    protected toastService: ToastService,
+    private authService: AuthService
   ) { }
 
   async searchByQuery(query: string, terms: any = null, filters: any = null, passiveSearch: boolean = false) {
+    // Don't run searches when there's no authenticated user. During logout the
+    // Cognito identity is torn down and an in-flight/re-fired search 403s with
+    // an IAM "explicit deny", which surfaced a "Search error" toast as the user
+    // signed out (#269).
+    if (!this.authService.user()) {
+      return null;
+    }
     const body = {
       text: query,
       ...terms
@@ -45,11 +54,15 @@ export class SearchService {
       this.loadingService.removeFromFetchList(Constants.dataIds.SEARCH_RESULTS);
       return res; // Return the results for further processing if needed
     } catch (error) {
-      this.toastService.addMessage(
-        errorMessage(error),
-        `Search error`,
-        ToastTypes.ERROR
-      );
+      // Suppress the toast if the user signed out mid-request — the search
+      // 403s as the session tears down (#269).
+      if (this.authService.user()) {
+        this.toastService.addMessage(
+          errorMessage(error),
+          `Search error`,
+          ToastTypes.ERROR
+        );
+      }
       this.loadingService.removeFromFetchList(Constants.dataIds.SEARCH_RESULTS);
       this.loggerService.error(error);
       return null; // Return null or handle the error as needed
