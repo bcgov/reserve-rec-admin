@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { CommonModule, UpperCasePipe } from '@angular/common';
-import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { GeozoneService } from '../../services/geozone.service';
@@ -64,17 +63,12 @@ export class GeozoneComponent {
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with details and its status.
   displayConfirmationModal(collectionId, geozoneId) {
-    const details: ModalRowSpec[] = [
-      { label: 'Geozone Name', value: this.data?.displayName },
-      { label: 'Geozone Collection ID', value: collectionId },
-      { label: 'Geozone ID', value: geozoneId }
-    ];
-
     // Show the modal with the confirmation details.
     const modalRef = this.modalService.show(ConfirmationModalComponent, {
+      class: 'modal-dialog-centered delete-confirmation-modal',
       initialState: {
-        title: 'Confirm Delete',
-        details,
+        title: `Delete ${this.data?.displayName}?`,
+        body: 'Deleting an inventory item will remove all associated data. Linked items will be unaffected. Are you sure you want to proceed?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         confirmClass: 'btn btn-danger',
