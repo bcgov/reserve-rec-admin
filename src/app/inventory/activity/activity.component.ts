@@ -5,7 +5,6 @@ import { Constants } from '../../app.constants';
 import { Subscription } from 'rxjs';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
-import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
 import { ActivityService } from '../../services/activity.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
@@ -91,18 +90,12 @@ export class ActivityComponent implements OnDestroy {
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with details and its status.
   displayConfirmationModal(collectionId, activityType, activityId) {
-    const details: ModalRowSpec[] = [
-      { label: 'Activity Name', value: this.data?.displayName },
-      { label: 'Activity Type', value: this.getActivityTypeOption()?.display },
-      { label: 'Activity Sub-Type', value: this.getActivitySubTypeOption()?.display },
-      { label: 'Activity ID', value: activityId }
-    ];
-
     // Show the modal with the confirmation details.
     const modalRef = this.modalService.show(ConfirmationModalComponent, {
+      class: 'modal-dialog-centered delete-confirmation-modal',
       initialState: {
-        title: 'Confirm Delete',
-        details,
+        title: `Delete ${this.data?.displayName}?`,
+        body: 'Deleting an inventory item will remove all associated data. Linked items will be unaffected. Are you sure you want to proceed?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         confirmClass: 'btn btn-danger',

@@ -3,7 +3,6 @@ import { AfterViewInit, ChangeDetectorRef, Component, Input, signal, ViewChild, 
 import { MapComponent } from '../../../map/map.component';
 import { GeozoneEditComponent } from '../geozone-edit/geozone-edit.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ModalRowSpec } from '../../../shared/components/search-terms/search-terms.component';
 import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { GeozoneService } from '../../../services/geozone.service';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -113,18 +112,15 @@ export class GeozoneDetailsComponent implements AfterViewInit {
   }
 
   async displayConfirmationModal() {
-    const details: ModalRowSpec[] = [
-      { label: 'Geozone to delete', value: this.geozone?.displayName },
-    ];
-
     // Show the modal with the confirmation details.
     const modalRef = this.modalService.show(ConfirmationModalComponent, {
+      class: 'modal-dialog-centered delete-confirmation-modal',
       initialState: {
-        title: 'Confirm Delete Geozone',
-        details,
-        confirmText: 'Confirm',
+        title: `Delete ${this.geozone?.displayName}?`,
+        body: 'Deleting an inventory item will remove all associated data. Linked items will be unaffected. Are you sure you want to proceed?',
+        confirmText: 'Delete',
         cancelText: 'Cancel',
-        confirmClass: 'btn btn-primary',
+        confirmClass: 'btn btn-danger',
         cancelClass: 'btn btn-outline-secondary'
       }
     });

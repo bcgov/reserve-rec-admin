@@ -26,6 +26,12 @@ app-root {
   background-color: #fca5a5 !important;
 }
 
+// Delete confirmation modal — fixed width 634px, height hugs content (Figma)
+.delete-confirmation-modal {
+  width: 634px;
+  max-width: 634px;
+}
+
 // Workaround to make ngds-text-input label appear above the input instead of to the right
 .label-top {
   .d-flex {

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { Constants } from '../../app.constants';
-import { ModalRowSpec } from '../../shared/components/search-terms/search-terms.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { FacilityService } from '../../services/facility.service';
@@ -77,18 +76,12 @@ export class FacilityComponent {
   // This sends the submitted form data object to the modal for confirmation, where
   // it constructs a confirmation modal with details and its status.
   displayConfirmationModal(collectionId, facilityType, facilityId) {
-    const details: ModalRowSpec[] = [
-      { label: 'Facility Name', value: this.data?.displayName },
-      { label: 'Facility Collection ID', value: collectionId },
-      { label: 'Facility Type', value: this.getFacilityTypeOption()?.display },
-      { label: 'Facility ID', value: facilityId }
-    ];
-
     // Show the modal with the confirmation details.
     const modalRef = this.modalService.show(ConfirmationModalComponent, {
+      class: 'modal-dialog-centered delete-confirmation-modal',
       initialState: {
-        title: 'Confirm Delete',
-        details,
+        title: `Delete ${this.data?.displayName}?`,
+        body: 'Deleting an inventory item will remove all associated data. Linked items will be unaffected. Are you sure you want to proceed?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         confirmClass: 'btn btn-danger',
