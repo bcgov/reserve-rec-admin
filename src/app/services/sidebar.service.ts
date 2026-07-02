@@ -1,63 +1,19 @@
-import { Injectable, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, filter, Subscription } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SidebarService implements OnDestroy {
-  @Output() toggleChange: EventEmitter<boolean> = new EventEmitter();
-
-  private subscriptions = new Subscription();
-
-  public currentRoute;
-  public routes;
-  public hide = false;
-
-  constructor(protected router: Router) {
-    const routesArray = router.config.filter((obj) => {
-      // if (!obj?.data?.['label']) {
-      //   return false;
-      // } else if (obj.path === 'login') {
-      //   return keyCloakService.isAuthenticated() ? false : true;
-      // } else {
-      //   return obj.path !== '**' && obj.path !== 'unauthorized';
-      // }
-    });
-    this.routes = new BehaviorSubject(routesArray);
-
-    this.subscriptions.add(
-      router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
-        // this.currentRoute = event;
-        // if (this.currentRoute.url === '/') {
-        //   routesArray.map((route) => (route['active'] = false));
-        //   routesArray[0]['active'] = true;
-        // } else {
-        //   for (let i = 0; i < routesArray.length; i++) {
-        //     if (routesArray[i].path && this.currentRoute.url.includes(routesArray[i].path as string)) {
-        //       routesArray[i]['active'] = true;
-        //     } else {
-        //       routesArray[i]['active'] = false;
-        //     }
-        //   }
-        // }
-
-        // this.routes.next(routesArray);
-      })
-    );
-  }
+export class SidebarService {
+  // Mobile sidebar open/closed state. Desktop ignores this (sidebar always
+  // shown via CSS). The header hamburger toggles it; the sidebar subscribes.
+  public isOpen$ = new BehaviorSubject<boolean>(false);
 
   toggle() {
-    this.hide = !this.hide;
-    this.toggleChange.emit(this.hide);
+    this.isOpen$.next(!this.isOpen$.value);
   }
 
   close() {
-    this.hide = true;
-    this.toggleChange.emit(this.hide);
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    this.isOpen$.next(false);
   }
 }

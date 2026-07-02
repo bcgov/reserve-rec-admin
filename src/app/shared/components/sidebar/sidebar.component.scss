@@ -17,8 +17,33 @@ a:hover,
   transition: all 0.3s;
 }
 
-#sidebar.hide {
-  margin-left: -250px;
+// Mobile: collapse the sidebar by default and reveal it only when the header
+// hamburger toggles it open. Desktop (>= lg / 992px) is unchanged — sidebar
+// stays permanently visible regardless of is-open.
+@media (max-width: 991.98px) {
+  #sidebar {
+    display: none;
+  }
+
+  #sidebar.is-open {
+    display: block;
+  }
+
+  // Mobile: logout flows below the menu items inside the open sidebar.
+  .logout-btn {
+    margin: 0.5rem 1rem;
+  }
+}
+
+// Desktop: same button, floated back to the header's top-right corner so the
+// header looks unchanged. The sidebar list keeps its own scroll/flow.
+@media (min-width: 992px) {
+  .logout-btn {
+    position: fixed;
+    top: 2rem;
+    right: 1.5rem;
+    z-index: 1031;
+  }
 }
 
 #sidebar ul li a {
