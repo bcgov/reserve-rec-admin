@@ -36,10 +36,11 @@ a:hover,
 }
 
 // Desktop: same button, floated back to the header's top-right corner so the
-// header looks unchanged. The sidebar list keeps its own scroll/flow.
+// header looks unchanged. Absolute (not fixed) so it scrolls away with the
+// header instead of staying pinned to the viewport.
 @media (min-width: 992px) {
   .logout-btn {
-    position: fixed;
+    position: absolute;
     top: 2rem;
     right: 1.5rem;
     z-index: 1031;
