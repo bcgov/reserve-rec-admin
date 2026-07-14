@@ -369,6 +369,19 @@ export class ProductFormComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // List display labels for required policy types not yet linked
+  missingRequiredPolicies(): string[] {
+    const labels: Record<string, string> = {
+      reservationPolicy: 'Reservation',
+      partyPolicy: 'Party',
+      feePolicy: 'Fee',
+      changePolicy: 'Change'
+    };
+    return Object.entries(labels)
+      .filter(([controlName]) => !this.form.get(controlName)?.value)
+      .map(([, label]) => label);
+  }
+
   // Custom validator to ensure displayName is not the default placeholder
   private displayNameValidator(control: AbstractControl) {
     const group = control as UntypedFormGroup;

@@ -81,8 +81,8 @@
                 [label]="'Display name'"
                 [placeholder]="'Type a display name for the product'" [resetButton]="true">
               </ngds-text-input>
-              <div 
-                *ngIf="form.hasError('invalidDisplayName') && (form.get('displayName')?.touched)"
+              <div
+                *ngIf="form.hasError('invalidDisplayName')"
                 class="alert alert-danger small p-2 mt-2"
               >
                 <strong>Invalid:</strong> please update the Display name; cannot use default value.
@@ -201,6 +201,9 @@
           <hr>
           <h3 class="mb-4 mt-4">Policies</h3>
           <p class="small mt-2">Polices are rules defining how the <strong>product</strong> behaves. They control the booking's stock, party limit, changes/cancellations, and fees. </p>
+          <div class="alert alert-warning small p-2 mb-3" *ngIf="missingRequiredPolicies().length">
+            <strong>Required:</strong> link one policy of each type — missing {{ missingRequiredPolicies().join(', ') }}.
+          </div>
           <div *ngIf="loadingPolicies" class="text-center my-3">
             <i class="fa fa-spinner fa-spin me-2"></i>
             Loading policies...
