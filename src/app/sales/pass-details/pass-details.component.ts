@@ -39,6 +39,20 @@ export class PassDetailsComponent {
     }
   }
 
+  async checkoutBooking(booking: any) {
+    try {
+      this.isLoading = true;
+      const res = (await lastValueFrom(this.apiService.put(`bookings/${booking.bookingId}/checkout`, {})))['data'];
+
+      booking.checkedInTime = "";
+      this.toastService.addMessage('Check-out successful', 'Success', ToastTypes.SUCCESS);
+    } catch (error) {
+      this.handleError('Check-out failed', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   // Display helpers
 
   getBookingName(booking: any): string {
@@ -53,19 +67,33 @@ export class PassDetailsComponent {
 
   getDisplayStatus(booking: any): string {
     if (booking.status === 'cancelled') return 'Cancelled';
-    const checkOutTime = booking.reservationContext?.checkOutTime;
-    if (booking.checkedInTime && checkOutTime && checkOutTime > Date.now()) return 'Active';
-    if (checkOutTime && checkOutTime < Date.now()) return 'Expired';
 
-    return 'Reserved';
+    const now = Date.now();
+    const checkInTime = booking.reservationContext?.checkInTime 
+      ? new Date(booking.reservationContext.checkInTime).getTime() 
+      : null;
+    const checkOutTime = booking.reservationContext?.checkOutTime 
+      ? new Date(booking.reservationContext.checkOutTime).getTime() 
+      : null;
+
+    if (checkInTime && now < checkInTime) {
+      return 'Reserved';
+    }
+
+    if (checkOutTime && now > checkOutTime) {
+      return 'Expired';
+    }
+
+    return 'Active';
   }
 
-  // Get the CSS class configuration for the status
+  // Color mappings via standard Bootstrap classes.
+  // Update the class strings below if you need customized colors!
   private readonly statusStyles = {
-    'Active': { bg: 'bg-active', border: 'border-active' },
-    'Expired': { bg: 'bg-expired', border: 'border-expired' },
-    'Cancelled': { bg: 'bg-cancelled', border: 'border-cancelled' },
-    'Reserved': { bg: 'bg-reserved', border: 'border-reserved' }
+    'Active': { bg: 'bg-success text-white', border: 'border-success' },
+    'Expired': { bg: 'bg-secondary text-white', border: 'border-secondary' },
+    'Cancelled': { bg: 'bg-danger text-white', border: 'border-danger' },
+    'Reserved': { bg: 'bg-warning text-dark', border: 'border-warning' }
   };
 
   getStatusClasses(booking: any) {
@@ -87,13 +115,17 @@ export class PassDetailsComponent {
     const status = booking.status;
     const queryTime = Date.now();
     const checkedInTime = booking?.checkedInTime;
-    const checkOutTime = booking.reservationContext.checkOutTime;
-
+    const checkOutTime = booking.reservationContext?.checkOutTime 
+      ? new Date(booking.reservationContext.checkOutTime).getTime() 
+      : null;
+    
     // Any other status but confirmed means no check-in option
     if (status !== 'confirmed') return false;
+    
+    const today = new Date().toLocaleDateString('en-CA').split('T')[0];
+    const sameDay = booking.startDate == today;
 
-    // Not checked in yet and not past window (allow early check-in, though)
-    return !checkedInTime && checkOutTime > queryTime;
+    return !checkedInTime && checkOutTime && checkOutTime > queryTime && sameDay;
   }
 
   isCheckedIn(booking: any): boolean {
@@ -107,26 +139,38 @@ export class PassDetailsComponent {
     if (p) {
       return (p.adult || 0) + (p.senior || 0) + (p.youth || 0) + (p.child || 0);
     }
+    if (booking.quantity) return booking.quantity;
     return booking['numberOfGuests'] || 0;
   }
 
   // Get a human-readable label for the activity type (known activity types)
   getActivityTypeLabel(activityType: string): string {
     const labels = {
-      dayuse: 'Day-use pass',
-      camping: 'Camping',
-      backcountry: 'Backcountry',
-      trail: 'Trail'
+      noType: "No type",
+      backcountrycamp: "Backcountry camping",
+      dayuse: "Day-use pass"
     };
     return labels[activityType?.toLowerCase()] || activityType;
+  }
+  
+  // Get a human-readable label for the activity type (known activity sub types)
+  getActivitySubTypeLabel(activitySubType: string): string {
+    const labels = {
+      campsite: "Campsite",
+      walkin: "Walk-in",
+      reservation: "Reservation",
+      passport: "Passport",
+      vehicleparking: "Vehicle parking",
+      trailuse: "Trail",
+    };
+    return labels[activitySubType?.toLowerCase()] || activitySubType;
   }
 
   // Get the location string for a booking, combining facility and entry point if available
   getLocation(booking: any): string {
-    const facilityName = booking?.facilityDisplayName ? booking?.facilityDisplayName : ''
-    const geozoneName = booking?.geozoneDisplayName ? booking?.geozoneDisplayName : ''
-
-    return `${geozoneName}${facilityName ? ', ' + facilityName : ''}`
+    const facilityName = booking?.facilityDisplayName ? booking?.facilityDisplayName : '';
+    const geozoneName = booking?.geozoneDisplayName ? booking?.geozoneDisplayName : '';
+    return `${geozoneName}${facilityName ? ', ' + facilityName : ''}`;
   }
 
   // Format the booked date to be readable in the format of "2024-01-01"
@@ -154,6 +198,11 @@ export class PassDetailsComponent {
     }
   }
 
+  getProductDisplayName(displayName): string {
+    const parts = displayName.split(',');
+    return parts[0]?.trim() || 'N/A';
+  }
+
   private handleError(message: string, error: any) {
     this.loggerService.error(error);
     this.toastService.addMessage(
@@ -162,5 +211,4 @@ export class PassDetailsComponent {
       ToastTypes.ERROR
     );
   }
-
 }

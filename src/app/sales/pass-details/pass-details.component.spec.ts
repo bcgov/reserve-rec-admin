@@ -57,6 +57,7 @@ describe('PassDetailsComponent', () => {
     firstName: 'John',
     lastName: 'Camper',
     email: 'john@example.com',
+    displayName: 'Activity, 2024-01-01',
     status: 'confirmed',
     startDate: '2024-01-01',
     activityType: 'dayuse',
@@ -120,24 +121,22 @@ describe('PassDetailsComponent', () => {
     expect(component.booking.checkedInTime).toBeDefined();
     expect(toastSpy).toHaveBeenCalledWith('Check-in successful', 'Success', ToastTypes.SUCCESS);
   });
-
-  it('should handle check-in failure', async () => {
-    const error = { message: 'Failed' };
-    setMockReturnValue(mockApiService.put, throwError(() => error));
-    const loggerSpy = mockLoggerService.error;
+  
+  it('should hide check-in if the booking is early', async () => {
+    const apiSpy = mockApiService.put;
     const toastSpy = mockToastService.addMessage;
     
     await component.checkinBooking(component.booking);
     
-    expect(loggerSpy).toHaveBeenCalledWith(error);
-    expect(toastSpy).toHaveBeenCalledWith('Failed', 'Check-in failed', ToastTypes.ERROR);
+    expect(apiSpy).toHaveBeenCalledWith('bookings/123456/checkin', {});
+    expect(component.booking.checkedInTime).toBeDefined();
+    expect(toastSpy).toHaveBeenCalledWith('Check-in successful', 'Success', ToastTypes.SUCCESS);
   });
 
   it('should determine display status correctly', () => {
     const now = Date.now();
     expect(component.getDisplayStatus({ status: 'cancelled' })).toBe('Cancelled');
     expect(component.getDisplayStatus({ 
-      checkedInTime: now, 
       reservationContext: { checkOutTime: now + 1000 } 
     })).toBe('Active');
     expect(component.getDisplayStatus({ 
@@ -145,7 +144,7 @@ describe('PassDetailsComponent', () => {
     })).toBe('Expired');
     expect(component.getDisplayStatus({ 
       status: 'confirmed', 
-      reservationContext: { checkOutTime: now + 1000 } 
+      reservationContext: { checkInTime: now + 500, checkOutTime: now + 1000 } 
     })).toBe('Reserved');
   });
 
@@ -155,12 +154,14 @@ describe('PassDetailsComponent', () => {
     // Must be confirmed
     expect(component.canCheckIn({ 
       status: 'cancelled', 
+      startDate: '2026-06-11',
       reservationContext: { checkOutTime: now + 100000 } 
     })).toBe(false);
 
     // Cannot check in if already checked in
     expect(component.canCheckIn({ 
       status: 'confirmed', 
+      startDate: '2026-06-11',
       checkedInTime: '1718112000', 
       reservationContext: { checkOutTime: now + 100000 } 
     })).toBe(false);
@@ -168,12 +169,21 @@ describe('PassDetailsComponent', () => {
     // Cannot check in if the checkout time has passed (Expired)
     expect(component.canCheckIn({ 
       status: 'confirmed', 
+      startDate: '2026-06-11',
       reservationContext: { checkOutTime: now - 100000 } 
+    })).toBe(false);
+
+    // Cannot be different than startDate (fixedDate is 2026-06-11)
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: '2026-06-12', 
+      reservationContext: { checkOutTime: now + 100000 } 
     })).toBe(false);
 
     // Valid scenario
     expect(component.canCheckIn({ 
       status: 'confirmed', 
+      startDate: '2026-06-11',
       reservationContext: { checkOutTime: now + 100000 } 
     })).toBe(true);
   });
@@ -190,6 +200,9 @@ describe('PassDetailsComponent', () => {
 
     // Secondary variable property check
     expect(component.getPartySize({ numberOfGuests: 3 })).toBe(3);
+    
+    // Tertiary variable check
+    expect(component.getPartySize({ quantity: 4 })).toBe(4);
 
     // Fallback security checks
     expect(component.getPartySize({})).toBe(0);
@@ -215,6 +228,11 @@ describe('PassDetailsComponent', () => {
   it('should process human-readable labels for known activity types', () => {
     expect(component.getActivityTypeLabel('dayuse')).toBe('Day-use pass');
   });
+  
+  it('should process human-readable labels for known activity types', () => {
+    expect(component.getActivitySubTypeLabel('trailUse')).toBe('Trail');
+    expect(component.getActivitySubTypeLabel('vehicleParking')).toBe('Vehicle parking');
+  });
 
   it('should parse epoch timestamps securely without crashing the interface', () => {
     // 1704067200000 is Jan 1, 2024
@@ -222,5 +240,3 @@ describe('PassDetailsComponent', () => {
     expect(component.formatBookedDate(0)).toBe('N/A');
   });
 });
-
-

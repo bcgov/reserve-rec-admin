@@ -135,7 +135,7 @@ describe('PassSearchComponent', () => {
     expect(component.filtersApplied).toBe(true);
   });
 
-  it('should manipulate dates correctly when searching for active statuses', async () => {
+  it('should forward search parameters clean to the backend when active is checked', async () => {
     const apiSpy = mockApiService.post;
     
     component.keyword = 'smith';
@@ -143,14 +143,11 @@ describe('PassSearchComponent', () => {
     
     await component.search(true);
 
-    // We expect the API payload to contain today as startDate and tomorrow as endDate
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
-
+    // Verify that frontend does not mutate or inject date overrides, 
+    // leaving dynamic checkin status range logic safely with the backend.
     expect(apiSpy).toHaveBeenCalledWith('bookings/search', objectContaining({
       checkinStatus: 'active',
-      startDate: today,
-      endDate: tomorrow
+      startDate: undefined,
     }));
   });
 
@@ -187,5 +184,3 @@ describe('PassSearchComponent', () => {
     expect(component.currentPage).toBe(1);
   });
 });
-
-
