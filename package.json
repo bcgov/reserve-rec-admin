@@ -26,7 +26,11 @@
   "resolutions": {
     "esbuild": "0.28.1",
     "esbuild-wasm": "0.28.1",
-    "browserslist": "^4.28.6"
+    "browserslist": "^4.28.6",
+    "fast-xml-parser": "^5.10.1",
+    "shell-quote": "^1.8.4",
+    "websocket-driver": "^0.7.5",
+    "handlebars": "^4.7.9"
   },
   "dependencies": {
     "@angular/animations": "^21.2.18",
