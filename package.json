@@ -25,7 +25,8 @@
   "private": true,
   "resolutions": {
     "esbuild": "0.28.1",
-    "esbuild-wasm": "0.28.1"
+    "esbuild-wasm": "0.28.1",
+    "browserslist": "^4.28.6"
   },
   "dependencies": {
     "@angular/animations": "^21.2.18",
