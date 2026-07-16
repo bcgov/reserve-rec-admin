@@ -15,6 +15,7 @@
           {{ getDisplayStatus(booking) }}
         </span>
         <span class="badge rounded-pill badge-meta">{{ getActivityTypeLabel(booking.activityType) }}</span>
+        <span class="badge rounded-pill badge-meta">{{ getActivitySubTypeLabel(booking.activitySubType) }}</span>
         <span class="badge rounded-pill badge-meta" *ngIf="booking.entryPoint?.category">
           {{ booking.entryPoint.category }}
         </span>
@@ -27,20 +28,20 @@
         [disabled]="isLoading">
         Check-in
       </button>
-      <div *ngIf="isCheckedIn(booking)" class="chip-checked-in">
-        <i class="fa-solid fa-circle-check me-2"></i>Checked-in
+      <div *ngIf="isCheckedIn(booking)">
+        <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>Checked-in</button>
       </div>
     </div>
   </div>
 
   <div class="d-md-none my-4">
-    <div *ngIf="isCheckedIn(booking)" class="badge chip-checked-in justify-content-center fs-6">
-      <i class="fa-solid fa-circle-check me-2"></i>Checked-in
+    <div *ngIf="isCheckedIn(booking)" class="badge justify-content-center fs-6">
+      <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>Checked-in</button>
     </div>
   </div>
 
   <div class="mb-3">
-    <div class="fs-5 mb-2 text-black">{{ booking.displayName || booking.activityType }}</div>
+    <div class="fs-5 mb-2 text-black">{{ getProductDisplayName(booking.displayName) || booking.activityType }}</div>
     <div class="text-body small mb-2" *ngIf="getLocation(booking)">{{ getLocation(booking) }}</div>
     <div class="text-body small">Party size: {{ getPartySize(booking) }}</div>
   </div>

@@ -31,8 +31,10 @@
         </div>
         <div class="col-12 col-md-3">
           <span class="form-label small">Email</span>
-          <input type="email" class="form-control" placeholder="name@example.com" [(ngModel)]="filterCriteria.email"
-            [ngModelOptions]="{ updateOn: 'blur' }" (ngModelChange)="onFilterChange()">
+          <input type="email" class="form-control" placeholder="name@example.com" 
+            [(ngModel)]="filterCriteria.email"
+            (keyup.enter)="onFilterChange()"
+            (blur)="onFilterChange()">
         </div>
         <div class="col-12 col-md-3">
           <span class="form-label small">Check-in status</span>

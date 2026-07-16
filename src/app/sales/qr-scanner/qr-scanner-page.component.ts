@@ -94,7 +94,7 @@ export class QrScannerPageComponent implements OnInit {
     this.toastService.addMessage(
       error,
       'Scan Error',
-      ToastTypes.WARNING
+      ToastTypes.ERROR
     );
   }
 

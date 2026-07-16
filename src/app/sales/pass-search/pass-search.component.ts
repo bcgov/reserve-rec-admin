@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subject, Subscription } from 'rxjs';
 import { PassDetailsComponent } from '../pass-details/pass-details.component';
 export interface FilterCriteria {
   checkinStatus: string;
@@ -70,34 +70,12 @@ export class PassSearchComponent {
       return;
     }
 
+    // Pass the raw criteria directly to the backend
     const status = this.filterCriteria.checkinStatus;
-    let startDate = this.filterCriteria.startDate;
-    let endDate = this.filterCriteria.endDate;
-
-    // 'Reserved' would only be for today onwards, and we shouldn't have a checkInTime
-    // Server-side looks for "addExistsQueryRule('checkedInTime', false)"
-    if (status === 'reserved') {
-      const today = new Date().toISOString().split('T')[0];
-      startDate = today;
-    }
-
-    // 'Active' means we're looking just for today, and the checkInTime should exist
-    // Server-side looks for "addExistsQueryRule('checkedInTime', true)"
-    if (status === 'active') {
-      const today = new Date().toISOString().split('T')[0];
-      const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
-      startDate = today;
-      endDate = tomorrow;
-    }
-    
-    // Except 'cancelled', we're looking for all items from yesterday and beyond
-    if (status === 'expired') {
-      const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
-      endDate = yesterday;
-    }
+    const startDate = this.filterCriteria.startDate;
+    const endDate = this.filterCriteria.endDate;
 
     try {
-      // If this is a new search, reset pagination
       if (newSearch) {
         this.isLoading = true;
         this.currentPage = 0;
@@ -105,14 +83,12 @@ export class PassSearchComponent {
         this.currentPage = page;
       }
 
-      // Construct request body with explicit filters
       const searchTerms = {
         text: this.keyword.trim(),
         from: this.currentPage * this.pageSize,
         size: this.pageSize,
         sortField: 'startDate',
         sortOrder: 'desc',
-        // Pass structured filters separately from the fuzzy text search
         email: this.filterCriteria.email?.trim() || undefined,
         checkinStatus: status || undefined,
         startDate: startDate || undefined,

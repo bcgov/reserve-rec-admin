@@ -29,6 +29,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   isScanning = false;
   isCameraLoading = false;
   isScanSuccess = false;
+  isScanFailure = false;
   error: string | null = null;
   lastScannedUrl: string | null = null;
 
@@ -147,8 +148,13 @@ export class QrScannerComponent implements OnInit, OnDestroy {
       this.isScanSuccess = true;
       this.scanSuccess.emit(result);
     } else {
-      this.error = 'Invalid QR code format. Expected a booking verification URL.';
-      this.scanError.emit('Invalid QR code format');
+      this.isScanFailure = true;
+      this.scanError.emit('Unable to scan pass');
+
+      // Hide banner after a few seconds
+      setTimeout(() => {
+        this.isScanFailure = false;
+      }, 3000);
     }
   }
 
@@ -177,6 +183,8 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error parsing verification URL:', error);
       return null;
+    } finally {
+      this.resetScanner()
     }
   }
 
@@ -196,6 +204,8 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   resetScanner(): void {
+    this.isScanSuccess = false;
+    this.isScanFailure = false;
     this.error = null;
     this.lastScannedUrl = null;
     this.loadCameras();
