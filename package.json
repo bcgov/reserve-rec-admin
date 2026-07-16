@@ -23,19 +23,19 @@
     "sandbox:destroy": "cdk destroy -c @context=dev -c sandboxName=${SANDBOX_NAME} --all --force"
   },
   "private": true,
-    "resolutions": {
+  "resolutions": {
     "esbuild": "0.28.1",
     "esbuild-wasm": "0.28.1"
   },
   "dependencies": {
-    "@angular/animations": "^19.2.18",
-    "@angular/common": "^19.2.16",
-    "@angular/compiler": "^19.2.17",
-    "@angular/core": "^19.2.16",
-    "@angular/forms": "^19.2.18",
-    "@angular/platform-browser": "^19.2.18",
-    "@angular/platform-browser-dynamic": "^19.2.18",
-    "@angular/router": "^19.2.18",
+    "@angular/animations": "^20.3.26",
+    "@angular/common": "^20.3.26",
+    "@angular/compiler": "^20.3.26",
+    "@angular/core": "^20.3.26",
+    "@angular/forms": "^20.3.26",
+    "@angular/platform-browser": "^20.3.26",
+    "@angular/platform-browser-dynamic": "^20.3.26",
+    "@angular/router": "^20.3.26",
     "@aws-amplify/backend": "^1.2.2",
     "@aws-amplify/core": "^6.10.6",
     "@aws-amplify/ui": "^6.5.0",
@@ -69,9 +69,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.18",
-    "@angular/cli": "^19.2.4",
-    "@angular/compiler-cli": "^19.2.18",
+    "@angular-devkit/build-angular": "^20.3.32",
+    "@angular/cli": "^20.3.32",
+    "@angular/compiler-cli": "^20.3.26",
     "@aws-sdk/client-cloudformation": "^3.624.0",
     "@aws-sdk/client-s3": "^3.624.0",
     "@aws-sdk/types": "^3.609.0",
