@@ -45,7 +45,7 @@ export class PassDetailsComponent {
       const res = (await lastValueFrom(this.apiService.put(`bookings/${booking.bookingId}/checkout`, {})))['data'];
 
       booking.checkedInTime = "";
-      this.toastService.addMessage('Check-out successful', 'Success', ToastTypes.SUCCESS);
+      this.toastService.addMessage('Check-in reverted', 'Warning', ToastTypes.WARNING);
     } catch (error) {
       this.handleError('Check-out failed', error);
     } finally {
@@ -186,14 +186,16 @@ export class PassDetailsComponent {
   }
 
   // Format the check in time to be readable in the format of "3:00 PM, 2024-01-01"
-  formatCheckedInTime(checkedInTime: string | number): string | number {
+  formatCheckedInTime(checkedInTime: number): string | number {
     if (!checkedInTime) return '';
+    
+    checkedInTime = Number(checkedInTime)
     try {
       const d = new Date(checkedInTime);
       const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       const date = d.toISOString().split('T')[0];
       return `${time}, ${date}`;
-    } catch {
+    } catch (error) {
       return checkedInTime;
     }
   }
