@@ -150,41 +150,45 @@ describe('PassDetailsComponent', () => {
 
   it('should restrict check-in permissions based on booking status and window', () => {
     const now = Date.now();
+    // Check-in is only allowed on the booking's start date, so derive "today"
+    // (in the same format canCheckIn uses) rather than hard-coding a fixed date.
+    const today = new Date().toLocaleDateString('en-CA');
+    const notToday = '2000-01-01';
 
     // Must be confirmed
-    expect(component.canCheckIn({ 
-      status: 'cancelled', 
-      startDate: '2026-06-11',
-      reservationContext: { checkOutTime: now + 100000 } 
+    expect(component.canCheckIn({
+      status: 'cancelled',
+      startDate: today,
+      reservationContext: { checkOutTime: now + 100000 }
     })).toBe(false);
 
     // Cannot check in if already checked in
-    expect(component.canCheckIn({ 
-      status: 'confirmed', 
-      startDate: '2026-06-11',
-      checkedInTime: '1718112000', 
-      reservationContext: { checkOutTime: now + 100000 } 
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: today,
+      checkedInTime: '1718112000',
+      reservationContext: { checkOutTime: now + 100000 }
     })).toBe(false);
 
     // Cannot check in if the checkout time has passed (Expired)
-    expect(component.canCheckIn({ 
-      status: 'confirmed', 
-      startDate: '2026-06-11',
-      reservationContext: { checkOutTime: now - 100000 } 
-    })).toBe(false);
-
-    // Cannot be different than startDate (fixedDate is 2026-06-11)
     expect(component.canCheckIn({
       status: 'confirmed',
-      startDate: '2026-06-12', 
-      reservationContext: { checkOutTime: now + 100000 } 
+      startDate: today,
+      reservationContext: { checkOutTime: now - 100000 }
+    })).toBe(false);
+
+    // Cannot check in when the start date is not today
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: notToday,
+      reservationContext: { checkOutTime: now + 100000 }
     })).toBe(false);
 
     // Valid scenario
-    expect(component.canCheckIn({ 
-      status: 'confirmed', 
-      startDate: '2026-06-11',
-      reservationContext: { checkOutTime: now + 100000 } 
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: today,
+      reservationContext: { checkOutTime: now + 100000 }
     })).toBe(true);
   });
 
