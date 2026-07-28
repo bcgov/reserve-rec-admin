@@ -19,10 +19,10 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-    "types": ["jest", "node", "@types/jest"],
-    "lib": [
-      "ES2022",
-      "dom"
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
     ],
     // Overrides
     "noImplicitAny": false,
