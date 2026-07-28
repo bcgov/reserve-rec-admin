@@ -27,16 +27,29 @@
       <button *ngIf="canCheckIn(booking)" class="btn btn-outline-secondary px-4" (click)="checkinBooking(booking)"
         [disabled]="isLoading">
         Check-in
+        @if (isLoading) {
+          <i class="fa fa-spinner fa-spin ms-1"></i>
+        }
       </button>
       <div *ngIf="isCheckedIn(booking)">
-        <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>Checked-in</button>
+        <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>
+          Checked-in
+          @if (isLoading) {
+            <i class="fa fa-spinner fa-spin ms-1"></i>
+          }
+        </button>
       </div>
     </div>
   </div>
 
   <div class="d-md-none my-4">
     <div *ngIf="isCheckedIn(booking)" class="badge justify-content-center fs-6">
-      <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>Checked-in</button>
+      <button (click)="checkoutBooking(booking)" class="btn btn-outline-success rounded-5"><i class="fa-solid fa-circle-check me-2"></i>
+        Checked-in
+        @if (isLoading) {
+          <i class="fa fa-spinner fa-spin ms-1"></i>
+        }
+      </button>
     </div>
   </div>
 
@@ -61,6 +74,9 @@
     <button *ngIf="canCheckIn(booking)" class="btn btn-outline-secondary w-100 fw-semibold"
       (click)="checkinBooking(booking)" [disabled]="isLoading">
       Check-in
+      @if (isLoading) {
+        <i class="fa fa-spinner fa-spin ms-1"></i>
+      }
     </button>
   </div>
 
