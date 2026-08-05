@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { UserGuard } from './guards/user.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
+import { VerifyRedirectGuard } from './guards/verify-redirect.guard';
 import { GeozoneResolver } from './resolvers/geozone.resolver';
 import { CollectionResolver } from './resolvers/collection.resolver';
 import { FacilityResolver } from './resolvers/facility.resolver';
@@ -30,6 +31,12 @@ export const routes: Routes = [
   {
     path: 'unauthorized',
     loadComponent: () => import('./unauthorized/unauthorized.component').then(mod => mod.UnauthorizedComponent)
+  },
+  {
+    // Matches the URL encoded in a booking's QR code. Redirects into the
+    // Sales QR scanner instead of rendering directly (bcgov/reserve-rec-admin#335).
+    path: 'verify/:bookingId/:hash',
+    canActivate: [UserGuard, VerifyRedirectGuard],
   },
   {
     path: 'sales',

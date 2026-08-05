@@ -5,6 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import { ApiService } from '../../services/api.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
+import { PendingScanService } from '../../services/pending-scan.service';
 import { QrScannerComponent, QRScanResult } from '../../shared/components/qr-scanner/qr-scanner.component';
 import { PassDetailsComponent } from '../pass-details/pass-details.component';
 
@@ -29,13 +30,21 @@ export class QrScannerPageComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private toastService: ToastService,
-    private loggerService: LoggerService
+    private loggerService: LoggerService,
+    private pendingScanService: PendingScanService
   ) {}
 
   ngOnInit(): void {
     // Check if we are in a development/sandbox environment
     const env = (window as any).__env?.ENVIRONMENT;
     this.isSandboxMode = env === 'sandbox' || env === 'local' || env === 'dev';
+
+    // If we arrived here via a scanned QR code (/verify/:bookingId/:hash),
+    // verify it immediately instead of waiting for the in-app camera scanner.
+    const pending = this.pendingScanService.takePending();
+    if (pending) {
+      this.onQRScanSuccess({ bookingId: pending.bookingId, hash: pending.hash, url: 'external-scan' });
+    }
   }
 
   private handleError(message: string, error: any) {
