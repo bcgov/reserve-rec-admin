@@ -238,6 +238,22 @@ describe('PassDetailsComponent', () => {
     expect(component.getActivitySubTypeLabel('vehicleParking')).toBe('Vehicle parking');
   });
 
+  // A booking may have no activitySubType at all (it is optional on the schema),
+  // in which case the label is empty and the badge must not render as a blank
+  // pill next to the real ones (Ref #336).
+  it('should only render the sub type badge when the booking has a sub type', () => {
+    const badgeText = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('.badge-meta'))
+        .map((el: any) => el.textContent.trim());
+
+    expect(badgeText()).toEqual(['Day-use pass']);
+
+    component.booking = { ...mockBooking, activitySubType: 'vehicleParking' };
+    fixture.detectChanges();
+
+    expect(badgeText()).toEqual(['Day-use pass', 'Vehicle parking']);
+  });
+
   it('should parse epoch timestamps securely without crashing the interface', () => {
     // 1704067200000 is Jan 1, 2024
     expect(component.formatBookedDate(1704067200000)).toBe('2024-01-01');
