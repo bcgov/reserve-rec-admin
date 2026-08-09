@@ -20,7 +20,9 @@ export class CallbackComponent implements OnInit {
         console.log('Code received:', code);
         // Example: this.authService.saveCode(code);
         setTimeout(() => {
-          this.router.navigate(['/']);
+          const redirectUrl = sessionStorage.getItem('postLoginRedirectUrl');
+          sessionStorage.removeItem('postLoginRedirectUrl');
+          this.router.navigateByUrl(redirectUrl || '/');
         }, 1000); // delay for 1 second to ensure code is handled
       } else {
         // Handle the error case
