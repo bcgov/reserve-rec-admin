@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, SimpleChanges, ViewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, ContentChildren, effect, ElementRef, OnChanges, OnDestroy, OnInit, signal, Signal, SimpleChanges, ViewChild, ViewContainerRef, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
@@ -21,7 +21,14 @@ export class InventorySearchComponent implements OnInit, OnDestroy {
   @ViewChild('markerRenderZone', { read: ViewContainerRef }) vcr!: ViewContainerRef;
   @ViewChild('searchOverlay') searchOverlay!: ElementRef; // Adjust type as necessary
   public form;
-  public searchResults = [];
+  // Computed (not a plain field mutated inside an effect) so the template's
+  // @if/results panel sees every update through Angular's normal signal-read
+  // tracking instead of a plain field written from outside the zone, which
+  // could leave the panel stuck showing stale results indefinitely.
+  public searchResults: Signal<any[]> = computed(() => (this._resultsSignal()?.map((result) => {
+    const doc = result?._source ? result._source : result;
+    return { ...doc, resultType: 'search' };
+  }) || []));
   public suggestions = [];
   public showSuggestions = false;
   private suggestionTimeout: any = null;
@@ -101,31 +108,25 @@ export class InventorySearchComponent implements OnInit, OnDestroy {
     this._passiveResultsSignal = this.dataService.watchItem(Constants.dataIds.PASSIVE_SEARCH_RESULTS);
     effect(() => {
       // combine passive and normal search results
-      this.searchResults = this._resultsSignal()?.map((result) => {
-        if (result?._source) {
-          return result._source;
-        }
-        return result;
-      }) || [];
-      // Flag search results with resultType
-      // Unfortunately this duplicates the searched results - TODO, find a better
-      // way to differentiate search results from passive results
-      this.searchResults = this.searchResults.map((result) => {
-        result['resultType'] = 'search';
-        return result;
-      });
       const passiveResults = this._passiveResultsSignal()?.map((result) => {
         if (result?._source) {
           return result._source;
         }
         return result;
       }) || [];
-      this.mapResults = new Set([...passiveResults, ...this.searchResults]);
+      this.mapResults = new Set([...passiveResults, ...this.searchResults()]);
       this.updateMapMarkers();
+      // effect() callbacks run outside Angular's zone, so nothing guarantees
+      // a zone-triggered change detection pass runs afterwards. Without
+      // forcing one here, the @if-gated results panel can sit showing stale
+      // results indefinitely even though searchResults() already
+      // updated (#346).
+      this.cdr.detectChanges();
     });
     effect(() => {
-      if (this._resultsSignal() && this.searchResults?.length > 0) {
-        this.mapComponent?.flyToFitBounds(this.searchResults?.map(result => result?.location), null);
+      const searchResults = this.searchResults();
+      if (this._resultsSignal() && searchResults?.length > 0) {
+        this.mapComponent?.flyToFitBounds(searchResults?.map(result => result?.location), null);
       }
     });
   }
@@ -347,10 +348,33 @@ export class InventorySearchComponent implements OnInit, OnDestroy {
     if (!this.vcr) {
       return this.oldMapMarkerHTML(options, data);
     }
+    // The returned element gets handed to maplibre-gl, which reparents it
+    // into its own marker layer via native appendChild — bypassing Angular's
+    // renderer entirely. If we hand over the live component's own node,
+    // Angular permanently loses track of it: destroying the component later
+    // can't remove a node maplibre has since moved elsewhere. That leak was
+    // corrupting this component's view tree and made an unrelated sibling
+    // (the search results panel) get stuck rendering stale/duplicate content
+    // on every marker click (#346).
+    //
+    // Fix: render through the real component as before (so markers look
+    // identical), but hand maplibre a detached *clone* of its DOM instead of
+    // the live node, then destroy the component. maplibre is free to move
+    // the clone anywhere since Angular never owned it.
+    //
+    // destroy() alone isn't enough here: it correctly marks the component's
+    // view as destroyed (hostView.destroyed === true) but leaves the host
+    // element itself still attached to the document — verified directly,
+    // not assumed. So remove it ourselves too, rather than trust destroy()
+    // to have taken the node with it.
     const el2 = this.vcr.createComponent(MapMarkerComponent);
     el2.setInput('markerData', data);
     el2.setInput('markerOptions', options);
-    return await el2.instance.getTemplate();
+    const template = await el2.instance.getTemplate();
+    const clone = template.cloneNode(true) as HTMLElement;
+    el2.destroy();
+    el2.location.nativeElement.remove();
+    return clone;
   }
 
   async oldMapMarkerHTML(options, data = null) {
