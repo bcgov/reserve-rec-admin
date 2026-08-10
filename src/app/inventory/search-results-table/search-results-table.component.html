@@ -3,7 +3,7 @@
   class="h-100 d-flex flex-column"
 >
   <div
-    *ngFor="let result of results"
+    *ngFor="let result of results(); trackBy: trackByResult"
     class="row"
   >
     <app-search-result [data]="result"></app-search-result>

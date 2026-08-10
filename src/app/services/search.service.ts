@@ -41,7 +41,13 @@ export class SearchService {
       // waiting for the search to complete, the results are updated in the background and
       // shown when available.
       if (!passiveSearch) {
-        this.clearSearchResults();
+        // Don't clear results before the fetch resolves: a brief empty state
+        // followed by the real results (two writes with a real await gap in
+        // between) causes the *ngIf-driven results panel to render a second,
+        // orphaned copy alongside the live one instead of replacing it (#346).
+        // Leaving the previous results visible until the new ones land avoids
+        // that empty-state transition and matches the expected "replace"
+        // behaviour anyway.
         this.loadingService.addToFetchList(Constants.dataIds.SEARCH_RESULTS);
       }
       console.log('search');
