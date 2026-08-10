@@ -17,10 +17,18 @@ export class ProductDateService {
     private loadingService: LoadingService
   ) { }
 
-  async getProductDates(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string) {
+  async getProductDates(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string, bypassDiscoveryRules: boolean = true) {
     const queryParams: Record<string, string> = {};
-    if (startDate) queryParams['startDate'] = startDate;
-    if (endDate) queryParams['endDate'] = endDate;
+    
+    // If querying a single date, send 'date' parameter; otherwise send range
+    if (startDate && startDate === endDate) {
+      queryParams['date'] = startDate;
+    } else {
+      if (startDate) queryParams['startDate'] = startDate;
+      if (endDate) queryParams['endDate'] = endDate;
+    }
+    
+    if (bypassDiscoveryRules) queryParams['bypassDiscoveryRules'] = 'true';
 
     try {
       this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_DATE_LIST);

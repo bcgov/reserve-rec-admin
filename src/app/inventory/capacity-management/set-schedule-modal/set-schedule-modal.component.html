@@ -1,0 +1,185 @@
+<div class="modal-header">
+  <h4 class="modal-title">Set Schedule</h4>
+  <button type="button" class="btn-close" aria-label="Close modal" (click)="activeModal.dismiss()"></button>
+</div>
+
+<form [formGroup]="form">
+  <div class="modal-body">
+    <!-- Main container with border -->
+    <div class="border rounded p-4 bg-light">
+      
+      <!-- Product Name -->
+      <h5 class="mb-3">{{ productName }}</h5>
+      
+      <!-- Intro Description -->
+      <p class="small text-muted mb-4">
+        Configure which days of the week require a pass and set the default daily capacity.
+      </p>
+
+      <!-- Date Range Section -->
+      <div class="mb-4">
+        <h6 class="fw-bold mb-1">Date Range</h6>
+        <p class="small text-muted mb-3">Select the start and end date for the capacities.</p>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <ngds-date-input
+              [control]="form.get('startDate')"
+              label="Start Date"
+              placeholder="Select start date"
+              dateFormat="yyyy-LL-dd"
+              dateDisplayFormat="yyyy-LL-dd"
+            ></ngds-date-input>
+          </div>
+          <div class="col-md-6">
+            <ngds-date-input
+              [control]="form.get('endDate')"
+              label="End Date"
+              placeholder="Select end date"
+              dateFormat="yyyy-LL-dd"
+              dateDisplayFormat="yyyy-LL-dd"
+            ></ngds-date-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- Days Section -->
+      <div class="mb-4">
+        <h6 class="fw-bold mb-1">Days when passes required</h6>
+        <p class="small text-muted mb-3">Select the days when a pass is required and set the default capacity for each day.</p>
+        <div class="days-container d-grid gap-3" style="grid-template-columns: repeat(4, 1fr)">
+          <div *ngFor="let day of days" class="day-item border rounded p-3 bg-light">
+            <div class="day-name fw-bold text-dark mb-2">{{ day.day }}</div>
+            <label class="toggle-label d-flex align-items-center gap-2 mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                class="toggle-checkbox"
+                [checked]="day.passesRequired"
+                (change)="togglePassesRequired(day)"
+              />
+              <span class="toggle-switch"></span>
+              <span class="toggle-text text-muted small">Passes Required</span>
+            </label>
+            <div class="capacity-input-group pt-2 border-top" [class.opacity-50]="!day.passesRequired">
+              <label [for]="'capacity-' + day.index" class="form-label small fw-semibold mb-1">Default Capacity</label>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                [id]="'capacity-' + day.index"
+                [value]="day.defaultCapacity"
+                (input)="onCapacityInput($event, day)"
+                [disabled]="!day.passesRequired"
+                placeholder="Enter capacity"
+                min="0"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Days Section -->
+      <div class="alert alert-info mt-4 mb-0">
+        <strong>Active Days:</strong> {{ getActiveDaysCount() }} of {{ days.length }} days require a pass
+      </div>
+
+      <!-- Existing Capacity Warning Section -->
+      <div *ngIf="existingCapacityDates.length > 0" class="alert alert-warning mt-3 mb-0">
+        <strong>{{ existingCapacityDates.length }} date(s) already have capacity assigned</strong><br>
+        <p class="mb-3 mt-2">Would you like to overwrite the existing capacity with this schedule?</p>
+        
+        <div class="d-flex gap-4">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="overwriteCapacityYes"
+              [(ngModel)]="overwriteExistingCapacity"
+              [ngModelOptions]="{standalone: true}"
+              [value]="true"
+              name="overwriteCapacityOption"
+            />
+            <label class="form-check-label" for="overwriteCapacityYes">
+              Yes, overwrite existing capacity
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="overwriteCapacityNo"
+              [(ngModel)]="overwriteExistingCapacity"
+              [ngModelOptions]="{standalone: true}"
+              [value]="false"
+              name="overwriteCapacityOption"
+            />
+            <label class="form-check-label" for="overwriteCapacityNo">
+              No, keep existing capacity
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Overrides Conflict Warning Section -->
+      <div *ngIf="editedDates.length > 0" class="alert alert-danger mt-3 mb-0">
+        <strong>{{ editedDates.length }} date(s) found with manual overrides</strong><br>
+        <p class="mb-3 mt-2">Would you like to overwrite the manual edits and apply this schedule to those dates?</p>
+        
+        <div class="d-flex gap-4">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="overwriteYes"
+              [(ngModel)]="overwriteOverrides"
+              [ngModelOptions]="{standalone: true}"
+              [value]="true"
+              name="overwriteOption"
+            />
+            <label class="form-check-label" for="overwriteYes">
+              Yes, apply the schedule to all dates
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="overwriteNo"
+              [(ngModel)]="overwriteOverrides"
+              [ngModelOptions]="{standalone: true}"
+              [value]="false"
+              name="overwriteOption"
+            />
+            <label class="form-check-label" for="overwriteNo">
+              No, skip the manually edited dates
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex gap-3 align-items-center">
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="addAnotherSchedule"
+          [(ngModel)]="addAnotherSchedule"
+          [ngModelOptions]="{standalone: true}"
+        />
+        <label class="form-check-label" for="addAnotherSchedule">
+          Add another schedule
+        </label>
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSave()"
+        [disabled]="!isValidDateRange()"
+      >
+        Save Schedule
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="onCancel()" style="background-color: #FFFFFF00; border: 2px solid #003366; color: #003366;">Cancel</button>
+    </div>
+  </div>
+</form>

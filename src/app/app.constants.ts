@@ -15,6 +15,7 @@ export class Constants {
     PRODUCT_RESULT: 'productResult',
     PRODUCT_LIST: 'productList',
     PRODUCT_DATE_LIST: 'productDateList',
+    INVENTORY_POOL_LIST: 'inventoryPoolList',
 
     // Relationships
     GEOZONE_RELATIONSHIP_RESULT: 'geozoneRelationshipResult',

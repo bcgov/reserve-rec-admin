@@ -1,0 +1,34 @@
+
+.toggle-checkbox {
+  display: none;
+}
+
+.toggle-switch {
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  background-color: #6c757d;
+  border-radius: 10px;
+  position: relative;
+  transition: background-color 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+  }
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+  background-color: #053662;
+
+  &::before {
+    transform: translateX(16px);
+  }
+}
