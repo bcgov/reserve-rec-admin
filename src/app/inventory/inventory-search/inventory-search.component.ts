@@ -372,6 +372,25 @@ export class InventorySearchComponent implements OnInit, OnDestroy {
     el2.setInput('markerOptions', options);
     const template = await el2.instance.getTemplate();
     const clone = template.cloneNode(true) as HTMLElement;
+    // destroy() removes the component's encapsulated .circle-marker
+    // stylesheet once it's the last live instance of this component type —
+    // the clone's classes then point at nothing, so the marker image
+    // rendered full-size/unclipped across the map instead of as a small
+    // circle. Bake the sizing inline on the clone so it doesn't depend on
+    // that stylesheet still being in the document.
+    const circle = clone.querySelector<HTMLElement>('.circle-marker');
+    if (circle) {
+      const size = data?.resultType === 'search' ? '50px' : '30px';
+      circle.style.width = size;
+      circle.style.height = size;
+      circle.style.borderRadius = '50%';
+      circle.style.borderWidth = '2px';
+      circle.style.borderStyle = 'solid';
+      circle.style.overflow = 'hidden';
+      circle.style.display = 'flex';
+      circle.style.alignItems = 'center';
+      circle.style.justifyContent = 'center';
+    }
     el2.destroy();
     el2.location.nativeElement.remove();
     return clone;
