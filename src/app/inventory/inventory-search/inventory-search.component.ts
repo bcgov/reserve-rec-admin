@@ -380,9 +380,13 @@ export class InventorySearchComponent implements OnInit, OnDestroy {
     // that stylesheet still being in the document.
     const circle = clone.querySelector<HTMLElement>('.circle-marker');
     if (circle) {
-      const size = data?.resultType === 'search' ? '50px' : '30px';
-      circle.style.width = size;
-      circle.style.height = size;
+      // 30px base size, matching the .circle-marker SCSS. The "bigger for
+      // search results" look comes entirely from the ngStyle scale(1.5)
+      // transform the component already applied inline (and which survives
+      // the clone) — setting a bigger base size here too would compound
+      // with that transform and make search markers oversized.
+      circle.style.width = '30px';
+      circle.style.height = '30px';
       circle.style.borderRadius = '50%';
       circle.style.borderWidth = '2px';
       circle.style.borderStyle = 'solid';
