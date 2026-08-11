@@ -15,7 +15,8 @@
           {{ getDisplayStatus(booking) }}
         </span>
         <span class="badge rounded-pill badge-meta">{{ getActivityTypeLabel(booking.activityType) }}</span>
-        <span class="badge rounded-pill badge-meta">{{ getActivitySubTypeLabel(booking.activitySubType) }}</span>
+        <span class="badge rounded-pill badge-meta" *ngIf="booking.activitySubType">{{
+          getActivitySubTypeLabel(booking.activitySubType) }}</span>
         <span class="badge rounded-pill badge-meta" *ngIf="booking.entryPoint?.category">
           {{ booking.entryPoint.category }}
         </span>

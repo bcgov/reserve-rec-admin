@@ -159,11 +159,11 @@
               </div> -->
             </div>
           </div>
-          <div *ngIf="searchResults?.length">
+          <div *ngIf="searchResults()?.length">
             <h6 class="text-center mt-2">Search Results</h6>
           </div>
           <div
-            *ngIf="searchResults?.length"
+            *ngIf="searchResults()?.length"
             class="flex-grow-1 results-table border rounded-3 p-2"
           >
             <app-search-results-table (loadMore)="loadMore($event)"></app-search-results-table>
