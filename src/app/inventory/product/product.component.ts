@@ -5,6 +5,7 @@ import { Constants } from '../../app.constants';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { ProductService } from '../../services/product.service';
+import { ActivityService } from '../../services/activity.service';
 import { PermissionDirective } from '../../shared/directives/permission.directive';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
 
@@ -17,6 +18,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/bre
 })
 export class ProductComponent {
   public data;
+  private activitySubType: string;
 
   get breadcrumbs(): BreadcrumbItem[] {
     const items: BreadcrumbItem[] = [
@@ -37,13 +39,25 @@ export class ProductComponent {
     protected router: Router,
     protected cdr: ChangeDetectorRef,
     private productService: ProductService,
+    private activityService: ActivityService,
     private modalService: BsModalService,
   ) {
     this.route.data.subscribe((data) => {
       if (data?.['product']) {
         this.data = data?.['product'];
+        this.loadActivitySubType();
       }
     });
+  }
+
+  // The product's own activitySubType is a stale copy set at creation time; the
+  // Activity is the source of truth (its subtype is edited on the Activity screen).
+  private async loadActivitySubType() {
+    const { collectionId, activityType, activityId } = this.data || {};
+    if (!collectionId || !activityType || !activityId) return;
+    const activity = await this.activityService.getActivity(collectionId, activityType, activityId);
+    this.activitySubType = activity?.activitySubType;
+    this.cdr.detectChanges();
   }
 
   get isEditing(): boolean {
@@ -55,7 +69,7 @@ export class ProductComponent {
   }
 
   getActivitySubTypeOption() {
-    return Constants.activityTypes[this.data?.activityType]?.subTypes?.[this.data?.activitySubType] || { display: 'None', value: '', iconClass: 'fa-solid fa-question' };
+    return Constants.activityTypes[this.data?.activityType]?.subTypes?.[this.activitySubType] || { display: 'None', value: '', iconClass: 'fa-solid fa-question' };
   }
 
   navToEdit() {
