@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
-import { LoggerService } from '../../services/logger.service';
 
 @Component({
   selector: 'app-customer-detail',
@@ -17,20 +16,12 @@ export class CustomerDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private customerService: CustomerService,
-    private logger: LoggerService
+    private customerService: CustomerService
   ) {}
 
   async ngOnInit() {
     this.customerId = this.route.snapshot.paramMap.get('id');
-    
-    // Get customer data from navigation state
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state || (window.history.state as any);
-    
-    if (state?.customer) {
-      this.customer = state.customer;
-    }
+    this.customer = this.customerService.selectedCustomer;
   }
 
   backToCustomerList() {
