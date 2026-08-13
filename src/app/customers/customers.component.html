@@ -1,4 +1,4 @@
-<div class="container-fluid p-4">
+<div class="container-fluid p-4" *ngIf="!showingDetail">
   <!-- Header Section -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Customers</h2>
@@ -88,6 +88,8 @@
     </button>
   </div>
 </div>
+
+<router-outlet (activate)="showingDetail = true" (deactivate)="showingDetail = false"></router-outlet>
 
 <!-- Filter Modal -->
 <div class="modal" [class.show]="showFilterModal" [style.display]="showFilterModal ? 'block' : 'none'" tabindex="-1">

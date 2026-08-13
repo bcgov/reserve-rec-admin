@@ -14,6 +14,11 @@ interface ApiResponse {
   providedIn: 'root',
 })
 export class CustomerService {
+  // Set by the customers list right before navigating to a detail route, since
+  // router navigation `state` isn't reliably readable in a lazy-loaded
+  // (loadComponent) child's ngOnInit by the time its chunk resolves.
+  selectedCustomer: any = null;
+
   constructor(
     private apiService: ApiService,
     private logger: LoggerService

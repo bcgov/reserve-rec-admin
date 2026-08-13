@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CustomerService } from '../services/customer.service';
 import { LoggerService } from '../services/logger.service';
 import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-customers',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterOutlet],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
@@ -22,6 +22,7 @@ export class CustomersComponent implements OnInit {
   sortField: string = 'email';
   sortOrder: 'asc' | 'desc' = 'asc';
   showFilterModal = false;
+  showingDetail = false;
 
   // Column visibility configuration
   availableColumns = [
@@ -138,9 +139,8 @@ export class CustomersComponent implements OnInit {
 
   viewCustomer(customer: any) {
     if (customer.sub) {
-      this.router.navigate(['/customers', customer.sub], {
-        state: { customer: customer }
-      });
+      this.customerService.selectedCustomer = customer;
+      this.router.navigate(['/customers', customer.sub]);
     } else {
       this.logger.error('Customer ID (sub) not found');
     }
