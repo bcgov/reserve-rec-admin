@@ -1,0 +1,61 @@
+<section class="mx-5 py-5 h-100">
+  <div class="col h-100 d-flex flex-column">
+    <!-- Breadcrumbs -->
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+
+    <!-- Title -->
+    <h3 class="mb-4">Pass Capacity</h3>
+
+    <!-- Filters -->
+    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()"></app-capacity-filters>
+
+    <!-- Calendar Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex gap-2 align-items-center" style="flex: 0 0 25%;">
+        <button class="btn btn-sm btn-outline-primary" (click)="previousMonth()">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <h5 class="mb-0">{{ currentMonth | date: 'MMMM yyyy' }}</h5>
+        <button class="btn btn-sm btn-outline-primary" (click)="nextMonth()">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+      </div>
+      <button class="btn btn-sm btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value">
+        Set Schedule
+      </button>
+    </div>
+
+    <!-- Product Date Range Info -->
+    <div *ngIf="productControl.value && currentProductRangeStart && currentProductRangeEnd" class="alert alert-info mb-3">
+      <strong>{{ currentProductName }}</strong> is active from 
+      <span class="fw-semibold">{{ currentProductRangeStart | date: 'MMM d, yyyy' }} to {{ currentProductRangeEnd | date: 'MMM d, yyyy' }}</span>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white">
+      <!-- Day headers -->
+      <div class="calendar-header d-grid gap-1 bg-light border-bottom" style="grid-template-columns: repeat(7, 1fr)">
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Sun</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Mon</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Tue</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Wed</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Thu</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Fri</div>
+        <div class="calendar-day-header p-3 fw-bold text-center text-muted">Sat</div>
+      </div>
+
+      <!-- Calendar component - destroyed and recreated on month navigation via calendarKey -->
+      <app-calendar
+        *ngIf="calendarKey && productControl.value"
+        [calendarDays]="calendarDays"
+        [inventoryPoolsByDate]="inventoryPoolsByDate"
+        [currentMonth]="currentMonth"
+        [productRangeStart]="currentProductRangeStart"
+        [productRangeEnd]="currentProductRangeEnd"
+        (toggleReservation)="toggleReservationStatus($event)"
+        (editCapacity)="onEditCapacity($event)"
+      ></app-calendar>
+    </div>
+  </div>
+</section>
+

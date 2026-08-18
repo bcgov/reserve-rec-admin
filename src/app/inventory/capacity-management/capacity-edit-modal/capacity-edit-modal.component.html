@@ -1,0 +1,67 @@
+<div class="modal-header">
+  <h4 class="modal-title">Edit Capacity - {{ formattedDate }}</h4>
+  <button type="button" class="btn-close" aria-label="Close modal" (click)="activeModal.dismiss()"></button>
+</div>
+
+<form [formGroup]="form">
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="capacity" class="form-label">New Capacity</label>
+      <input
+        type="text"
+        class="form-control"
+        id="capacity"
+        formControlName="capacity"
+        (input)="onNumericInput($event, 'capacity')"
+        placeholder="Enter new capacity"
+      />
+      <div class="invalid-feedback d-block text-danger small mt-1" *ngIf="form.get('capacity')?.invalid && form.get('capacity')?.touched">
+        Capacity must be a non-negative number
+      </div>
+      <small class="text-muted d-block mt-2">
+        <strong>Current Capacity:</strong> {{ originalPoolData.capacity }}<br>
+        <strong>Current Available:</strong> {{ originalPoolData.available }}
+      </small>
+    </div>
+
+    <div class="alert alert-info mt-3">
+      <strong>Availability will be automatically adjusted:</strong><br>
+      <span *ngIf="capacityDelta !== 0">
+        New Availability: {{ calculatedAvailability }} 
+        <span *ngIf="capacityDelta > 0">(+{{ capacityDelta }} passes created)</span>
+        <span *ngIf="capacityDelta < 0">({{ capacityDelta }} passes removed)</span>
+      </span>
+      <span *ngIf="capacityDelta === 0">
+        Availability will remain: {{ originalPoolData.available }}
+      </span>
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="notes" class="form-label">Notes <span class="text-muted small">(optional)</span></label>
+      <textarea
+        class="form-control"
+        id="notes"
+        formControlName="notes"
+        placeholder="Document the reason for this manual edit..."
+        rows="3"
+      ></textarea>
+      <small class="text-muted d-block mt-1">
+        These notes will be saved with this date's capacity record for future reference.
+      </small>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="save()"
+      [disabled]="form.invalid || !form.dirty"
+    >
+      Save Changes
+    </button>
+  </div>
+</form>

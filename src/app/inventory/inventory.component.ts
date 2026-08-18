@@ -23,5 +23,7 @@ export class InventoryComponent {
   createNewInventory() {
     this.router.navigate(['/inventory/create']);
   }
-
+  manageCapacity() {
+    this.router.navigate(['/inventory/capacity']);
+  }
 }
