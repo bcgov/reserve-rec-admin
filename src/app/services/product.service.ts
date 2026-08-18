@@ -308,11 +308,6 @@ export class ProductService {
     }
   }
 
-  /**
-   * Lightweight range extension for manual date edits
-   * Just updates rangeEnd without creating ProductDates for entire range
-   * ProductDates will be created on-demand via ensureInventoryPoolExists
-   */
   async updateProductRangeEnd(
     collectionId: string,
     activityType: string,

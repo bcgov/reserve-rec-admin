@@ -115,6 +115,12 @@ export class CapacityManagementComponent implements OnInit {
     this.updateCalendarKey();
   }
 
+  onFacilityChange() {
+    this.inventoryPoolsByDate.clear();
+    this.calendarDays = [];
+    this.updateCalendarKey();
+  }
+
   private async loadInventoryPoolData() {
     try {
       const collectionId = this.collectionControl.value;
@@ -122,6 +128,15 @@ export class CapacityManagementComponent implements OnInit {
       if (!collectionId || !productKey) {
         return;
       }
+      
+      // Preserve manuallyEdited flags before reload
+      const preservedManuallyEdited = new Map<string, boolean>();
+      this.inventoryPoolsByDate.forEach((pools, dateKey) => {
+        if (pools[0]?.['manuallyEdited'] === true) {
+          preservedManuallyEdited.set(dateKey, true);
+        }
+      });
+      
       const productId = this.extractProductId(productKey);
       const year = this.currentMonth.getFullYear();
       const month = this.currentMonth.getMonth();
@@ -146,14 +161,19 @@ export class CapacityManagementComponent implements OnInit {
           if (!this.inventoryPoolsByDate.has(dateKey)) {
             this.inventoryPoolsByDate.set(dateKey, []);
           }
-          this.inventoryPoolsByDate.get(dateKey)!.push({
+          const poolData = {
             date: dateKey,
             capacity: capacity,
             availability: availability,
             available: availability,
             isOpen: capacity === 0 && availability === 0 ? false : (pool.isOpen !== false),
             ...pool
-          });
+          };
+          // Restore manuallyEdited flag if it was set before reload
+          if (preservedManuallyEdited.has(dateKey)) {
+            poolData['manuallyEdited'] = true;
+          }
+          this.inventoryPoolsByDate.get(dateKey)!.push(poolData);
         });
       }
     } catch (error) {
@@ -406,7 +426,10 @@ export class CapacityManagementComponent implements OnInit {
 
       // Step 4: Update capacity
       try {
-        await this.inventoryPoolService.updateInventoryPool(
+        const existingPool = pools[0];
+        const oldCapacity = existingPool?.capacity || 0;
+        
+        const response = await this.inventoryPoolService.updateInventoryPool(
           collectionId,
           this.currentActivityType,
           this.currentActivityId,
@@ -414,17 +437,19 @@ export class CapacityManagementComponent implements OnInit {
           dateKey,
           capacity,
           isManualEdit ? 'manual' : 'bulk',
-          notes
+          notes,
+          isManualEdit ? oldCapacity : undefined 
         );
 
-        const existingPool = pools[0];
         if (existingPool) {
-          const oldCapacity = existingPool.capacity || 0;
           const capacityDelta = capacity - oldCapacity;
           const newAvailability = (existingPool.available || 0) + capacityDelta;
           existingPool.capacity = capacity;
           existingPool.available = Math.max(0, Math.min(newAvailability, capacity));
-          existingPool['manuallyEdited'] = isManualEdit;
+          // Only mark as manually edited for manual edits (via modal), not for bulk operations
+          if (isManualEdit) {
+            existingPool['manuallyEdited'] = true;
+          }
           if (notes) {
             existingPool['notes'] = notes;
           }
@@ -581,15 +606,19 @@ export class CapacityManagementComponent implements OnInit {
       }
 
       let newCapacity = pool.capacity;
+      let preCloseCapacityValue: number | null = null;
 
       if (finalNewState === false) {
+        // Closing: set capacity to booked amount, persist original for reopening
         const bookedPasses = (pool.capacity || 0) - (pool.available || 0);
         newCapacity = bookedPasses;
-        (pool as any).originalCapacity = pool.capacity;
+        preCloseCapacityValue = pool.capacity; 
       } else if (finalNewState === true) {
-        if ((pool as any).originalCapacity !== undefined) {
-          newCapacity = (pool as any).originalCapacity;
+        // Reopening: restore from server-persisted preCloseCapacity
+        if (pool['preCloseCapacity'] !== undefined) {
+          newCapacity = pool['preCloseCapacity'];
         }
+        preCloseCapacityValue = null; 
       }
       if (newCapacity !== pool.capacity) {
         try {
@@ -599,13 +628,21 @@ export class CapacityManagementComponent implements OnInit {
             this.currentActivityId,
             productId,
             dateKey,
-            newCapacity
+            newCapacity,
+            'bulk',
+            undefined,
+            preCloseCapacityValue // Send appropriate preCloseCapacity (save on close, clear on open)
           );
           const oldCapacity = pool.capacity || 0;
           const capacityDelta = newCapacity - oldCapacity;
           const newAvailability = (pool.available || 0) + capacityDelta;
           pool.capacity = newCapacity;
           pool.available = Math.max(0, Math.min(newAvailability, newCapacity));
+          // Persist preCloseCapacity from response so it survives page reloads
+          // NOTE: Do NOT update manuallyEdited here - only set it via direct modal edits
+          if (response['preCloseCapacity'] !== undefined) {
+            pool['preCloseCapacity'] = response['preCloseCapacity'];
+          }
         } catch (updateError: any) {
           const errorMsg = updateError?.error?.msg || updateError?.message || 'Unknown error';
           this.toastService.addMessage(
@@ -616,6 +653,7 @@ export class CapacityManagementComponent implements OnInit {
         }
       }
       pool.isOpen = finalNewState;
+      await this.loadInventoryPoolData();
     } catch (error) {
       this.toastService.addMessage(
         `Failed to toggle reservation status. Please try again.`,

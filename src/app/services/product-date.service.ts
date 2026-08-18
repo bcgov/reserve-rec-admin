@@ -17,16 +17,11 @@ export class ProductDateService {
     private loadingService: LoadingService
   ) { }
 
-  async getProductDates(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string, bypassDiscoveryRules: boolean = true) {
+  async getProductDates(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string, bypassDiscoveryRules: boolean = false) {
     const queryParams: Record<string, string> = {};
     
-    // If querying a single date, send 'date' parameter; otherwise send range
-    if (startDate && startDate === endDate) {
-      queryParams['date'] = startDate;
-    } else {
-      if (startDate) queryParams['startDate'] = startDate;
-      if (endDate) queryParams['endDate'] = endDate;
-    }
+    if (startDate) queryParams['startDate'] = startDate;
+    if (endDate) queryParams['endDate'] = endDate;
     
     if (bypassDiscoveryRules) queryParams['bypassDiscoveryRules'] = 'true';
 

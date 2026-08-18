@@ -7,7 +7,7 @@
     <h3 class="mb-4">Pass Capacity</h3>
 
     <!-- Filters -->
-    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()"></app-capacity-filters>
+    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()"></app-capacity-filters>
 
     <!-- Calendar Navigation -->
     <div class="d-flex justify-content-between align-items-center mb-3">

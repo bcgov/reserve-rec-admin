@@ -44,6 +44,7 @@ export class CapacityFiltersComponent implements OnInit {
   // Output events
   @Output() productSelected = new EventEmitter<ProductSelectionEvent>();
   @Output() collectionChanged = new EventEmitter<void>();
+  @Output() facilityChanged = new EventEmitter<void>();
 
   constructor(
     protected facilityService: FacilityService,
@@ -57,8 +58,8 @@ export class CapacityFiltersComponent implements OnInit {
   private initializeForm() {
     this.filterForm = this.fb.group({
       collection: [''],
-      facility: [''],
-      product: ['']
+      facility: [{ value: '', disabled: true }],
+      product: [{ value: '', disabled: true }]
     });
   }
 
@@ -80,19 +81,19 @@ export class CapacityFiltersComponent implements OnInit {
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(() => this.onCollectionChange());
+      .subscribe((value) => {this.onCollectionChange();});
     this.facilityControl.valueChanges
       .pipe(
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(() => this.onFacilityChange());
+      .subscribe((value) => {this.onFacilityChange();});
     this.productControl.valueChanges
       .pipe(
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(() => this.onProductChange());
+      .subscribe((value) => {this.onProductChange();});
   }
 
   private extractArrayFromResponse(data: any): any[] {
@@ -110,8 +111,12 @@ export class CapacityFiltersComponent implements OnInit {
     this.products = [];
     const selectedCollectionId = this.collectionControl.value;
     if (!selectedCollectionId) {
+      this.facilityControl.disable({ emitEvent: false });
+      this.productControl.disable({ emitEvent: false });
       return;
     }
+    // Enable facility control when collection is selected
+    this.facilityControl.enable({ emitEvent: false });
     await this.loadFacilities(selectedCollectionId);
   }
 
@@ -125,12 +130,16 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   async onFacilityChange() {
+    this.facilityChanged.emit();
     this.productControl.setValue('', { emitEvent: false });
     this.products = [];
     const selectedFacilityId = this.facilityControl.value;
     if (!selectedFacilityId) {
+      this.productControl.disable({ emitEvent: false });
       return;
     }
+    // Enable product control when facility is selected
+    this.productControl.enable({ emitEvent: false });
     await this.loadProducts(selectedFacilityId);
   }
 
@@ -153,7 +162,12 @@ export class CapacityFiltersComponent implements OnInit {
           );
           if (productsData) {
             const productsArray = this.extractArrayFromResponse(productsData);
-            allProducts.push(...productsArray);
+            const productsWithActivity = productsArray.map(product => ({
+              ...product,
+              activityType: activity.activityType,
+              activityId: activity.activityId,
+            }));
+            allProducts.push(...productsWithActivity);
           }
         } catch (error) {
           // Continue with next activity if one fails
@@ -166,9 +180,8 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   async onProductChange() {
-    const selectedProductId = this.productControl.value;
-    
-    if (!selectedProductId) {
+    const selectedValue = this.productControl.value;
+    if (!selectedValue) {
       this.productSelected.emit({
         productId: '',
         productName: '',
@@ -181,29 +194,27 @@ export class CapacityFiltersComponent implements OnInit {
       return;
     }
 
-    // Find the selected product in the products array to get its metadata
-    const selectedProduct = this.products.find(p => p.pk === selectedProductId);
+    // Parse composite key: pk::sk (pk can contain :: so we split from the end)
+    const lastSeparatorIndex = selectedValue.lastIndexOf('::');
+    const selectedPk = selectedValue.substring(0, lastSeparatorIndex);
+    const selectedSk = selectedValue.substring(lastSeparatorIndex + 2);
+    
+    // NEEDED PK AND SK For this query
+    const selectedProduct = this.products.find(p => p['pk'] === selectedPk && p['sk'] === selectedSk);
     if (!selectedProduct) {
       return;
     }
 
     const collectionId = this.collectionControl.value;
-    const activitiesData = await this.activityService.getActivitiesByCollectionId(collectionId);
-    const activitiesArray = this.extractArrayFromResponse(activitiesData);
-    const activity = activitiesArray.length > 0 ? activitiesArray[0] : null;
-    const productId = this.extractProductId(selectedProductId);
+    const productId = selectedProduct['productId'] || selectedSk;   
     this.productSelected.emit({
-      productId,
-      productName: selectedProduct.displayName || '',
+      productId: String(productId),
+      productName: selectedProduct['displayName'] || '',
       rangeStart: selectedProduct['rangeStart'] || '',
       rangeEnd: selectedProduct['rangeEnd'] || '',
-      activityType: activity?.activityType || '',
-      activityId: activity?.activityId || '',
+      activityType: selectedProduct['activityType'] || '',
+      activityId: selectedProduct['activityId'] || '',
       collectionId: collectionId
     });
-  }
-
-  private extractProductId(productKey: string): string {
-    return productKey.split('::')[productKey.split('::').length - 1];
   }
 }

@@ -44,7 +44,8 @@ export class InventoryPoolService {
     date: string,
     capacity: number,
     editMode: 'manual' | 'bulk' = 'bulk',
-    notes?: string
+    notes?: string,
+    preCloseCapacity?: number
   ) {
     const queryParams: Record<string, string> = {
       'date': date,
@@ -54,6 +55,11 @@ export class InventoryPoolService {
     const body: any = {
       capacity: capacity
     };
+
+    // Add preCloseCapacity if provided (when closing a date)
+    if (preCloseCapacity !== undefined && preCloseCapacity !== null) {
+      body.preCloseCapacity = preCloseCapacity;
+    }
 
     // Add notes if provided
     if (notes !== undefined && notes !== null) {
