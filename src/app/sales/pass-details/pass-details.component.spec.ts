@@ -184,7 +184,22 @@ describe('PassDetailsComponent', () => {
       reservationContext: { checkOutTime: now + 100000 }
     })).toBe(false);
 
-    // Valid scenario
+    // Cannot check in before the check-in window opens — a PM pass in the
+    // morning (#366)
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: today,
+      reservationContext: { checkInTime: now + 100000, checkOutTime: now + 200000 }
+    })).toBe(false);
+
+    // Can check in once inside the window
+    expect(component.canCheckIn({
+      status: 'confirmed',
+      startDate: today,
+      reservationContext: { checkInTime: now - 100000, checkOutTime: now + 100000 }
+    })).toBe(true);
+
+    // Valid scenario — an all-day pass carries no checkInTime and is unaffected
     expect(component.canCheckIn({
       status: 'confirmed',
       startDate: today,

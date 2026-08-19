@@ -115,12 +115,21 @@ export class PassDetailsComponent {
     const status = booking.status;
     const queryTime = Date.now();
     const checkedInTime = booking?.checkedInTime;
+    const checkInTime = booking.reservationContext?.checkInTime
+      ? new Date(booking.reservationContext.checkInTime).getTime()
+      : null;
     const checkOutTime = booking.reservationContext?.checkOutTime 
       ? new Date(booking.reservationContext.checkOutTime).getTime() 
       : null;
     
     // Any other status but confirmed means no check-in option
     if (status !== 'confirmed') return false;
+
+    // The check-in window has not opened yet. Without this a PM pass could be
+    // checked in during the morning (#366). The upper bound is already covered
+    // by checkOutTime below, which is what stops an AM pass being checked in
+    // after midday. Passes with no checkInTime — all-day — are unaffected.
+    if (checkInTime && queryTime < checkInTime) return false;
     
     const today = new Date().toLocaleDateString('en-CA').split('T')[0];
     const sameDay = booking.startDate == today;
