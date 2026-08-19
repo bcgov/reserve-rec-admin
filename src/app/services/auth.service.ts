@@ -67,10 +67,8 @@ export class AuthService {
 
   loginWithProvider(provider: string) {
     let idpName = '';
-    // Only IDIR and BCSC are registered on the admin user pool client
-    // (reserve-rec-api admin-identity-stack). Naming any other provider just
-    // drops the user on Cognito's hosted chooser (bcgov/reserve-rec-admin#364).
     if (provider === 'idir') idpName = 'IDIR';
+    else if (provider === 'bceid') idpName = 'BCEID';
     else if (provider === 'bcsc') idpName = 'BCSC';
     else return;
     // Use Amplify's signInWithRedirect method to initiate the OAuth flow instead of custome method
