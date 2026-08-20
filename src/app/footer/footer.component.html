@@ -13,7 +13,7 @@
       <span class="quick-links me-5">Quick links:</span>
       <li class="me-5 fw-bold">
         <a 
-          [href]="envName==='prod' ? 'https://attendance-revenue.bcparks.ca/' : '#notProd'"
+          [href]="envName==='prod' || envName==='production' ? 'https://attendance-revenue.bcparks.ca/' : '#notProd'"
           target="_blank"
         >
           Attendance & Revenue
@@ -21,7 +21,7 @@
       </li>
       <li class="me-5 fw-bold">
         <a 
-          [href]="envName==='prod' ? 'https://reserve-admin.bcparks.ca/dayuse/' : '#notProd'"
+          [href]="envName==='prod' || envName==='production' ? 'https://reserve-admin.bcparks.ca/dayuse/' : '#notProd'"
           target="_blank"
         >
           Day Use Pass Admin

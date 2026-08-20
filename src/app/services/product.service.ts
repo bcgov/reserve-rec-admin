@@ -19,26 +19,29 @@ export class ProductService {
     private loadingService: LoadingService
   ) { }
 
+  private extractErrorMessage(error: any): string {
+    return error?.error?.msg || error?.error?.error || error?.error?.message || error?.message || 'Unknown error';
+  }
+
+  private buildQueryParams(params: Record<string, any>): Record<string, any> {
+    const result: Record<string, any> = {};
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        result[key] = value;
+      }
+    });
+    return result;
+  }
+
   async getProduct(collectionId, activityType, activityId, productId, fetchActivities = false, fetchGeozones = false, fetchFacilities = false) {
-    const queryParams = {};
-    if (activityType) {
-      queryParams['activityType'] = activityType;
-    }
-    if (activityId) {
-      queryParams['activityId'] = activityId;
-    }
-    if (productId) {
-      queryParams['productId'] = productId;
-    }
-    if (fetchActivities) {
-      queryParams['fetchActivities'] = true;
-    }
-    if (fetchGeozones) {
-      queryParams['fetchGeozones'] = true;
-    }
-    if (fetchFacilities) {
-      queryParams['fetchFacilities'] = true;
-    }
+    const queryParams = this.buildQueryParams({
+      activityType,
+      activityId,
+      productId,
+      fetchActivities: fetchActivities || undefined,
+      fetchGeozones: fetchGeozones || undefined,
+      fetchFacilities: fetchFacilities || undefined
+    });
 
     try {
       this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
@@ -49,15 +52,9 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = 
-        (error as any)?.error?.msg ||
-        (error as any)?.error?.error ||
-        (error as any)?.error?.message ||
-        (error as any)?.message ||
-        'Unknown error';
       this.toastService.addMessage(
-        errorMessage,
-        `Product failed to get`,
+        this.extractErrorMessage(error),
+        'Product failed to get',
         ToastTypes.ERROR
       );
       return null;
@@ -65,13 +62,7 @@ export class ProductService {
   }
 
   async getProductsByActivity(collectionId, activityType, activityId) {
-    const queryParams = {};
-    if (activityType) {
-      queryParams['activityType'] = activityType;
-    }
-    if (activityId) {
-      queryParams['activityId'] = activityId;
-    }
+    const queryParams = this.buildQueryParams({ activityType, activityId });
 
     try {
       this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_LIST);
@@ -82,15 +73,9 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_LIST);
       this.loggerService.error(error);
-      const errorMessage = 
-        (error as any)?.error?.msg ||
-        (error as any)?.error?.error ||
-        (error as any)?.error?.message ||
-        (error as any)?.message ||
-        'Unknown error';
       this.toastService.addMessage(
-        errorMessage,
-        `Product failed to get`,
+        this.extractErrorMessage(error),
+        'Product failed to get',
         ToastTypes.ERROR
       );
       return null;
@@ -112,18 +97,12 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = 
-        (error as any)?.error?.msg ||
-        (error as any)?.error?.error ||
-        (error as any)?.error?.message ||
-        (error as any)?.message ||
-        'Unknown error';
       this.toastService.addMessage(
-        errorMessage,
-        `Product failed to create`,
+        this.extractErrorMessage(error),
+        'Product failed to create',
         ToastTypes.ERROR
       );
-      this.loggerService.error(error);
+      return null;
     }
   }
 
@@ -134,7 +113,7 @@ export class ProductService {
       this.dataService.setItemValue(Constants.dataIds.PRODUCT_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.toastService.addMessage(
-        `Product successfully updated`,
+        'Product successfully updated',
         '',
         ToastTypes.SUCCESS
       );
@@ -142,15 +121,9 @@ export class ProductService {
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = 
-        (error as any)?.error?.msg ||
-        (error as any)?.error?.error ||
-        (error as any)?.error?.message ||
-        (error as any)?.message ||
-        'Unknown error';
       this.toastService.addMessage(
-        errorMessage,
-        `Product failed to update`,
+        this.extractErrorMessage(error),
+        'Product failed to update',
         ToastTypes.ERROR
       );
       return null;
@@ -164,11 +137,159 @@ export class ProductService {
       this.dataService.setItemValue(Constants.dataIds.PRODUCT_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.toastService.addMessage(
-        `Product successfully deleted`,
+        'Product successfully deleted',
         '',
         ToastTypes.SUCCESS
       );
       return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      this.loggerService.error(error);
+      this.toastService.addMessage(
+        this.extractErrorMessage(error),
+        'Product failed to delete',
+        ToastTypes.ERROR
+      );
+      return null;
+    }
+  }
+
+  async createProductDates(collectionId, activityType, activityId, productId, dateParams: { startDate: string; endDate: string } = { startDate: '', endDate: '' }, showSuccessToast = true) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
+      const queryParams = { startDate: dateParams.startDate, endDate: dateParams.endDate };
+      const response = await lastValueFrom(this.apiService.post(`product-dates/${collectionId}/${activityType}/${activityId}/${productId}`, {}, queryParams));
+      const res = response['data'];
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      
+      if (!res || res.length === 0) {
+        return null;
+      }
+      
+      if (showSuccessToast) {
+        this.toastService.addMessage(
+          'Product dates successfully created',
+          '',
+          ToastTypes.SUCCESS
+        );
+      }
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      this.loggerService.error(error);
+      this.toastService.addMessage(
+        this.extractErrorMessage(error),
+        'Product dates failed to create',
+        ToastTypes.ERROR
+      );
+      return null;
+    }
+  }
+
+  async createInventoryPools(collectionId, activityType, activityId, productId, startDate, endDate, skipWarnings = false, showSuccessToast = true) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
+      const queryParams = { startDate, endDate, skipWarnings };
+      const response = await lastValueFrom(this.apiService.post(`inventory-pools/${collectionId}/${activityType}/${activityId}/${productId}`, {}, queryParams));
+      const res = response['data'];
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      
+      if (!res || res.length === 0) {
+        return null;
+      }
+      
+      if (showSuccessToast) {
+        this.toastService.addMessage(
+          'Inventory pools successfully created',
+          '',
+          ToastTypes.SUCCESS
+        );
+      }
+      return res;
+    } catch (error) {
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+      this.loggerService.error(error);
+      this.toastService.addMessage(
+        this.extractErrorMessage(error),
+        'Inventory pools failed to create',
+        ToastTypes.ERROR
+      );
+      return null;
+    }
+  }
+
+  async extendProductDateRange(
+    collectionId: string,
+    activityType: string,
+    activityId: string | number,
+    productId: string | number,
+    product: any,
+    newRangeEnd: string,
+    startDateForProductDates: string
+  ) {
+    try {
+      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
+
+      // Step 1: Update the product with new date range
+      // Only send fields that the backend allows for updates
+      const updatePayload = {
+        rangeStart: product.rangeStart,
+        rangeEnd: newRangeEnd,
+        // Include other updatable fields from the product
+        ...(product.displayName && { displayName: product.displayName }),
+        ...(product.description && { description: product.description }),
+        ...(product.timezone && { timezone: product.timezone }),
+        ...(product.assetList && { assetList: product.assetList }),
+        ...(product.availabilityEstimationPattern && { availabilityEstimationPattern: product.availabilityEstimationPattern }),
+        ...(product.reservationPolicy && { reservationPolicy: product.reservationPolicy }),
+        ...(product.partyPolicy && { partyPolicy: product.partyPolicy }),
+        ...(product.feePolicy && { feePolicy: product.feePolicy }),
+        ...(product.changePolicy && { changePolicy: product.changePolicy }),
+      };
+
+      const updateRes = await this.updateProduct(collectionId, activityType, activityId, productId, updatePayload);
+      
+      if (!updateRes) {
+        this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+        this.toastService.addMessage(
+          'Failed to update product date range',
+          'Extension Failed',
+          ToastTypes.ERROR
+        );
+        return null;
+      }
+
+      // Step 2: Create ProductDate records for the new date range
+      const createRes = await this.createProductDates(
+        collectionId,
+        activityType,
+        activityId,
+        productId,
+        {
+          startDate: startDateForProductDates,
+          endDate: newRangeEnd
+        },
+        false // Don't show success toast yet
+      );
+
+      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
+
+      if (createRes) {
+        this.toastService.addMessage(
+          `Product date range extended to ${newRangeEnd}. Ready to apply capacity.`,
+          'Range Extended Successfully',
+          ToastTypes.SUCCESS
+        );
+        return { product: updateRes, productDates: createRes };
+      } else {
+        // Product was updated but ProductDates creation failed
+        this.toastService.addMessage(
+          'Product range updated but ProductDate creation failed. Try loading the calendar again.',
+          'Partial Extension',
+          ToastTypes.WARNING
+        );
+        return { product: updateRes, productDates: null };
+      }
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
@@ -180,64 +301,53 @@ export class ProductService {
         'Unknown error';
       this.toastService.addMessage(
         errorMessage,
-        `Product failed to delete`,
+        'Failed to extend product date range',
         ToastTypes.ERROR
       );
       return null;
     }
   }
 
-  async createProductDates(collectionId, activityType, activityId, productId, bodyParams = {}, showSuccessToast = true) {
+  async updateProductRangeEnd(
+    collectionId: string,
+    activityType: string,
+    activityId: string | number,
+    productId: string | number,
+    product: any,
+    newRangeEnd: string
+  ) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
-      const res = (await lastValueFrom(this.apiService.post(`product-dates/${collectionId}/${activityType}/${activityId}/${productId}`, bodyParams)))['data'];
-      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
-      if (showSuccessToast) {
-        this.toastService.addMessage(
-          `Product dates successfully created`,
-          '',
-          ToastTypes.SUCCESS
-        );
-      }
-      return res;
-    } catch (error) {
-      this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
-      this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
-      this.toastService.addMessage(
-        errorMessage,
-        `Product dates failed to create`,
-        ToastTypes.ERROR
-      );
-      return null;
-    }
-  }
 
-  async createInventoryPools(collectionId, activityType, activityId, productId, startDate, endDate, skipWarnings = false, showSuccessToast = true) {
-    try {
-      this.loadingService.addToFetchList(Constants.dataIds.PRODUCT_RESULT);
-      const queryParams = {
-        startDate,
-        endDate,
-        skipWarnings,
+      const updatePayload = {
+        rangeStart: product.rangeStart,
+        rangeEnd: newRangeEnd,
+        ...(product.displayName && { displayName: product.displayName }),
+        ...(product.description && { description: product.description }),
+        ...(product.timezone && { timezone: product.timezone }),
+        ...(product.assetList && { assetList: product.assetList }),
+        ...(product.availabilityEstimationPattern && { availabilityEstimationPattern: product.availabilityEstimationPattern }),
+        ...(product.reservationPolicy && { reservationPolicy: product.reservationPolicy }),
+        ...(product.partyPolicy && { partyPolicy: product.partyPolicy }),
+        ...(product.feePolicy && { feePolicy: product.feePolicy }),
+        ...(product.changePolicy && { changePolicy: product.changePolicy }),
       };
-      const res = (await lastValueFrom(this.apiService.post(`inventory-pools/${collectionId}/${activityType}/${activityId}/${productId}`, {}, queryParams)))['data'];
+
+      const updateRes = await this.updateProduct(collectionId, activityType, activityId, productId, updatePayload);
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
-      if (showSuccessToast) {
-        this.toastService.addMessage(
-          `Inventory pools successfully created`,
-          '',
-          ToastTypes.SUCCESS
-        );
-      }
-      return res;
+      return updateRes;
     } catch (error) {
       this.loadingService.removeFromFetchList(Constants.dataIds.PRODUCT_RESULT);
       this.loggerService.error(error);
-      const errorMessage = (error as any)?.error?.msg || (error as any)?.error?.error || (error as any)?.message || 'Unknown error';
+      const errorMessage = 
+        (error as any)?.error?.msg ||
+        (error as any)?.error?.error ||
+        (error as any)?.error?.message ||
+        (error as any)?.message ||
+        'Unknown error';
       this.toastService.addMessage(
         errorMessage,
-        `Inventory pools failed to create`,
+        'Failed to extend product date range',
         ToastTypes.ERROR
       );
       return null;

@@ -1,0 +1,94 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #FAF9F8;
+  border-radius: 8px;
+}
+
+.calendar-day {
+  min-height: 100px;
+
+  &.not-current-month {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.toggle-slider-container {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  display: inline-block;
+}
+
+.toggle-slider-checkbox {
+  display: none;
+}
+
+.toggle-slider {
+  display: block;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #6c757d;
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+
+  // Slider thumb
+  &::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  &.toggle-empty {
+    background-color: #6c757d;
+  }
+
+  &.toggle-full {
+    background-color: #6c757d;
+  }
+
+  &.toggle-available {
+    background-color: #053662;
+  }
+}
+
+// When checked (ON/RIGHT) - slider thumb moves right (blue/available)
+.toggle-slider-checkbox:checked + .toggle-slider {
+  background-color: #053662;
+
+  &::before {
+    transform: translateX(24px);
+  }
+}
+
+.toggle-slider-checkbox:checked + .toggle-slider::before {
+  transform: translateX(24px);
+}
+
+// When unchecked (OFF/LEFT) - slider thumb stays left (grey/unavailable)
+.toggle-slider-checkbox:not(:checked) + .toggle-slider::before {
+  transform: translateX(0);
+}
+
+.toggle-slider-checkbox:focus + .toggle-slider {
+  outline: 2px solid #013366;
+  outline-offset: 2px;
+}

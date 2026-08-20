@@ -68,7 +68,7 @@ export class AuthService {
   loginWithProvider(provider: string) {
     let idpName = '';
     if (provider === 'idir') idpName = 'IDIR';
-    else if (provider === 'bceid') idpName = 'BCEID';
+    else if (provider === 'bceid') idpName = 'BCeID';
     else if (provider === 'bcsc') idpName = 'BCSC';
     else return;
     // Use Amplify's signInWithRedirect method to initiate the OAuth flow instead of custome method
@@ -147,8 +147,7 @@ export class AuthService {
               //This is just kicking user out to login page. TODO: Add a modal to confirm logout or stay logged in?
               if (currentTime >= refreshTokenExp) {
                 this.loggerService.info('Refresh token expired. Logging out...');
-                await this.logout();
-                this.router.navigate(['/login']);
+                await this.logout('/login');
               }
             }
           }, refreshInterval);
@@ -156,8 +155,7 @@ export class AuthService {
       }
     } catch (error) {
       console.error('Error setting refresh token:', error);
-      await this.logout(); // Log out on error
-      this.router.navigate(['/login']); // Redirect to login
+      await this.logout('/login'); // Log out on error, back to login
     }
   }
 
@@ -168,13 +166,19 @@ export class AuthService {
 
 
   //Use this to ensure signal gets cleared
-  async logout() {
+  async logout(redirectTo = '/') {
     await signOut();
+    // Navigate before clearing the auth signals. The sidebar in app.component
+    // is gated on authService.user(), so clearing first tears the nav out of
+    // the layout while the previous route is still rendered in the outlet —
+    // the content jumps sideways to fill the gap before the route swaps
+    // (bcgov/reserve-rec-admin#365). Home derives its own state from Amplify's
+    // getCurrentUser(), which already reflects the signOut above, so it
+    // renders logged-out on arrival.
+    await this.router.navigate([redirectTo]);
     this.updateUser(null);
     this.session.set(null);
     this.permissionsService.clear();
-    console.log('User logged out', this.user);
-    this.router.navigate(['/']);
   }
 
   async getCurrentUser() {

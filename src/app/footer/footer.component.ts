@@ -13,7 +13,7 @@ export class FooterComponent {
         protected configService: ConfigService,
     ) {
 
-        this.envName = this.configService.config['ENVIRONMENT'];
+        this.envName = (this.configService.config['ENVIRONMENT'] || '').toLowerCase();
     }
 
 }

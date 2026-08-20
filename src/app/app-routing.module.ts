@@ -84,6 +84,12 @@ export const routes: Routes = [
     data: { requiredPermission: 'limited' },
   },
   {
+    path: 'inventory/capacity',
+    loadComponent: () => import('./inventory/capacity-management/capacity-management.component').then(mod => mod.CapacityManagementComponent),
+    canActivate: [UserGuard, PermissionsGuard],
+    data: { requiredPermission: 'superadmin' },
+  },
+  {
     path: 'inventory/create',
     loadComponent: () => import('./inventory/create-inventory/create-inventory.component').then(mod => mod.CreateInventoryComponent),
     canActivate: [UserGuard, PermissionsGuard],
