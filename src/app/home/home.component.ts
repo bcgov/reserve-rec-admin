@@ -3,16 +3,11 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { SearchComponent } from './search/search.component';
-import { InventoryComponent } from '../inventory/inventory.component';
-import { SalesComponent } from '../sales/sales.component';
-import { ReportsComponent } from '../reports/reports.component';
 import { NgdsFormsModule } from '@digitalspace/ngds-forms';
 import { LoginComponent } from '../login/login.component';
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, SearchComponent, SalesComponent, InventoryComponent, ReportsComponent, NgdsFormsModule, LoginComponent
-  ],
+  imports: [CommonModule, NgdsFormsModule, LoginComponent],
   templateUrl: './home.component.html',
 
   styleUrl: './home.component.scss'
