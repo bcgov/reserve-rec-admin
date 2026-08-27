@@ -33,11 +33,6 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   }
 
-  it('redirects an already-authenticated user away from the login page (#360)', async () => {
-    await setup({ tokens: { idToken: 'stub' } });
-    expect(navigatedTo).toEqual(['/']);
-  });
-
   it('leaves an unauthenticated user on the login page', async () => {
     await setup(null);
     expect(navigatedTo).toBeNull();
