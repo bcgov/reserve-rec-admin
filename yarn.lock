@@ -6166,10 +6166,10 @@
     bootstrap "^5.3.3"
     jquery "^3.6.0"
 
-"@digitalspace/ngds-forms@^0.0.133":
-  version "0.0.133"
-  resolved "https://registry.yarnpkg.com/@digitalspace/ngds-forms/-/ngds-forms-0.0.133.tgz#e1812a5bd6c18eae495b8e22e23c3a4e88069e63"
-  integrity sha512-D580Q8sjaiB71sJ8hxf9pZciUSfDEHe/SiKv1AQ3Mseu5iXgUi7t2ECZAcbVHaYbiLfW8icHmKbV9ijBiUSxGA==
+"@digitalspace/ngds-forms@^0.0.134":
+  version "0.0.134"
+  resolved "https://registry.yarnpkg.com/@digitalspace/ngds-forms/-/ngds-forms-0.0.134.tgz#98be4d0c53ecf820b8e7451c6466241e39f9fa18"
+  integrity sha512-i1g/4DlIyb9fVJft3d6CufD2QsXfh6Iuw7sRhSlTB6rK4isgZZdk1p9qQhh5f9M5e3Pv11xewjvqL+ks/KNKCA==
   dependencies:
     tslib "^2.3.0"
 
