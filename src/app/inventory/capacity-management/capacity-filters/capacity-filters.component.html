@@ -1,10 +1,12 @@
 <div class="row g-3 mb-4">
   <div class="col-md-4">
-    <app-collection-selector
-      [control]="collectionControl"
-      [label]="'Collection'"
-    >
-    </app-collection-selector>
+    <label for="collection-select" class="form-label mb-2">Collection</label>
+    <select id="collection-select" class="form-select" [formControl]="collectionControl">
+      <option value="">Please Select</option>
+      <option *ngFor="let collection of collections" [value]="collection.value">
+        {{ collection.display }}
+      </option>
+    </select>
   </div>
   <div class="col-md-4">
     <label for="facility-select" class="form-label mb-2">Facility</label>

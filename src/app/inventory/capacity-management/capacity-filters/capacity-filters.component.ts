@@ -3,15 +3,22 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { CollectionSelectorComponent } from '../../../shared/components/collection-selector/collection-selector.component';
+import { CollectionService } from '../../../services/collection.service';
 import { FacilityService } from '../../../services/facility.service';
 import { ActivityService } from '../../../services/activity.service';
 import { ProductService } from '../../../services/product.service';
+import { DataService } from '../../../services/data.service';
+import { Constants } from '../../../app.constants';
 
 interface DropdownOption {
   pk: string;
   displayName: string;
   [key: string]: any;
+}
+
+interface CollectionDropdownOption {
+  display: string;
+  value: string;
 }
 
 interface ProductSelectionEvent {
@@ -27,7 +34,7 @@ interface ProductSelectionEvent {
 @Component({
   selector: 'app-capacity-filters',
   standalone: true,
-  imports: [CommonModule, CollectionSelectorComponent, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './capacity-filters.component.html',
   styleUrls: ['./capacity-filters.component.scss']
 })
@@ -38,6 +45,7 @@ export class CapacityFiltersComponent implements OnInit {
   filterForm!: FormGroup;
 
   // Dropdown options
+  collections: CollectionDropdownOption[] = [];
   facilities: DropdownOption[] = [];
   products: DropdownOption[] = [];
 
@@ -47,9 +55,11 @@ export class CapacityFiltersComponent implements OnInit {
   @Output() facilityChanged = new EventEmitter<void>();
 
   constructor(
+    protected collectionService: CollectionService,
     protected facilityService: FacilityService,
     protected activityService: ActivityService,
     protected productService: ProductService,
+    protected dataService: DataService,
     private fb: FormBuilder
   ) {
     this.initializeForm();
@@ -76,6 +86,7 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadCollections();
     this.collectionControl.valueChanges
       .pipe(
         distinctUntilChanged(),
@@ -94,6 +105,32 @@ export class CapacityFiltersComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((value) => {this.onProductChange();});
+  }
+
+  private async loadCollections() {
+    try {
+      // Try cache first
+      const cached = this.dataService.getItemValue(Constants.dataIds.COLLECTIONS_RESULT);
+      if (cached?.items?.length) {
+        this.collections = this.mapCollectionsToOptions(cached.items);
+        return;
+      }
+      
+      const res = await this.collectionService.getAllCollections();
+      this.collections = this.mapCollectionsToOptions(res?.items ?? []);
+    } catch (error) {
+      console.error('Error loading collections:', error);
+      this.collections = [];
+    }
+  }
+
+  private mapCollectionsToOptions(collections: any[]): CollectionDropdownOption[] {
+    return collections
+      .filter(c => c.isVisible !== false)
+      .map(c => ({
+        display: c.displayName ? `${c.displayName} (${c.collectionId})` : c.collectionId,
+        value: c.collectionId,
+      }));
   }
 
   private extractArrayFromResponse(data: any): any[] {
