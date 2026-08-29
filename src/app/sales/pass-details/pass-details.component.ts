@@ -9,6 +9,9 @@ import {
   formatBookedDate,
   getCardBorderClass,
   getDisplayStatus,
+  getLocation,
+  getPartySize,
+  getProductDisplayName,
   getStatusBgClass,
 } from '../../utils/booking-status';
 
@@ -109,13 +112,7 @@ export class PassDetailsComponent {
 
   // Get the party size for a booking, calculating from party information (if available)
   getPartySize(booking: any): number {
-    if (booking.partySize) return booking.partySize;
-    const p = booking.partyInformation;
-    if (p) {
-      return (p.adult || 0) + (p.senior || 0) + (p.youth || 0) + (p.child || 0);
-    }
-    if (booking.quantity) return booking.quantity;
-    return booking['numberOfGuests'] || 0;
+    return getPartySize(booking);
   }
 
   // Get a human-readable label for the activity type (known activity types)
@@ -143,9 +140,7 @@ export class PassDetailsComponent {
 
   // Get the location string for a booking, combining facility and entry point if available
   getLocation(booking: any): string {
-    const facilityName = booking?.facilityDisplayName ? booking?.facilityDisplayName : '';
-    const geozoneName = booking?.geozoneDisplayName ? booking?.geozoneDisplayName : '';
-    return `${geozoneName}${facilityName ? ', ' + facilityName : ''}`;
+    return getLocation(booking);
   }
 
   // Format the booked date to be readable in the format of "2024-01-01"
@@ -169,8 +164,7 @@ export class PassDetailsComponent {
   }
 
   getProductDisplayName(displayName): string {
-    const parts = displayName.split(',');
-    return parts[0]?.trim() || 'N/A';
+    return getProductDisplayName(displayName);
   }
 
   private handleError(message: string, error: any) {

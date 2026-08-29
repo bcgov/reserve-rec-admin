@@ -43,6 +43,14 @@ describe('CustomerDetailComponent', () => {
     startDate: '2025-08-01',
     endDate: '2025-08-01',
   };
+  const inProgressBooking = {
+    bookingId: 'p1',
+    displayName: 'Cypress, Day-use pass',
+    status: 'in progress',
+    startDate: '2026-09-01',
+    endDate: '2026-09-01',
+    reservationContext: { checkInTime: now + 100000, checkOutTime: now + 200000 },
+  };
 
   function setup(bookingsResponse: any = { data: { items: [], lastEvaluatedKey: null } }) {
     mockCustomerService = {
@@ -104,8 +112,35 @@ describe('CustomerDetailComponent', () => {
     await create();
 
     expect(component.currentBookings.map((b) => b.bookingId)).toEqual(['r1', 'a1']);
-    expect(component.pastBookings.map((b) => b.bookingId)).toEqual(['e1', 'c1']);
+    // Past is sorted newest-first by startDate: 2025-08-01 (c1) then 2025-07-01 (e1)
+    expect(component.pastBookings.map((b) => b.bookingId)).toEqual(['c1', 'e1']);
     expect(component.hasMoreBookings).toBe(false);
+  });
+
+  it('leaves an in-progress booking out of both lists', async () => {
+    await setup({
+      data: { items: [reservedBooking, inProgressBooking, expiredBooking], lastEvaluatedKey: null },
+    });
+    await create();
+
+    expect(component.currentBookings.map((b) => b.bookingId)).toEqual(['r1']);
+    expect(component.pastBookings.map((b) => b.bookingId)).toEqual(['e1']);
+  });
+
+  it('sorts past bookings newest first', async () => {
+    await setup({
+      data: {
+        items: [
+          { bookingId: 'old', status: 'cancelled', startDate: '2024-01-01' },
+          { bookingId: 'new', status: 'cancelled', startDate: '2026-01-01' },
+          { bookingId: 'mid', status: 'cancelled', startDate: '2025-01-01' },
+        ],
+        lastEvaluatedKey: null,
+      },
+    });
+    await create();
+
+    expect(component.pastBookings.map((b) => b.bookingId)).toEqual(['new', 'mid', 'old']);
   });
 
   it('renders empty states when the customer has no bookings', async () => {
@@ -145,5 +180,52 @@ describe('CustomerDetailComponent', () => {
     expect(component.bookingsError).toBeTruthy();
     expect(mockLoggerService.error).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('Unable to load bookings');
+  });
+
+  it('keeps already-loaded bookings when a further page fails', async () => {
+    await setup({ data: { items: [reservedBooking], lastEvaluatedKey: { pk: 'x', sk: 'y' } } });
+    await create();
+
+    mockCustomerService.getCustomerBookings.mockRejectedValue(new Error('boom'));
+    await component.loadBookings(true);
+    fixture.detectChanges();
+
+    expect(component.currentBookings.map((b) => b.bookingId)).toEqual(['r1']);
+    expect(component.bookingsError).toBeTruthy();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Unable to load bookings');
+    expect(text).toContain('Joffre Lakes');
+    expect(text).not.toContain('No current bookings');
+  });
+
+  it('retries the page that failed', async () => {
+    await setup({ data: { items: [reservedBooking], lastEvaluatedKey: { pk: 'x', sk: 'y' } } });
+    await create();
+
+    mockCustomerService.getCustomerBookings.mockRejectedValue(new Error('boom'));
+    await component.loadBookings(true);
+
+    mockCustomerService.getCustomerBookings.mockResolvedValue({
+      data: { items: [expiredBooking], lastEvaluatedKey: null },
+    });
+    await component.retryLoadBookings();
+
+    expect(component.currentBookings.map((b) => b.bookingId)).toEqual(['r1']);
+    expect(component.pastBookings.map((b) => b.bookingId)).toEqual(['e1']);
+    expect(component.bookingsError).toBeNull();
+  });
+
+  it('ignores a second load while one is already in flight', async () => {
+    await setup();
+    await create();
+
+    mockCustomerService.getCustomerBookings.mockClear();
+
+    const first = component.loadBookings(true);
+    const second = component.loadBookings(true);
+    await Promise.all([first, second]);
+
+    expect(mockCustomerService.getCustomerBookings).toHaveBeenCalledTimes(1);
   });
 });

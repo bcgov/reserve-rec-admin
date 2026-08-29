@@ -7,8 +7,12 @@ import {
   formatBookedDate,
   getCardBorderClass,
   getDisplayStatus,
+  getLocation,
+  getPartySize,
+  getProductDisplayName,
   getStatusBgClass,
   isCurrentBooking,
+  isPastBooking,
 } from '../../utils/booking-status';
 
 const BOOKINGS_PAGE_SIZE = 20;
@@ -30,6 +34,7 @@ export class CustomerDetailComponent implements OnInit {
   bookingsLoadingMore = false;
   bookingsError: string | null = null;
   private bookingsLastEvaluatedKey: any = null;
+  private lastLoadWasAppend = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -54,18 +59,22 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   async loadBookings(append = false) {
-    if (!this.customerId) return;
+    // Guard against a double-tap on "Load more" (or a reload racing the initial
+    // fetch) appending the same page twice.
+    if (!this.customerId || this.bookingsLoading || this.bookingsLoadingMore) return;
+
+    this.lastLoadWasAppend = append;
 
     try {
       if (append) {
         this.bookingsLoadingMore = true;
       } else {
         this.bookingsLoading = true;
-        this.bookingsError = null;
         this.currentBookings = [];
         this.pastBookings = [];
         this.bookingsLastEvaluatedKey = null;
       }
+      this.bookingsError = null;
 
       const res = await this.customerService.getCustomerBookings(this.customerId, {
         limit: BOOKINGS_PAGE_SIZE,
@@ -76,19 +85,44 @@ export class CustomerDetailComponent implements OnInit {
       this.bookingsLastEvaluatedKey = res?.data?.lastEvaluatedKey || null;
 
       for (const booking of items) {
+        // A booking that is neither current nor past (an abandoned "in progress"
+        // one) belongs in neither list.
         if (isCurrentBooking(booking)) {
           this.currentBookings.push(booking);
-        } else {
+        } else if (isPastBooking(booking)) {
           this.pastBookings.push(booking);
         }
       }
+
+      this.sortPastBookingsNewestFirst();
     } catch (error) {
       this.logger.error(error);
+      // A failed page must not discard what is already on screen — the sections stay
+      // rendered and the message offers a retry.
       this.bookingsError = 'Unable to load bookings for this customer.';
     } finally {
       this.bookingsLoading = false;
       this.bookingsLoadingMore = false;
     }
+  }
+
+  retryLoadBookings(): Promise<void> {
+    return this.loadBookings(this.lastLoadWasAppend);
+  }
+
+  // The API returns newest-first, but paging can interleave, so keep the finished
+  // bookings in a stable newest-first order of their own.
+  private sortPastBookingsNewestFirst() {
+    this.pastBookings.sort((a, b) => {
+      const aDate = a?.startDate || '';
+      const bDate = b?.startDate || '';
+      if (aDate === bDate) return 0;
+      return aDate < bDate ? 1 : -1;
+    });
+  }
+
+  trackBooking(index: number, booking: any): string {
+    return booking?.bookingId || booking?.sk || String(index);
   }
 
   // Booking display helpers (shared with the pass check-in cards)
@@ -110,14 +144,11 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   getBookingTitle(booking: any): string {
-    const displayName = booking?.displayName || '';
-    return displayName.split(',')[0]?.trim() || booking?.activityType || 'Booking';
+    return getProductDisplayName(booking?.displayName);
   }
 
   getBookingLocation(booking: any): string {
-    const facilityName = booking?.facilityDisplayName || '';
-    const geozoneName = booking?.geozoneDisplayName || '';
-    return `${geozoneName}${facilityName ? (geozoneName ? ', ' : '') + facilityName : ''}`;
+    return getLocation(booking);
   }
 
   getBookingDates(booking: any): string {
@@ -129,13 +160,7 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   getPartySize(booking: any): number {
-    if (booking?.partySize) return booking.partySize;
-    const p = booking?.partyInformation;
-    if (p) {
-      return (p.adult || 0) + (p.senior || 0) + (p.youth || 0) + (p.child || 0);
-    }
-    if (booking?.quantity) return booking.quantity;
-    return booking?.['numberOfGuests'] || 0;
+    return getPartySize(booking);
   }
 
   backToCustomerList() {

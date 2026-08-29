@@ -81,13 +81,9 @@
           <p class="mt-2 mb-0">Loading...</p>
         </div>
 
-        <div *ngIf="!bookingsLoading && bookingsError" class="alert alert-danger mb-0">
-          {{ bookingsError }}
-        </div>
-
-        <ng-container *ngIf="!bookingsLoading && !bookingsError">
+        <ng-container *ngIf="!bookingsLoading">
           <p *ngIf="currentBookings.length === 0" class="text-muted mb-0">No current bookings</p>
-          <ng-container *ngFor="let booking of currentBookings">
+          <ng-container *ngFor="let booking of currentBookings; trackBy: trackBooking">
             <ng-container *ngTemplateOutlet="bookingCard; context: { $implicit: booking }"></ng-container>
           </ng-container>
         </ng-container>
@@ -107,20 +103,25 @@
           <p class="mt-2 mb-0">Loading...</p>
         </div>
 
-        <div *ngIf="!bookingsLoading && bookingsError" class="alert alert-danger mb-0">
-          {{ bookingsError }}
-        </div>
-
-        <ng-container *ngIf="!bookingsLoading && !bookingsError">
+        <ng-container *ngIf="!bookingsLoading">
           <p *ngIf="pastBookings.length === 0" class="text-muted mb-0">No past bookings</p>
-          <ng-container *ngFor="let booking of pastBookings">
+          <ng-container *ngFor="let booking of pastBookings; trackBy: trackBooking">
             <ng-container *ngTemplateOutlet="bookingCard; context: { $implicit: booking }"></ng-container>
           </ng-container>
         </ng-container>
       </div>
     </div>
 
-    <div *ngIf="!bookingsLoading && !bookingsError && hasMoreBookings" class="d-flex justify-content-center mb-4">
+    <!-- A failed page leaves whatever loaded on screen; this only offers the retry. -->
+    <div *ngIf="!bookingsLoading && bookingsError"
+      class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span>{{ bookingsError }}</span>
+      <button class="btn btn-sm btn-outline-danger" (click)="retryLoadBookings()" [disabled]="bookingsLoadingMore">
+        Retry
+      </button>
+    </div>
+
+    <div *ngIf="!bookingsLoading && hasMoreBookings" class="d-flex justify-content-center mb-4">
       <div *ngIf="bookingsLoadingMore" class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
