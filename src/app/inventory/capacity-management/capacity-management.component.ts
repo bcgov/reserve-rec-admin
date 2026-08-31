@@ -110,12 +110,32 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   onCollectionChange() {
+    // Clear product context
+    this.productControl.setValue('', { emitEvent: false });
+    this.currentProductName = '';
+    this.currentProductRangeStart = '';
+    this.currentProductRangeEnd = '';
+    this.currentProduct = null;
+    this.currentActivityType = '';
+    this.currentActivityId = '';
+    
+    // Clear calendar
     this.inventoryPoolsByDate.clear();
     this.calendarDays = [];
     this.updateCalendarKey();
   }
 
   onFacilityChange() {
+    // Clear product context
+    this.productControl.setValue('', { emitEvent: false });
+    this.currentProductName = '';
+    this.currentProductRangeStart = '';
+    this.currentProductRangeEnd = '';
+    this.currentProduct = null;
+    this.currentActivityType = '';
+    this.currentActivityId = '';
+    
+    // Clear calendar
     this.inventoryPoolsByDate.clear();
     this.calendarDays = [];
     this.updateCalendarKey();
@@ -428,7 +448,6 @@ export class CapacityManagementComponent implements OnInit {
       try {
         const existingPool = pools[0];
         const oldCapacity = existingPool?.capacity || 0;
-        
         const response = await this.inventoryPoolService.updateInventoryPool(
           collectionId,
           this.currentActivityType,
@@ -446,7 +465,7 @@ export class CapacityManagementComponent implements OnInit {
           const newAvailability = (existingPool.available || 0) + capacityDelta;
           existingPool.capacity = capacity;
           existingPool.available = Math.max(0, Math.min(newAvailability, capacity));
-          // Only mark as manually edited for manual edits (via modal), not for bulk operations
+          // Only mark give override badge for manual edits (not for toggles or bulk updates)
           if (isManualEdit) {
             existingPool['manuallyEdited'] = true;
           }
@@ -639,7 +658,7 @@ export class CapacityManagementComponent implements OnInit {
           pool.capacity = newCapacity;
           pool.available = Math.max(0, Math.min(newAvailability, newCapacity));
           // Persist preCloseCapacity from response so it survives page reloads
-          // NOTE: Do NOT update manuallyEdited here - only set it via direct modal edits
+          // DONT UPDATE preCloseCapacity on open if it was cleared on the server
           if (response['preCloseCapacity'] !== undefined) {
             pool['preCloseCapacity'] = response['preCloseCapacity'];
           }

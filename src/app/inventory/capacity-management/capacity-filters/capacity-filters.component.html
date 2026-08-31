@@ -12,7 +12,7 @@
     <label for="facility-select" class="form-label mb-2">Facility</label>
     <select id="facility-select" class="form-select" [formControl]="facilityControl">
       <option value="">Please Select</option>
-      <option *ngFor="let facility of facilities" [value]="facility['pk']">
+      <option *ngFor="let facility of facilities" [value]="facility['pk'] + '::' + facility['sk']">
         {{ facility.displayName }}
       </option>
     </select>
