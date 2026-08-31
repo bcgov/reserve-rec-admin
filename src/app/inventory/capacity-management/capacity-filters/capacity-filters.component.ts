@@ -7,6 +7,7 @@ import { CollectionService } from '../../../services/collection.service';
 import { FacilityService } from '../../../services/facility.service';
 import { ActivityService } from '../../../services/activity.service';
 import { ProductService } from '../../../services/product.service';
+import { RelationshipService } from '../../../services/relationship.service';
 import { DataService } from '../../../services/data.service';
 import { Constants } from '../../../app.constants';
 
@@ -48,6 +49,8 @@ export class CapacityFiltersComponent implements OnInit {
   collections: CollectionDropdownOption[] = [];
   facilities: DropdownOption[] = [];
   products: DropdownOption[] = [];
+  private facilitiesMap: Map<string, any> = new Map(); // Map to store facilities by pk
+  private productsMap: Map<string, any> = new Map(); // Map to store products by pk::sk
 
   // Output events
   @Output() productSelected = new EventEmitter<ProductSelectionEvent>();
@@ -59,6 +62,7 @@ export class CapacityFiltersComponent implements OnInit {
     protected facilityService: FacilityService,
     protected activityService: ActivityService,
     protected productService: ProductService,
+    protected relationshipService: RelationshipService,
     protected dataService: DataService,
     private fb: FormBuilder
   ) {
@@ -145,7 +149,9 @@ export class CapacityFiltersComponent implements OnInit {
     this.facilityControl.setValue('', { emitEvent: false });
     this.productControl.setValue('', { emitEvent: false });
     this.facilities = [];
+    this.facilitiesMap.clear();
     this.products = [];
+    this.productsMap.clear();
     const selectedCollectionId = this.collectionControl.value;
     if (!selectedCollectionId) {
       this.facilityControl.disable({ emitEvent: false });
@@ -161,8 +167,16 @@ export class CapacityFiltersComponent implements OnInit {
     try {
       const facilitiesData = await this.facilityService.getFacilitiesByCollectionId(collectionId);
       this.facilities = this.extractArrayFromResponse(facilitiesData);
+      
+      // Populate the facilities map for quick lookup by composite key (pk::sk)
+      this.facilitiesMap.clear();
+      for (const facility of this.facilities) {
+        const compositeKey = `${facility['pk']}::${facility['sk']}`;
+        this.facilitiesMap.set(compositeKey, facility);
+      }
     } catch (error) {
       this.facilities = [];
+      this.facilitiesMap.clear();
     }
   }
 
@@ -170,6 +184,7 @@ export class CapacityFiltersComponent implements OnInit {
     this.facilityChanged.emit();
     this.productControl.setValue('', { emitEvent: false });
     this.products = [];
+    this.productsMap.clear();
     const selectedFacilityId = this.facilityControl.value;
     if (!selectedFacilityId) {
       this.productControl.disable({ emitEvent: false });
@@ -183,13 +198,42 @@ export class CapacityFiltersComponent implements OnInit {
   private async loadProducts(facilityId: string) {
     try {
       const collectionId = this.collectionControl.value;
-      const activitiesData = await this.activityService.getActivitiesByCollectionId(collectionId);
-      const activitiesArray = this.extractArrayFromResponse(activitiesData);
-      if (!activitiesArray || activitiesArray.length === 0) {
+      
+      // Get the facility object from map using composite key
+      const selectedFacility = this.facilitiesMap.get(facilityId);
+      if (!selectedFacility) {
+        console.warn('Selected facility not found in facilities map:', facilityId);
         this.products = [];
         return;
       }
+
+      // Get activities that are specifically related to this facility
+      // (not all activities in the collection)
+      const activitiesData = await this.relationshipService.getRelationshipsFrom(
+        selectedFacility.pk,
+        selectedFacility.sk,
+        'activity', // target schema filter
+        true, // expand entities to get full activity data
+        false
+      );
+
+      if (!activitiesData || activitiesData.length === 0) {
+        this.products = [];
+        return;
+      }
+
+      // Extract activity entities from the relationship response
+      const activitiesArray = activitiesData
+        .map((rel: any) => rel.entity)
+        .filter((entity: any) => entity !== null);
+
+      if (activitiesArray.length === 0) {
+        this.products = [];
+        return;
+      }
+
       const allProducts: DropdownOption[] = [];
+      this.productsMap.clear();
       for (const activity of activitiesArray) {
         try {
           const productsData = await this.productService.getProductsByActivity(
@@ -205,6 +249,12 @@ export class CapacityFiltersComponent implements OnInit {
               activityId: activity.activityId,
             }));
             allProducts.push(...productsWithActivity);
+            
+            // Populate products map with composite key for fast lookup
+            productsWithActivity.forEach(product => {
+              const compositeKey = `${product.pk}::${product.sk}`;
+              this.productsMap.set(compositeKey, product);
+            });
           }
         } catch (error) {
           // Continue with next activity if one fails
@@ -212,6 +262,7 @@ export class CapacityFiltersComponent implements OnInit {
       }
       this.products = allProducts;
     } catch (error) {
+      console.error('Error loading products:', error);
       this.products = [];
     }
   }
@@ -231,19 +282,15 @@ export class CapacityFiltersComponent implements OnInit {
       return;
     }
 
-    // Parse composite key: pk::sk (pk can contain :: so we split from the end)
-    const lastSeparatorIndex = selectedValue.lastIndexOf('::');
-    const selectedPk = selectedValue.substring(0, lastSeparatorIndex);
-    const selectedSk = selectedValue.substring(lastSeparatorIndex + 2);
-    
-    // NEEDED PK AND SK For this query
-    const selectedProduct = this.products.find(p => p['pk'] === selectedPk && p['sk'] === selectedSk);
+    // Get product from map using composite key for O(1) lookup
+    const selectedProduct = this.productsMap.get(selectedValue);
     if (!selectedProduct) {
+      console.warn('Selected product not found in products map');
       return;
     }
 
     const collectionId = this.collectionControl.value;
-    const productId = selectedProduct['productId'] || selectedSk;   
+    const productId = selectedProduct['productId'] || selectedProduct['sk'];   
     this.productSelected.emit({
       productId: String(productId),
       productName: selectedProduct['displayName'] || '',
