@@ -1,1 +1,10 @@
+// Matches the accent stripe used on the pass check-in cards.
+.booking-card {
+  border-left-width: 4px !important;
+}
 
+@media (max-width: 768px) {
+  .booking-card {
+    border-left-width: 0px !important;
+  }
+}

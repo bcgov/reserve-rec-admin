@@ -50,4 +50,39 @@ export class CustomerService {
       throw error;
     }
   }
+
+  /**
+   * Fetch every booking belonging to a customer, identified by their Cognito sub.
+   * `lastEvaluatedKey` is echoed back from a previous response to fetch the next page.
+   */
+  async getCustomerBookings(
+    sub: string,
+    opts: {
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+      lastEvaluatedKey?: any;
+    } = {}
+  ) {
+    try {
+      const queryParams: any = {};
+      if (opts.startDate) queryParams.startDate = opts.startDate;
+      if (opts.endDate) queryParams.endDate = opts.endDate;
+      if (opts.limit) queryParams.limit = opts.limit;
+      if (opts.lastEvaluatedKey) {
+        queryParams.lastEvaluatedKey = JSON.stringify(opts.lastEvaluatedKey);
+      }
+
+      const res = await firstValueFrom(
+        this.apiService.get(
+          `bookings/admin/user/${encodeURIComponent(sub)}`,
+          Object.keys(queryParams).length ? queryParams : null
+        )
+      ) as ApiResponse;
+      return res;
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 }

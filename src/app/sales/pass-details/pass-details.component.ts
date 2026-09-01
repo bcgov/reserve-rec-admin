@@ -5,6 +5,15 @@ import { ApiService } from '../../services/api.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
 import { lastValueFrom } from 'rxjs';
+import {
+  formatBookedDate,
+  getCardBorderClass,
+  getDisplayStatus,
+  getLocation,
+  getPartySize,
+  getProductDisplayName,
+  getStatusBgClass,
+} from '../../utils/booking-status';
 
 @Component({
   selector: 'app-pass-details',
@@ -66,48 +75,17 @@ export class PassDetailsComponent {
   }
 
   getDisplayStatus(booking: any): string {
-    if (booking.status === 'cancelled') return 'Cancelled';
-
-    const now = Date.now();
-    const checkInTime = booking.reservationContext?.checkInTime 
-      ? new Date(booking.reservationContext.checkInTime).getTime() 
-      : null;
-    const checkOutTime = booking.reservationContext?.checkOutTime 
-      ? new Date(booking.reservationContext.checkOutTime).getTime() 
-      : null;
-
-    if (checkInTime && now < checkInTime) {
-      return 'Reserved';
-    }
-
-    if (checkOutTime && now > checkOutTime) {
-      return 'Expired';
-    }
-
-    return 'Active';
-  }
-
-  // Color mappings via standard Bootstrap classes.
-  // Update the class strings below if you need customized colors!
-  private readonly statusStyles = {
-    'Active': { bg: 'bg-success text-white', border: 'border-success' },
-    'Expired': { bg: 'bg-secondary text-white', border: 'border-secondary' },
-    'Cancelled': { bg: 'bg-danger text-white', border: 'border-danger' },
-    'Reserved': { bg: 'bg-warning text-dark', border: 'border-warning' }
-  };
-
-  getStatusClasses(booking: any) {
-    return this.statusStyles[this.getDisplayStatus(booking)] || this.statusStyles['Reserved'];
+    return getDisplayStatus(booking);
   }
 
   // Get the CSS class for the status badge/mobile header based on booking status
   getStatusBgClass(booking: any): string {
-    return this.getStatusClasses(booking).bg;
+    return getStatusBgClass(booking);
   }
 
   // Get the CSS class for the card border based on booking status
   getCardBorderClass(booking: any): string {
-    return this.getStatusClasses(booking).border;
+    return getCardBorderClass(booking);
   }
 
   // Check and display the check-in status of the booking
@@ -134,13 +112,7 @@ export class PassDetailsComponent {
 
   // Get the party size for a booking, calculating from party information (if available)
   getPartySize(booking: any): number {
-    if (booking.partySize) return booking.partySize;
-    const p = booking.partyInformation;
-    if (p) {
-      return (p.adult || 0) + (p.senior || 0) + (p.youth || 0) + (p.child || 0);
-    }
-    if (booking.quantity) return booking.quantity;
-    return booking['numberOfGuests'] || 0;
+    return getPartySize(booking);
   }
 
   // Get a human-readable label for the activity type (known activity types)
@@ -168,21 +140,12 @@ export class PassDetailsComponent {
 
   // Get the location string for a booking, combining facility and entry point if available
   getLocation(booking: any): string {
-    const facilityName = booking?.facilityDisplayName ? booking?.facilityDisplayName : '';
-    const geozoneName = booking?.geozoneDisplayName ? booking?.geozoneDisplayName : '';
-    return `${geozoneName}${facilityName ? ', ' + facilityName : ''}`;
+    return getLocation(booking);
   }
 
   // Format the booked date to be readable in the format of "2024-01-01"
   formatBookedDate(bookingCompletionTime: number): string {
-    if (!bookingCompletionTime) return 'N/A';
-    try {
-      const date = new Date(0);
-      date.setUTCSeconds(bookingCompletionTime / 1000);
-      return date.toISOString().split('T')[0];
-    } catch {
-      return 'N/A';
-    }
+    return formatBookedDate(bookingCompletionTime);
   }
 
   // Format the check in time to be readable in the format of "3:00 PM, 2024-01-01"
@@ -201,8 +164,7 @@ export class PassDetailsComponent {
   }
 
   getProductDisplayName(displayName): string {
-    const parts = displayName.split(',');
-    return parts[0]?.trim() || 'N/A';
+    return getProductDisplayName(displayName);
   }
 
   private handleError(message: string, error: any) {
