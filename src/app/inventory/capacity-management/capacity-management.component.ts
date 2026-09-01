@@ -100,7 +100,7 @@ export class CapacityManagementComponent implements OnInit {
       );
       this.generateCalendarDays();
       this.updateCalendarKey();
-      await this.loadInventoryPoolData();
+      await this.loadInventoryPoolData(false); // If your changing products clear the override badge
     } else {
       this.currentProduct = null;
       this.inventoryPoolsByDate.clear();
@@ -141,7 +141,7 @@ export class CapacityManagementComponent implements OnInit {
     this.updateCalendarKey();
   }
 
-  private async loadInventoryPoolData() {
+  private async loadInventoryPoolData(preserveManualEdits: boolean = true) {
     try {
       const collectionId = this.collectionControl.value;
       const productKey = this.productControl.value;
@@ -149,13 +149,15 @@ export class CapacityManagementComponent implements OnInit {
         return;
       }
       
-      // Preserve manuallyEdited flags before reload
+      // Preserve manuallyEdited flags before reload (only if requested, e.g., for month navigation)
       const preservedManuallyEdited = new Map<string, boolean>();
-      this.inventoryPoolsByDate.forEach((pools, dateKey) => {
-        if (pools[0]?.['manuallyEdited'] === true) {
-          preservedManuallyEdited.set(dateKey, true);
-        }
-      });
+      if (preserveManualEdits) {
+        this.inventoryPoolsByDate.forEach((pools, dateKey) => {
+          if (pools[0]?.['manuallyEdited'] === true) {
+            preservedManuallyEdited.set(dateKey, true);
+          }
+        });
+      }
       
       const productId = this.extractProductId(productKey);
       const year = this.currentMonth.getFullYear();

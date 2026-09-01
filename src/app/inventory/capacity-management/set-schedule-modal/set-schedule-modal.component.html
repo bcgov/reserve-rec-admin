@@ -40,6 +40,19 @@
             ></ngds-date-input>
           </div>
         </div>
+        <!-- Invalid Date Range Warning -->
+        <div *ngIf="!isValidDateRange() && (form.get('startDate')?.touched || form.get('endDate')?.touched)" class="alert alert-danger mt-3 mb-0">
+          <i class="fa fa-exclamation-circle me-2"></i>
+          <strong>Invalid Date Range</strong><br>
+          <p class="mb-0 mt-2">
+            <span *ngIf="!form.get('startDate')?.value || !form.get('endDate')?.value">
+              Both start and end dates are required.
+            </span>
+            <span *ngIf="form.get('startDate')?.value && form.get('endDate')?.value && form.get('endDate')?.value < form.get('startDate')?.value">
+              End date must be on or after the start date.
+            </span>
+          </p>
+        </div>
       </div>
 
       <!-- Days Section -->
