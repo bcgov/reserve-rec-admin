@@ -10,12 +10,13 @@ import { provideRouter } from '@angular/router';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authService: { isSuperAdmin: jest.Mock; hasPermission: jest.Mock };
 
   beforeEach(async () => {
-    authService = jasmine.createSpyObj('AuthService', ['isSuperAdmin', 'hasPermission']);
-    authService.hasPermission.and.returnValue(false);
-    authService.isSuperAdmin.and.returnValue(false);
+    authService = {
+      isSuperAdmin: jest.fn().mockReturnValue(false),
+      hasPermission: jest.fn().mockReturnValue(false),
+    };
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
@@ -50,14 +51,16 @@ describe('HomeComponent', () => {
   });
 
   it('grants the dashboard to any user holding a role', () => {
-    authService.hasPermission.and.returnValue(true);
+    authService.hasPermission.mockReturnValue(true);
 
     expect(component.resolveAccess()).toBe(true);
   });
 
   it('shows the dashboard to a user with access', () => {
-    expect(render(true, true)).toContain('Reservations System');
-    expect(render(true, true)).not.toContain('No Access');
+    const text = render(true, true);
+
+    expect(text).toContain('Reservations System');
+    expect(text).not.toContain('No Access');
   });
 
   it('still shows No Access to an authenticated user with no role', () => {
