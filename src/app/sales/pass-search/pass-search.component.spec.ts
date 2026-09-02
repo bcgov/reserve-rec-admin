@@ -16,11 +16,7 @@ describe('PassSearchComponent', () => {
   const fixedDate = new Date('2026-06-11T00:00:00Z');
 
   function createMockFn(implementation: (...args: any[]) => any) {
-    if (typeof jest !== 'undefined') {
-      return jest.fn(implementation);
-    }
-
-    return jasmine.createSpy().and.callFake(implementation);
+    return jest.fn(implementation);
   }
 
   function setMockReturnValue(mockFn: any, value: any) {
