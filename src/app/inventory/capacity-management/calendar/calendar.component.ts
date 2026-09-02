@@ -106,5 +106,37 @@ export class CalendarComponent {
     const poolData = this.getInventoryPoolDataForDay(day);
     return poolData?.['manuallyEdited'] === true;
   }
+
+  isDateInPast(day: CalendarDay): boolean {
+    // Get today's date at midnight (start of day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Compare with the day's date
+    return day.date < today;
+  }
+
+  isToggleDisabled(day: CalendarDay): boolean {
+    // Can't toggle if date is in past
+    if (this.isDateInPast(day)) {
+      return true;
+    }
+    
+    const poolData = this.getInventoryPoolDataForDay(day);
+    
+    // Can't toggle OFF (close) if there are bookings
+    if (poolData?.isOpen && this.hasBookings(poolData)) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  hasBookings(poolData: InventoryPoolData | undefined): boolean {
+    if (!poolData) return false;
+    // Bookings exist if available < capacity
+    const booked = (poolData.capacity || 0) - (poolData.available || 0);
+    return booked > 0;
+  }
 }
 

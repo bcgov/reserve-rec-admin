@@ -8,22 +8,26 @@
       </div>
       
       <!-- Toggle slider for dates in range -->
-      <div class="toggle-slider-container">
+      <!-- IF IN THE PAST, OR THERE ARE BOOKINGS DONT LET SOMEONE CLOSE IT -->
+       
+      <div class="toggle-slider-container" [class.opacity-50]="isToggleDisabled(day)">
         <input
           [id]="'toggle-' + formatDateKey(day.date)"
           type="checkbox"
           class="toggle-slider-checkbox"
           [checked]="getInventoryPoolDataForDay(day)?.isOpen"
           (change)="onToggleReservation(day)"
+          [disabled]="isToggleDisabled(day)"
+          [title]="(getInventoryPoolDataForDay(day)?.isOpen && hasBookings(getInventoryPoolDataForDay(day))) ? 'Cannot close: passes are booked for this date' : ''"
           [attr.aria-label]="getInventoryPoolDataForDay(day)?.isOpen ? 'Park Open' : 'Park Closed'"
         />
         <label [for]="'toggle-' + formatDateKey(day.date)" class="toggle-slider" [ngClass]="'toggle-' + getToggleStatusClass(getInventoryPoolDataForDay(day))"></label>
       </div>
       
-      <!-- Edit icon -->
-      <i *ngIf="getInventoryPoolDataForDay(day)" class="fa-solid fa-pen text-muted cursor-pointer" role="button" tabindex="0" (click)="onEditCapacity(day, $event)" (keydown.enter)="onEditCapacity(day, $event)" (keydown.space)="onEditCapacity(day, $event)" style="font-size: 0.9rem; cursor: pointer;"></i>
-      <!-- Placeholder to maintain spacing when no pool data -->
-      <div *ngIf="!getInventoryPoolDataForDay(day)" style="width: 0.9rem;"></div>
+      <!-- Edit icon - disabled when closed -->
+      <i *ngIf="getInventoryPoolDataForDay(day) && !isDateInPast(day)" class="fa-solid fa-pen cursor-pointer" role="button" tabindex="0" (click)="getInventoryPoolDataForDay(day)?.isOpen && onEditCapacity(day, $event)" (keydown.enter)="getInventoryPoolDataForDay(day)?.isOpen && onEditCapacity(day, $event)" (keydown.space)="getInventoryPoolDataForDay(day)?.isOpen && onEditCapacity(day, $event)" style="font-size: 0.9rem; cursor: pointer;" [class.text-muted]="getInventoryPoolDataForDay(day)?.isOpen" [class.opacity-50]="!getInventoryPoolDataForDay(day)?.isOpen" [style.cursor]="getInventoryPoolDataForDay(day)?.isOpen ? 'pointer' : 'not-allowed'"></i>
+      <!-- Placeholder to maintain spacing when no pool data or past date -->
+      <div *ngIf="!getInventoryPoolDataForDay(day) || isDateInPast(day)" style="width: 0.9rem;"></div>
     </div>
 
     <!-- Top row for out-of-range dates (just date number) -->
@@ -34,8 +38,12 @@
     </div>
     
     <!-- Out of product range - clickable placeholder to add capacity and extend range -->
-    <div *ngIf="day.isCurrentMonth && !isDateInProductRange(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 w-100 text-center cursor-pointer small text-muted flex-grow-1 d-flex align-items-center justify-content-center" role="button" tabindex="0" (click)="onEditOutOfRangeDate(day, $event)" (keydown.enter)="onEditOutOfRangeDate(day, $event)" (keydown.space)="onEditOutOfRangeDate(day, $event)">
+    <div *ngIf="day.isCurrentMonth && !isDateInProductRange(day) && !isDateInPast(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 w-100 text-center cursor-pointer small text-muted flex-grow-1 d-flex align-items-center justify-content-center" role="button" tabindex="0" (click)="onEditOutOfRangeDate(day, $event)" (keydown.enter)="onEditOutOfRangeDate(day, $event)" (keydown.space)="onEditOutOfRangeDate(day, $event)">
       <span class="add-capacity-text d-block">Click to add capacity</span>
+    </div>
+    <!-- Past date placeholder (non-editable) -->
+    <div *ngIf="day.isCurrentMonth && !isDateInProductRange(day) && isDateInPast(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 w-100 text-center small text-muted flex-grow-1 d-flex align-items-center justify-content-center opacity-50" style="cursor: not-allowed;">
+      <span class="add-capacity-text d-block">Past date</span>
     </div>
 
     <!-- Passes info for existing inventory pools - centered at 75% width -->
@@ -51,8 +59,12 @@
     </div>
 
     <!-- Empty placeholder for dates in range without inventory pools (clickable to add) -->
-    <div *ngIf="day.isCurrentMonth && isDateInProductRange(day) && !getInventoryPoolDataForDay(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 text-center cursor-pointer small text-muted flex-grow-1 d-flex align-items-center justify-content-center" role="button" tabindex="0" style="width: 75%; margin: 0 auto; cursor: pointer;" (click)="onEditEmptyDate(day, $event)" (keydown.enter)="onEditEmptyDate(day, $event)" (keydown.space)="onEditEmptyDate(day, $event)">
+    <div *ngIf="day.isCurrentMonth && isDateInProductRange(day) && !getInventoryPoolDataForDay(day) && !isDateInPast(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 text-center cursor-pointer small text-muted flex-grow-1 d-flex align-items-center justify-content-center" role="button" tabindex="0" style="width: 75%; margin: 0 auto; cursor: pointer;" (click)="onEditEmptyDate(day, $event)" (keydown.enter)="onEditEmptyDate(day, $event)" (keydown.space)="onEditEmptyDate(day, $event)">
       <span class="add-capacity-text d-block">Click to add capacity</span>
+    </div>
+    <!-- Past date in range placeholder (non-editable) -->
+    <div *ngIf="day.isCurrentMonth && isDateInProductRange(day) && !getInventoryPoolDataForDay(day) && isDateInPast(day)" class="empty-capacity-placeholder bg-light border border-2 border-dashed rounded p-2 text-center small text-muted flex-grow-1 d-flex align-items-center justify-content-center opacity-50" style="width: 75%; margin: 0 auto; cursor: not-allowed;">
+      <span class="add-capacity-text d-block">Past date</span>
     </div>
 
     <!-- Override badge (always reserves space) - moved to bottom -->

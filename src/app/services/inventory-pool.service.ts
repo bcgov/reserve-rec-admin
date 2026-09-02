@@ -45,12 +45,19 @@ export class InventoryPoolService {
     capacity: number,
     editMode: 'manual' | 'bulk' = 'bulk',
     notes?: string,
-    preCloseCapacity?: number
+    preCloseCapacity?: number,
+    clearManualEdit: boolean = false,
+    isOpen?: boolean
   ) {
     const queryParams: Record<string, string> = {
       'date': date,
       'editMode': editMode
     };
+
+    // Add clearManualEdit flag to query params if requested
+    if (clearManualEdit) {
+      queryParams['clearManualEdit'] = 'true';
+    }
 
     const body: any = {
       capacity: capacity
@@ -64,6 +71,11 @@ export class InventoryPoolService {
     // Add notes if provided
     if (notes !== undefined && notes !== null) {
       body.notes = notes;
+    }
+
+    // Add isOpen if provided (when toggling or explicitly setting state)
+    if (isOpen !== undefined && isOpen !== null) {
+      body.isOpen = isOpen;
     }
 
     try {

@@ -14,13 +14,18 @@
         formControlName="capacity"
         (input)="onNumericInput($event, 'capacity')"
         placeholder="Enter new capacity"
+        [class.is-invalid]="!isCapacityValid() && form.get('capacity')?.touched"
       />
       <div class="invalid-feedback d-block text-danger small mt-1" *ngIf="form.get('capacity')?.invalid && form.get('capacity')?.touched">
         Capacity must be a non-negative number
       </div>
+      <div class="invalid-feedback d-block text-danger small mt-1" *ngIf="!isCapacityValid() && form.get('capacity')?.touched">
+        {{ getCapacityErrorMessage() }}
+      </div>
       <small class="text-muted d-block mt-2">
         <strong>Current Capacity:</strong> {{ originalPoolData.capacity }}<br>
-        <strong>Current Available:</strong> {{ originalPoolData.available }}
+        <strong>Current Available:</strong> {{ originalPoolData.available }}<br>
+        <strong>Currently Booked:</strong> {{ (originalPoolData.capacity || 0) - (originalPoolData.available || 0) }}
       </small>
     </div>
 
@@ -59,7 +64,7 @@
       type="button"
       class="btn btn-primary"
       (click)="save()"
-      [disabled]="form.invalid || !form.dirty"
+      [disabled]="form.invalid || !form.dirty || !isCapacityValid()"
     >
       Save Changes
     </button>

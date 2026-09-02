@@ -188,7 +188,7 @@ export class CapacityManagementComponent implements OnInit {
             capacity: capacity,
             availability: availability,
             available: availability,
-            isOpen: capacity === 0 && availability === 0 ? false : (pool.isOpen !== false),
+            isOpen: pool.isOpen !== false,
             ...pool
           };
           // Restore manuallyEdited flag if it was set before reload
@@ -389,7 +389,7 @@ export class CapacityManagementComponent implements OnInit {
     }
   }
 
-  private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string): Promise<boolean> {
+  private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
     try {
       const dateKey = day.date.toISOString().split('T')[0];
       const collectionId = this.collectionControl.value;
@@ -459,7 +459,8 @@ export class CapacityManagementComponent implements OnInit {
           capacity,
           isManualEdit ? 'manual' : 'bulk',
           notes,
-          isManualEdit ? oldCapacity : undefined 
+          isManualEdit ? oldCapacity : undefined,
+          clearManualEdit
         );
 
         if (existingPool) {
@@ -470,6 +471,10 @@ export class CapacityManagementComponent implements OnInit {
           // Only mark give override badge for manual edits (not for toggles or bulk updates)
           if (isManualEdit) {
             existingPool['manuallyEdited'] = true;
+          }
+          // Clear manual edit flag if requested (e.g., when applying schedule that overwrites overrides)
+          if (clearManualEdit) {
+            existingPool['manuallyEdited'] = false;
           }
           if (notes) {
             existingPool['notes'] = notes;
@@ -576,9 +581,21 @@ export class CapacityManagementComponent implements OnInit {
   private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false): Promise<void> {
     const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
     const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
+    
+    // Get today's date string for comparison (YYYY-MM-DD format)
+    const today = new Date();
+    const todayKey = today.toISOString().split('T')[0];
+    
     const current = new Date(start);
     while (current <= end) {
       const dateKey = current.toISOString().split('T')[0];
+      
+      // Skip dates before today (but allow today)
+      if (dateKey < todayKey) {
+        current.setDate(current.getDate() + 1);
+        continue;
+      }
+      
       const hasOverrideBadge = overrideBadgeDateSet.has(dateKey);
       const hasExistingCapacity = existingCapacityDateSet.has(dateKey);
       const isManualOverride = hasOverrideBadge;
@@ -591,7 +608,9 @@ export class CapacityManagementComponent implements OnInit {
         if (dayConfig) {
           const capacity = dayConfig.passesRequired ? dayConfig.defaultCapacity : 0;
           const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
-          await this.updateSingleDay(day, capacity);
+          // If overwriting a manual override, clear the manual edit flag
+          const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+          await this.updateSingleDay(day, capacity, false, undefined, clearManualEdit);
         }
       }
       current.setDate(current.getDate() + 1);
@@ -639,9 +658,15 @@ export class CapacityManagementComponent implements OnInit {
         if (pool['preCloseCapacity'] !== undefined) {
           newCapacity = pool['preCloseCapacity'];
         }
+        // If no preCloseCapacity, keep current capacity (could be 0 from schedule)
         preCloseCapacityValue = null; 
       }
-      if (newCapacity !== pool.capacity) {
+      
+      // Update if capacity changed OR if we're toggling the open state
+      const isCapacityChanging = newCapacity !== pool.capacity;
+      const isTogglingState = finalNewState !== pool.isOpen;
+      
+      if (isCapacityChanging || isTogglingState) {
         try {
           const response = await this.inventoryPoolService.updateInventoryPool(
             collectionId,
@@ -652,7 +677,9 @@ export class CapacityManagementComponent implements OnInit {
             newCapacity,
             'bulk',
             undefined,
-            preCloseCapacityValue // Send appropriate preCloseCapacity (save on close, clear on open)
+            preCloseCapacityValue, // Send appropriate preCloseCapacity (save on close, clear on open)
+            false, // clearManualEdit
+            finalNewState // Send the toggle state (isOpen)
           );
           const oldCapacity = pool.capacity || 0;
           const capacityDelta = newCapacity - oldCapacity;
