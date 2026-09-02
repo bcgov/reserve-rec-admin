@@ -32,31 +32,64 @@
         <div class="mb-2">
           <strong>Last Updated:</strong> {{data?.lastUpdated | date:'short'}}
         </div>
-        <div
-          *ngIf="data?.collectionId || data?.collectionId || data?.collectionId"
-          class="mb-2"
-        >
-          <strong>Collection ID: </strong>
-          <div class="badge bg-secondary">{{data?.collectionId || data?.collectionId || data?.collectionId || 'No
-            ID available.'}}</div>
-        </div>
-        <div *ngIf="data?.facilityType">
-          <strong>Facility Type: </strong>
-          <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.facilityType}}</span>
-        </div>
-        <div *ngIf="data?.activityType">
-          <strong>Activity Type: </strong>
-          <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.activityType}}</span>
-        </div>
+        @if(data?.collectionId || data?.collectionId || data?.collectionId) {
+          <div class="mb-2">
+            <strong>Collection ID: </strong>
+            <div class="badge bg-secondary">{{data?.collectionId || data?.collectionId || data?.collectionId || 'No ID available.'}}</div>
+          </div>
+        }
+        @if(data?.facilityType) {
+          <div>
+            <strong>Facility Type: </strong>
+            <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.facilityType}}</span>
+          </div>
+        }
+        @if(data?.activityType) {
+          <div>
+            <strong>Activity Type: </strong>
+            <span class="badge" [ngClass]="getBadgeClass(data?.schema)">{{data?.activityType}}</span>
+          </div>
+        }
+        @if(data?.isVisible === true || data?.isVisible === false) {
+          <div class="my-2 ms-1">
+            @if(data?.isVisible === true) {
+              <i class="fa-solid fa-eye fa-lg"></i>
+              <!-- <p class="mb-0 small">Visible to public</p> -->
+            } @else {
+              <i class="fa-solid fa-eye-slash fa-lg"></i>
+              <!-- <p class="mb-0 small">Not visible to public</p> -->
+            }
+          </div>
+        }
+        @if(data?.isOpen === true || data?.isOpen === false) {
+          <div>
+            @if(data?.isOpen === true) {
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzMvd3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iMTIiIGZpbGw9IiMwMDMzNjYiLz4KPHJlY3QgeD0iNS44MjAzMSIgeT0iNS44MTY0MSIgd2lkdGg9IjEyLjM2MzYiIGhlaWdodD0iMTIuMzYzNiIgcng9IjYuMTgxODIiIGZpbGw9IiNBN0QyRkYiLz4KPC9zdmc+Cg=="
+                alt=""
+                class="me-2"
+                >
+                <span class="fw-bold pt-2">Open</span>
+            } @else {
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iMTIiIGZpbGw9IiNEODI5MkYiLz4KPHJlY3QgeD0iNS44MjAzMSIgeT0iNS44MTY0MSIgd2lkdGg9IjEyLjM2MzYiIGhlaWdodD0iMTIuMzYzNiIgcng9IjYuMTgxODIiIGZpbGw9IiNGMEI0QjYiLz4KPC9zdmc+Cg=="
+                alt=""
+                class="me-2"
+                >
+                <span class="fw-bold pt-2">Closed</span>
+            }
+          </div>
+        }
       </div>
       <div class="col-auto">
-        <img
-          *ngIf="data?.imageUrl"
-          [src]="data.imageUrl"
-          alt="{{data.displayName}} image"
-          class="img-fluid rounded"
-          style="max-width: 150px; max-height: 150px;"
-        />
+        @if(data?.imageUrl) {
+          <img
+            [src]="data.imageUrl"
+            alt="{{data.displayName}} image"
+            class="img-fluid rounded"
+            style="max-width: 150px; max-height: 150px;"
+          />
+        }
       </div>
     </div>
   </div>
