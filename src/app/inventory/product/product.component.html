@@ -64,5 +64,5 @@
   <div *ngIf="subtype?.value" class="badge bg-info text-dark d-inline-flex align-items-center px-2 me-2 mb-2">
     <h6 *ngIf="subtype" class="mb-0">{{subtype?.display}}</h6>
   </div>
-  <span class="d-inline-flex ms-2 mt-2 p2">Last edited {{ data?.lastUpdated | date:'YYYY-LL-dd, h:mma' }}</span>
+  <span class="d-inline-flex ms-2 mt-2 p2">Last edited {{ data?.lastUpdated | date:'yyyy-LL-dd, h:mma' }}</span>
 </ng-template>
