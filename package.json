@@ -15,7 +15,7 @@
     "deploy:test": "cdk deploy -c @context=test --all",
     "lint": "ng lint",
     "test": "jest",
-    "test-ci": "ng test --watch=false",
+    "test-ci": "jest --runInBand",
     "sandbox:setup": "./scripts/sandbox-setup.sh",
     "sandbox:teardown": "./scripts/sandbox-teardown.sh",
     "sandbox:synth": "cdk synth -c @context=dev -c sandboxName=${SANDBOX_NAME} --all",

@@ -49,7 +49,7 @@ export class CapacityFiltersComponent implements OnInit {
   collections: CollectionDropdownOption[] = [];
   facilities: DropdownOption[] = [];
   products: DropdownOption[] = [];
-  private facilitiesMap: Map<string, any> = new Map(); // Map to store facilities by pk
+  private facilitiesMap: Map<string, any> = new Map(); // Map to store facilities by pk 
   private productsMap: Map<string, any> = new Map(); // Map to store products by pk::sk
 
   // Output events
@@ -110,7 +110,7 @@ export class CapacityFiltersComponent implements OnInit {
       )
       .subscribe((value) => {this.onProductChange();});
   }
-
+ 
   private async loadCollections() {
     try {
       // Try cache first
@@ -147,7 +147,7 @@ export class CapacityFiltersComponent implements OnInit {
   async onCollectionChange() {
     this.collectionChanged.emit();
     this.facilityControl.setValue('', { emitEvent: false });
-    this.productControl.setValue('', { emitEvent: false });
+    this.productControl.setValue('', { emitEvent: true });
     this.facilities = [];
     this.facilitiesMap.clear();
     this.products = [];
@@ -167,7 +167,7 @@ export class CapacityFiltersComponent implements OnInit {
     try {
       const facilitiesData = await this.facilityService.getFacilitiesByCollectionId(collectionId);
       this.facilities = this.extractArrayFromResponse(facilitiesData);
-      
+
       // Populate the facilities map for quick lookup by composite key (pk::sk)
       this.facilitiesMap.clear();
       for (const facility of this.facilities) {
@@ -182,7 +182,7 @@ export class CapacityFiltersComponent implements OnInit {
 
   async onFacilityChange() {
     this.facilityChanged.emit();
-    this.productControl.setValue('', { emitEvent: false });
+    this.productControl.setValue('', { emitEvent: true });
     this.products = [];
     this.productsMap.clear();
     const selectedFacilityId = this.facilityControl.value;
