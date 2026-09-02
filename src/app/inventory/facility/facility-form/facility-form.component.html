@@ -60,6 +60,22 @@
             </div>
           </div>
 
+          <div class="row mt-2" *ngIf="!form.get('isOpen')?.value">
+            <div class="col-12 col-lg-6">
+              <ngds-text-input class="mb-3"
+                [control]="form.get('closureStatus')"
+                [label]="'Closure status'"
+                [placeholder]="'e.g. Full closure, Partial closure'">
+              </ngds-text-input>
+              <ngds-text-input class="mb-3"
+                [control]="form.get('closureReason')"
+                [label]="'Closure reason'"
+                [multiline]="true"
+                [placeholder]="'Reason for the closure'">
+              </ngds-text-input>
+            </div>
+          </div>
+
           <div class="row mt-2">
             <div class="col-12 col-lg-6 d-flex align-items-end justify-content-start gap-3">
               <div class="toggle-wrapper">

@@ -119,6 +119,8 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
       facilitySubType: [this.facility?.facilitySubType || null],
       geozones: [this.facility?.geozones || []],
       isOpen: [this.facility?.isOpen || false],
+      closureStatus: [this.facility?.closureStatus || ''],
+      closureReason: [this.facility?.closureReason || ''],
       isVisible: [this.facility?.isVisible || false],
       location: this.fb.group({
         latitude: [
