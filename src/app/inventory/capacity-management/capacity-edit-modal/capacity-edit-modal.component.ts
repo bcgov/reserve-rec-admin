@@ -61,6 +61,21 @@ export class CapacityEditModalComponent implements OnInit {
     this.calculatedAvailability = Math.max(0, Math.min(this.calculatedAvailability, newCapacity));
   }
 
+  isCapacityValid(): boolean {
+    const newCapacity = this.parseCapacity(this.form.value.capacity);
+    // Capacity cannot be reduced below the booked amount
+    const booked = (this.originalPoolData.capacity || 0) - (this.originalPoolData.available || 0);
+    return newCapacity >= booked;
+  }
+
+  getCapacityErrorMessage(): string {
+    if (!this.isCapacityValid()) {
+      const booked = (this.originalPoolData.capacity || 0) - (this.originalPoolData.available || 0);
+      return `Capacity cannot be less than ${booked} (currently booked passes). Please increase capacity or cancel bookings.`;
+    }
+    return '';
+  }
+
   onNumericInput(event: Event, fieldName: string): void {
     const input = event.target as HTMLInputElement;
     const numericValue = input.value.replace(/[^0-9]/g, '');
