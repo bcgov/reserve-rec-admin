@@ -219,6 +219,9 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
   onSearchTermsChange(searchTerms: string[]) {
     this.form.get('searchTerms')?.setValue(searchTerms);
     this.form.get('searchTerms')?.markAsDirty();
+    // Without this the [searchTerms] binding is not re-read, so the pill list and
+    // its "No search terms added" placeholder keep showing the pre-add state (#388).
+    this.cdr.detectChanges();
   }
 
   navigateToEntityRelationships() {
