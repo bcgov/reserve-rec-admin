@@ -17,11 +17,14 @@ export class InventoryPoolService {
     private loadingService: LoadingService
   ) { }
 
-  async getInventoryPools(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string, date?: string) {
+  async getInventoryPools(collectionId: string, activityType: string, activityId: string | number, productId: string | number, startDate?: string, endDate?: string, date?: string, includeCheckedIn = false) {
     const queryParams: Record<string, string> = {};
     if (startDate) queryParams['startDate'] = startDate;
     if (endDate) queryParams['endDate'] = endDate;
     if (date && !startDate && !endDate) queryParams['date'] = date;
+    // Asks the API to tally checked-in bookings per date alongside capacity,
+    // so the calendar gets it without a second request (#391).
+    if (includeCheckedIn) queryParams['includeCheckedIn'] = 'true';
 
     try {
       this.loadingService.addToFetchList(Constants.dataIds.INVENTORY_POOL_LIST);

@@ -56,6 +56,10 @@
         <span class="fw-semibold">Reserved:</span>
         <span>{{ poolData.capacity - poolData.available }}</span>
       </div>
+      <div class="d-flex justify-content-between w-100 small">
+        <span class="fw-semibold">Checked in:</span>
+        <span>{{ checkedInDisplay(day) }}</span>
+      </div>
     </div>
 
     <!-- Empty placeholder for dates in range without inventory pools (clickable to add) -->
