@@ -107,6 +107,34 @@ export class CalendarComponent {
     return poolData?.['manuallyEdited'] === true;
   }
 
+  /**
+   * Checked-in passes for a day, or 'NA' where a count means nothing (#391).
+   *
+   * A future date with nobody checked in shows NA rather than 0, per the
+   * ticket — 0 there would read as "nobody turned up" for a day that has not
+   * happened. A missing count also shows NA: the API only tallies when asked,
+   * and it drops the count rather than fail the request if the tally errors,
+   * so undefined means "not counted", not "none".
+   */
+  checkedInDisplay(day: CalendarDay): number | string {
+    const count = this.getInventoryPoolDataForDay(day)?.['checkedInCount'];
+
+    if (count === undefined || count === null) {
+      return 'NA';
+    }
+    if (count === 0 && this.isDateInFuture(day)) {
+      return 'NA';
+    }
+    return count;
+  }
+
+  isDateInFuture(day: CalendarDay): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return day.date > today;
+  }
+
   isDateInPast(day: CalendarDay): boolean {
     // Get today's date at midnight (start of day)
     const today = new Date();

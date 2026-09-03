@@ -172,7 +172,9 @@ export class CapacityManagementComponent implements OnInit {
         this.currentActivityId,
         productId,
         startDate,
-        endDate
+        endDate,
+        undefined,
+        true // include the checked-in tally (#391)
       );
       this.inventoryPoolsByDate.clear();
       if (inventoryPoolsData && Array.isArray(inventoryPoolsData)) {
