@@ -48,12 +48,6 @@ export class PermissionsService {
     this.permissions.set(null);
   }
 
-  // Send back if the user is staff (or superadmin) for conditional UI rendering
-  isAdmin() {
-    const perms = this.permissions();
-    return perms?.[this.allAccessRoleName] === this.allAccessRoleName;
-  }
-
   isSuperAdmin() {
     return this.permissions()?.[this.allAccessRoleName] === this.allAccessRoleName;
   }

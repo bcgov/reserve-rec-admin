@@ -2,7 +2,7 @@
   <app-login></app-login>
 </div>
 
-<div *ngIf="isAuthenticed && !isAdmin" class="mt-5">
+<div *ngIf="isAuthenticed && !hasAccess" class="mt-5">
   <div class="container">
       <div class="row">
         <div class="d-flex flex-column justify-content-center align-items-center mt-5">
@@ -13,7 +13,7 @@
   </div>
 </div>
 
-<div *ngIf="isAuthenticed && isAdmin" class="container py-4">
+<div *ngIf="isAuthenticed && hasAccess" class="container py-4">
   <div class="row mb-4">
     <div class="col">
       <h1 class="display-5">Reservations System</h1>

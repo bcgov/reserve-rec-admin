@@ -26,6 +26,9 @@ export class AuthService {
   get permissions() { return this.permissionsService.permissions; }
   get allAccessRoleName() { return this.permissionsService.allAccessRoleName; }
   isSuperAdmin() { return this.permissionsService.isSuperAdmin(); }
+  hasPermission(required: string, collectionId?: string) {
+    return this.permissionsService.hasPermission(required, collectionId);
+  }
 
   async init() {
     console.log('this.configService.config:', this.configService.config);

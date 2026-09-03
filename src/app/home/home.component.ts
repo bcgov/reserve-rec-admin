@@ -14,7 +14,7 @@ import { LoginComponent } from '../login/login.component';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   isAuthenticed = false;
-  isAdmin = false;
+  hasAccess = false;
   checkingSession = true;
 
   constructor(public authService: AuthService, private router: Router, protected cdr: ChangeDetectorRef) { }
@@ -23,12 +23,20 @@ export class HomeComponent implements OnInit, OnDestroy {
       // Check if user is already signed in, throws if not
       await getCurrentUser();
       this.isAuthenticed = true;
-      this.isAdmin = this.authService.isSuperAdmin();
+      this.hasAccess = this.resolveAccess();
     } catch (e) {
       console.log(e);
     } finally {
       this.checkingSession = false;
     }
+  }
+
+  // The dashboard is gated on having any role at all, not on superadmin:
+  // staff and limited users have access to other pages and were being shown
+  // "No Access" here (#395). 'limited' is the lowest tier, and hasPermission
+  // passes on any collection the user holds it for.
+  resolveAccess(): boolean {
+    return this.authService.hasPermission('limited');
   }
 
   goToLogin() {
