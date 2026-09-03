@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
+import { LoadalComponent } from '../../shared/components/loadal/loadal.component';
 import { CalendarComponent, CalendarDay, InventoryPoolData, CapacityEditEvent } from './calendar/calendar.component';
 import { CapacityEditModalComponent } from './capacity-edit-modal/capacity-edit-modal.component';
 import { SetScheduleModalComponent } from './set-schedule-modal/set-schedule-modal.component';
@@ -16,7 +17,7 @@ import { ToastService, ToastTypes } from '../../services/toast.service';
 
 @Component({
   selector: 'app-capacity-management',
-  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule, LoadalComponent],
   templateUrl: './capacity-management.component.html',
   styleUrls: ['./capacity-management.component.scss']
 })
@@ -25,6 +26,8 @@ export class CapacityManagementComponent implements OnInit {
     { label: 'Inventory', link: '/inventory' },
     { label: 'Pass Capacity' },
   ];
+
+  @ViewChild(LoadalComponent) loadal!: LoadalComponent;
 
   // Filter-related state (passed from filter component)
   filterForm!: FormGroup;
@@ -390,6 +393,7 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
+    this.loadal.show();
     try {
       const dateKey = day.date.toISOString().split('T')[0];
       const collectionId = this.collectionControl.value;
@@ -502,6 +506,8 @@ export class CapacityManagementComponent implements OnInit {
         ToastTypes.ERROR
       );
       return false;
+    } finally {
+      this.loadal.hide();
     }
   }
 
@@ -579,43 +585,48 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false): Promise<void> {
-    const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
-    const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
-    
-    // Get today's date string for comparison (YYYY-MM-DD format)
-    const today = new Date();
-    const todayKey = today.toISOString().split('T')[0];
-    
-    const current = new Date(start);
-    while (current <= end) {
-      const dateKey = current.toISOString().split('T')[0];
+    this.loadal.show();
+    try {
+      const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
+      const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
       
-      // Skip dates before today (but allow today)
-      if (dateKey < todayKey) {
-        current.setDate(current.getDate() + 1);
-        continue;
-      }
+      // Get today's date string for comparison (YYYY-MM-DD format)
+      const today = new Date();
+      const todayKey = today.toISOString().split('T')[0];
       
-      const hasOverrideBadge = overrideBadgeDateSet.has(dateKey);
-      const hasExistingCapacity = existingCapacityDateSet.has(dateKey);
-      const isManualOverride = hasOverrideBadge;
-      const isScheduledInventory = hasExistingCapacity && !hasOverrideBadge;
-      const skipDueToOverride = isManualOverride && !overwriteOverrides;
-      const skipDueToScheduled = isScheduledInventory && !overwriteExistingCapacity;
-      if (!skipDueToOverride && !skipDueToScheduled) {
-        const dayOfWeek = current.getUTCDay();
-        const dayConfig = days[dayOfWeek];
-        if (dayConfig) {
-          const capacity = dayConfig.passesRequired ? dayConfig.defaultCapacity : 0;
-          const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
-          // If overwriting a manual override, clear the manual edit flag
-          const clearManualEdit = hasOverrideBadge && overwriteOverrides;
-          await this.updateSingleDay(day, capacity, false, undefined, clearManualEdit);
+      const current = new Date(start);
+      while (current <= end) {
+        const dateKey = current.toISOString().split('T')[0];
+        
+        // Skip dates before today (but allow today)
+        if (dateKey < todayKey) {
+          current.setDate(current.getDate() + 1);
+          continue;
         }
+        
+        const hasOverrideBadge = overrideBadgeDateSet.has(dateKey);
+        const hasExistingCapacity = existingCapacityDateSet.has(dateKey);
+        const isManualOverride = hasOverrideBadge;
+        const isScheduledInventory = hasExistingCapacity && !hasOverrideBadge;
+        const skipDueToOverride = isManualOverride && !overwriteOverrides;
+        const skipDueToScheduled = isScheduledInventory && !overwriteExistingCapacity;
+        if (!skipDueToOverride && !skipDueToScheduled) {
+          const dayOfWeek = current.getUTCDay();
+          const dayConfig = days[dayOfWeek];
+          if (dayConfig) {
+            const capacity = dayConfig.passesRequired ? dayConfig.defaultCapacity : 0;
+            const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
+            // If overwriting a manual override, clear the manual edit flag
+            const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+            await this.updateSingleDay(day, capacity, false, undefined, clearManualEdit);
+          }
+        }
+        current.setDate(current.getDate() + 1);
       }
-      current.setDate(current.getDate() + 1);
+      await this.loadInventoryPoolData();
+    } finally {
+      this.loadal.hide();
     }
-    await this.loadInventoryPoolData();
   }
 
 
@@ -637,6 +648,7 @@ export class CapacityManagementComponent implements OnInit {
     const pool = pools[0];
     const finalNewState = newState !== undefined ? newState : !pool.isOpen;
 
+    this.loadal.show();
     try {
       const collectionId = this.collectionControl.value;
       const productId = this.extractProductId(this.productControl.value);
@@ -708,6 +720,8 @@ export class CapacityManagementComponent implements OnInit {
         'Toggle Failed',
         ToastTypes.ERROR
       );
+    } finally {
+      this.loadal.hide();
     }
   }
 
