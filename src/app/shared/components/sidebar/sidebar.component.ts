@@ -39,12 +39,24 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.sidebarService.isOpen$.subscribe((open) => (this.isOpen = open))
     );
-    // Collapse the mobile sidebar after navigating so it doesn't stay open
-    // over the page content.
+    // After navigating: collapse the mobile sidebar, and drop focus from the
+    // clicked nav link. A clicked link keeps DOM focus, and browser back/forward
+    // doesn't move it — the sidebar's `:focus` style is the same gold as the
+    // active link, so a stale focused link looks like a second active item.
     this.subscriptions.add(
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
-        .subscribe(() => this.sidebarService.close())
+        .subscribe(() => {
+          this.sidebarService.close();
+          const active = document.activeElement;
+          if (
+            active instanceof HTMLElement &&
+            active.closest('#sidebar') &&
+            !active.matches(':focus-visible') // keep real keyboard focus
+          ) {
+            active.blur();
+          }
+        })
     );
   }
 
