@@ -197,7 +197,7 @@
         type="button"
         class="btn btn-primary"
         (click)="onSave()"
-        [disabled]="!isValidDateRange()"
+        [disabled]="!isValidDateRange() || isStartDateInPast()"
       >
         Save Schedule
       </button>
