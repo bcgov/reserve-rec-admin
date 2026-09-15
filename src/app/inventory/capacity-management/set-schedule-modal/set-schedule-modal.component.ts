@@ -110,6 +110,18 @@ export class SetScheduleModalComponent implements OnInit {
     return endDate >= startDate;
   }
 
+  isStartDateInPast(): boolean {
+    const start = this.form.get('startDate')?.value;
+    if (!start) {
+      return false;
+    }
+    const startDate = this.parseDate(start);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    startDate.setHours(0, 0, 0, 0); 
+    return startDate < today; //Today not allowed
+  }
+
   private async checkForConflicts(): Promise<void> {
     if (!this.isValidDateRange()) {
       this.editedDates = [];
