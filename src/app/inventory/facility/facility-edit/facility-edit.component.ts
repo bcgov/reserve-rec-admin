@@ -71,6 +71,10 @@ export class FacilityEditComponent extends EntityEditBaseComponent {
       console.error('Error updating facility:', error);
     } finally {
       this.isSubmitting = false;
+      // The error path doesn't navigate, and with event coalescing the state
+      // change after the await isn't picked up on its own - flush it so the
+      // spinner in the Save button clears.
+      this.cdr.detectChanges();
     }
   }
 

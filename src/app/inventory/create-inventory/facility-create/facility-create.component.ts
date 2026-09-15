@@ -72,6 +72,10 @@ export class FacilityCreateComponent {
       console.error('Error creating facility:', error);
     } finally {
       this.isSubmitting = false;
+      // The error path doesn't navigate, and with event coalescing the state
+      // change after the await isn't picked up on its own - flush it so the
+      // spinner in the Create button clears.
+      this.cdr.detectChanges();
     }
   }
 
