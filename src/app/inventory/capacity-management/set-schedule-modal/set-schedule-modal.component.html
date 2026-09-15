@@ -40,18 +40,27 @@
             ></ngds-date-input>
           </div>
         </div>
-        <!-- Invalid Date Range Warning -->
-        <div *ngIf="!isValidDateRange() && (form.get('startDate')?.touched || form.get('endDate')?.touched)" class="alert alert-danger mt-3 mb-0">
-          <i class="fa fa-exclamation-circle me-2"></i>
-          <strong>Invalid Date Range</strong><br>
-          <p class="mb-0 mt-2">
-            <span *ngIf="!form.get('startDate')?.value || !form.get('endDate')?.value">
-              Both start and end dates are required.
-            </span>
-            <span *ngIf="form.get('startDate')?.value && form.get('endDate')?.value && form.get('endDate')?.value < form.get('startDate')?.value">
-              End date must be on or after the start date.
-            </span>
-          </p>
+        <!-- Date Range Validation Warnings -->
+        <div *ngIf="(!isValidDateRange() && (form.get('startDate')?.touched || form.get('endDate')?.touched)) || (isStartDateInPast() && form.get('startDate')?.touched)" [ngClass]="isValidDateRange() ? 'alert alert-warning' : 'alert alert-danger'" class="mt-3 mb-0">
+          <ng-container *ngIf="!isValidDateRange() && (form.get('startDate')?.touched || form.get('endDate')?.touched)">
+            <i class="fa fa-exclamation-circle me-2"></i>
+            <strong>Invalid Date Range</strong><br>
+            <p class="mb-0 mt-2">
+              <span *ngIf="!form.get('startDate')?.value || !form.get('endDate')?.value">
+                Both start and end dates are required.
+              </span>
+              <span *ngIf="form.get('startDate')?.value && form.get('endDate')?.value && form.get('endDate')?.value < form.get('startDate')?.value">
+                End date must be on or after the start date.
+              </span>
+            </p>
+          </ng-container>
+          <ng-container *ngIf="isValidDateRange() && isStartDateInPast() && form.get('startDate')?.touched">
+            <i class="fa fa-exclamation-triangle me-2"></i>
+            <strong>Start Date in Past</strong><br>
+            <p class="mb-0 mt-2">
+              The start date is in the past. Schedules can only apply to future dates.
+            </p>
+          </ng-container>
         </div>
       </div>
 
@@ -188,7 +197,7 @@
         type="button"
         class="btn btn-primary"
         (click)="onSave()"
-        [disabled]="!isValidDateRange()"
+        [disabled]="!isValidDateRange() || isStartDateInPast()"
       >
         Save Schedule
       </button>
