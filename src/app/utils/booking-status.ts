@@ -105,15 +105,12 @@ export function isPastBooking(booking: any): boolean {
 // partyContext (partyInformation on the OpenSearch documents); quantity is the
 // last-resort fallback for records that never carried a breakdown.
 export function getPartySize(booking: any): number {
-  console.log('Getting party size for booking:', booking);
+
   if (typeof booking?.invQuantity === 'number') {
-    console.log('Booking invQuantity:', booking?.invQuantity);
     return booking.invQuantity;
     }
   if (booking?.partySize) return booking.partySize;
-  console.log('Booking party size:', booking?.partySize);
   const party = booking?.partyContext || booking?.partyInformation;
-  console.log('Booking party context:', party);
   if (party) {
     const total =
       (party.adult || 0) +
@@ -125,7 +122,6 @@ export function getPartySize(booking: any): number {
   }
 
   if (booking?.quantity) return booking.quantity;
-  console.log('Booking quantity:', booking?.quantity);
   return booking?.['numberOfGuests'] || 0;
 }
 
