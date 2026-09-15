@@ -175,6 +175,7 @@ export const routes: Routes = [
     canActivate: [UserGuard, PermissionsGuard],
     data: { requiredPermission: 'limited' },
     resolve: { geozone: GeozoneResolver },
+    runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
