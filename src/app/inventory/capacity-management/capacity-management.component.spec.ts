@@ -70,6 +70,52 @@ describe('CapacityManagementComponent - updateSchedule', () => {
     expect(updateSingleDaySpy.mock.calls[0][1]).toBe(10);
   });
 
+  // #422 again: an unchecked day that already carries capacity from an earlier
+  // schedule stayed open, so a Mon/Wed/Fri schedule still read as every day on.
+  it('zeroes an unchecked day that already has capacity when overwriting is allowed', async () => {
+    const start = new Date('2026-09-14T00:00:00Z');
+    const end = new Date('2026-09-20T00:00:00Z');
+    const days = buildDays([1, 3, 5]); // Mon, Wed, Fri
+    const existing = [{ date: '2026-09-15', capacity: 10, booked: 0, lastUpdated: '' }]; // Tuesday
+
+    await (component as any).updateSchedule(start, end, days, [], false, existing, true);
+
+    const calls = updateSingleDaySpy.mock.calls.map((args: any[]) => [
+      args[0].date.toISOString().split('T')[0],
+      args[1]
+    ]);
+    expect(calls).toContainEqual(['2026-09-15', 0]);
+  });
+
+  it('leaves an unchecked day with existing capacity alone when overwriting is off', async () => {
+    const start = new Date('2026-09-14T00:00:00Z');
+    const end = new Date('2026-09-20T00:00:00Z');
+    const days = buildDays([1, 3, 5]);
+    const existing = [{ date: '2026-09-15', capacity: 10, lastUpdated: '' }];
+
+    await (component as any).updateSchedule(start, end, days, [], false, existing, false);
+
+    const dates = updateSingleDaySpy.mock.calls.map((args: any[]) => args[0].date.toISOString().split('T')[0]);
+    expect(dates).not.toContain('2026-09-15');
+  });
+
+  // The toggle refuses to close a day that has passes booked; a schedule that
+  // turns the day off must not wipe that capacity out either.
+  it('winds an unchecked day down to its booked passes rather than to zero', async () => {
+    const start = new Date('2026-09-14T00:00:00Z');
+    const end = new Date('2026-09-20T00:00:00Z');
+    const days = buildDays([1, 3, 5]); // Mon, Wed, Fri
+    const existing = [{ date: '2026-09-15', capacity: 10, booked: 4, lastUpdated: '' }];
+
+    await (component as any).updateSchedule(start, end, days, [], false, existing, true);
+
+    const calls = updateSingleDaySpy.mock.calls.map((args: any[]) => [
+      args[0].date.toISOString().split('T')[0],
+      args[1]
+    ]);
+    expect(calls).toContainEqual(['2026-09-15', 4]);
+  });
+
   it('never touches inventory when no day-of-week is checked', async () => {
     const start = new Date('2026-09-14T00:00:00Z');
     const end = new Date('2026-09-20T00:00:00Z');
