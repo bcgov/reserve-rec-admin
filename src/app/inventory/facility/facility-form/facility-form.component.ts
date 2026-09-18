@@ -54,7 +54,9 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
   public defaultFacilityName = 'New Facility';
   public defaultFacilityType = 'general';
   public facilitySubtypes = [];
-  private siblingFacilityNames: Set<string> = new Set();
+  // null => sibling names unknown (fetch failed); submit is blocked rather than
+  // letting a duplicate through, since the API doesn't enforce uniqueness
+  private siblingFacilityNames: Set<string> | null = new Set();
   public markerOptions = {
     displayName: this.defaultFacilityName,
     color: '#003366',
@@ -331,6 +333,9 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
     if (isOwnName) {
       return null;
     }
+    if (this.siblingFacilityNames === null) {
+      return { displayNameCheckUnavailable: true };
+    }
     return this.siblingFacilityNames.has(displayName) ? { duplicateDisplayName: true } : null;
   }
 
@@ -339,8 +344,15 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
       this.siblingFacilityNames = new Set();
       return;
     }
-    const res = await this.facilityService.getFacilitiesByCollectionId(collectionId);
-    const items = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+    // paginated: false - the check has to see every facility in the park, not just page 1
+    const res = await this.facilityService.getFacilitiesByCollectionId(collectionId, { paginated: false });
+    const items = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : null;
+    if (!items) {
+      this.siblingFacilityNames = null;
+      this.form.updateValueAndValidity({ emitEvent: false });
+      this.cdr.detectChanges();
+      return;
+    }
     this.siblingFacilityNames = new Set(
       items
         .filter((item) => item?.facilityId !== this.facility?.facilityId)
