@@ -15,6 +15,9 @@ interface DayCapacity {
 interface EditedDate {
   date: string;
   capacity: number;
+  // Passes already booked on that date, so a day the schedule turns off can be
+  // wound down to what is booked rather than to zero.
+  booked?: number;
   lastUpdated: string;
 }
 
@@ -110,6 +113,18 @@ export class SetScheduleModalComponent implements OnInit {
     return endDate >= startDate;
   }
 
+  isStartDateInPast(): boolean {
+    const start = this.form.get('startDate')?.value;
+    if (!start) {
+      return false;
+    }
+    const startDate = this.parseDate(start);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    startDate.setHours(0, 0, 0, 0); 
+    return startDate < today; //Today not allowed
+  }
+
   private async checkForConflicts(): Promise<void> {
     if (!this.isValidDateRange()) {
       this.editedDates = [];
@@ -139,16 +154,22 @@ export class SetScheduleModalComponent implements OnInit {
           capacity: pool.capacity || 0,
           lastUpdated: pool.lastUpdated
         }));
-      const dateCapacityMap = new Map<string, number>();
+      const dateCapacityMap = new Map<string, { capacity: number; booked: number }>();
       inventoryPoolsData.forEach((pool: any) => {
-        const existingCapacity = dateCapacityMap.get(pool.date) || 0;
-        dateCapacityMap.set(pool.date, Math.max(existingCapacity, pool.capacity || 0));
+        const existing = dateCapacityMap.get(pool.date) || { capacity: 0, booked: 0 };
+        const capacity = pool.capacity || 0;
+        const booked = Math.max(0, capacity - (pool.availability || 0));
+        dateCapacityMap.set(pool.date, {
+          capacity: Math.max(existing.capacity, capacity),
+          booked: Math.max(existing.booked, booked)
+        });
       });
       this.existingCapacityDates = Array.from(dateCapacityMap.entries())
-        .filter(([date, capacity]) => capacity > 0)
-        .map(([date, capacity]) => ({
+        .filter(([, pool]) => pool.capacity > 0)
+        .map(([date, pool]) => ({
           date,
-          capacity,
+          capacity: pool.capacity,
+          booked: pool.booked,
           lastUpdated: ''
         }));
     } catch (error) {
