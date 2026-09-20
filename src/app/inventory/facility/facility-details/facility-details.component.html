@@ -7,14 +7,6 @@
 
           <div class="row mt-2">
             <div class="col-12 d-flex align-items-center justify-content-start gap-3">
-              <i *ngIf="facility?.isOpen" class="fa-solid fa-door-open fa-lg"></i>
-              <i *ngIf="!facility?.isOpen" class="fa-solid fa-door-closed fa-lg"></i>
-              <p class="mb-0 small"> {{ facility?.isOpen ? 'Open' : 'Closed' }}</p>
-            </div>
-          </div>
-
-          <div class="row mt-2">
-            <div class="col-12 d-flex align-items-center justify-content-start gap-3">
               <i *ngIf="facility?.isVisible" class="fa-solid fa-eye fa-lg"></i>
               <i *ngIf="!facility?.isVisible" class="fa-solid fa-eye-slash fa-lg"></i>
               <p class="mb-0 small"> {{ facility?.isVisible ? 'Visible to public' : 'Not visible to public' }}</p>

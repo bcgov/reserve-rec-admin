@@ -591,6 +591,11 @@ export class CapacityManagementComponent implements OnInit {
     try {
       const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
       const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
+      // Passes already booked per date, so turning a day off winds it down to
+      // what is booked instead of wiping capacity out from under those passes.
+      const bookedByDate = new Map<string, number>(
+        existingCapacityDates.map((ed: any) => [ed.date, ed.booked || 0])
+      );
       
       // Get today's date string for comparison (YYYY-MM-DD format)
       const today = new Date();
@@ -615,12 +620,19 @@ export class CapacityManagementComponent implements OnInit {
         if (!skipDueToOverride && !skipDueToScheduled) {
           const dayOfWeek = current.getUTCDay();
           const dayConfig = days[dayOfWeek];
-          if (dayConfig) {
-            const capacity = dayConfig.passesRequired ? dayConfig.defaultCapacity : 0;
-            const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
-            // If overwriting a manual override, clear the manual edit flag
-            const clearManualEdit = hasOverrideBadge && overwriteOverrides;
-            await this.updateSingleDay(day, capacity, false, undefined, clearManualEdit);
+          const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
+          // If overwriting a manual override, clear the manual edit flag
+          const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+          if (dayConfig?.passesRequired) {
+            await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit);
+          } else if (hasExistingCapacity) {
+            // Unchecked day that already carries capacity from an earlier schedule:
+            // wind it down so the calendar matches what was just set. A day with no
+            // pool is left alone - creating one only to set it to zero is what
+            // turned every day on in #422. Booked passes hold the floor, matching
+            // what closing the day by its toggle does; the calendar will not let a
+            // booked day be closed by hand either.
+            await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
           }
         }
         current.setDate(current.getDate() + 1);
