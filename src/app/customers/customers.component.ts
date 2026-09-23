@@ -33,7 +33,7 @@ export class CustomersComponent implements OnInit {
     { field: 'streetAddress', label: 'Street Address', visible: false, sortable: true },
     { field: 'postalCode', label: 'Postal Code', visible: false, sortable: true },
     { field: 'province', label: 'Province', visible: false, sortable: true },
-    { field: 'activeBooking', label: 'Active Booking', visible: true, sortable: false },
+    { field: 'activeBooking', label: 'Active Booking', visible: true, sortable: true },
     { field: 'accountType', label: 'Account Type', visible: false, sortable: true },
     { field: 'emailVerified', label: 'Email Verified', visible: false, sortable: true }
   ];
@@ -74,11 +74,31 @@ export class CustomersComponent implements OnInit {
       this.hasMore = users.length === this.pageSize;
 
       this.logger.info(`Loaded ${this.customers.length} customers`);
+
+      await this.loadActiveBookingFlags(users);
     } catch (error) {
       this.logger.error(error);
     } finally {
       this.loading = false;
       this.loadingService.removeFromFetchList('customers');
+    }
+  }
+
+  // The customer search reads the user index, which carries no booking data, so the
+  // "Active Booking" column is filled in from the booking search afterwards - one
+  // request for the page that was just loaded.
+  private async loadActiveBookingFlags(customers: any[]) {
+    const subs = customers.map((customer) => customer?.sub).filter(Boolean);
+    if (!subs.length) return;
+
+    try {
+      const subsWithBooking = await this.customerService.getSubsWithCurrentBooking(subs);
+      for (const customer of customers) {
+        customer.hasActiveBooking = subsWithBooking.has(customer?.sub);
+      }
+    } catch (error) {
+      // The column falls back to '-' rather than claiming every customer has nothing.
+      this.logger.error(error);
     }
   }
 
@@ -101,6 +121,11 @@ export class CustomersComponent implements OnInit {
       return fullName || '-';
     }
     
+    if (field === 'activeBooking') {
+      if (customer?.hasActiveBooking === undefined) return '-';
+      return customer.hasActiveBooking ? 'yes' : 'no';
+    }
+
     if (field === 'accountType') {
       const status = customer?.userStatus;
       if (status === 'EXTERNAL_PROVIDER') {

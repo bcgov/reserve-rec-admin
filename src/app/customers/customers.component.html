@@ -57,7 +57,9 @@
       <tbody>
         <tr *ngFor="let customer of customers">
           <td *ngFor="let column of getVisibleColumns()">
-            <span *ngIf="column.field === 'activeBooking'" class="badge bg-secondary">No Active Booking</span>
+            <span *ngIf="column.field === 'activeBooking'"
+                  class="badge"
+                  [ngClass]="getValue(customer, column.field) === 'yes' ? 'bg-success' : 'bg-secondary'">{{ getValue(customer, column.field) }}</span>
             <span *ngIf="column.field === 'accountType' && getValue(customer, column.field) === 'BCSC'" class="badge" style="background-color: #003366;">BCSC</span>
             <span *ngIf="column.field === 'accountType' && getValue(customer, column.field) === 'BCP Account'" class="badge bg-success">BCP Account</span>
             <span *ngIf="column.field !== 'activeBooking' && column.field !== 'accountType'">{{ getValue(customer, column.field) }}</span>
