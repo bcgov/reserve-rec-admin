@@ -48,10 +48,10 @@ export class FacilityService {
     }
   }
 
-  async getFacilitiesByCollectionId(collectionId) {
+  async getFacilitiesByCollectionId(collectionId, params = null) {
     try {
       this.loadingService.addToFetchList(Constants.dataIds.FACILITIES_RESULT);
-      const res = (await lastValueFrom(this.apiService.get(`facilities/${collectionId}`)))['data'];
+      const res = (await lastValueFrom(this.apiService.get(`facilities/${collectionId}`, params)))['data'];
       this.dataService.setItemValue(Constants.dataIds.FACILITIES_RESULT, res);
       this.loadingService.removeFromFetchList(Constants.dataIds.FACILITIES_RESULT);
       return res;

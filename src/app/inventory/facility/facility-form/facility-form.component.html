@@ -95,11 +95,17 @@
                 [label]="'Display name'"
                 [placeholder]="'Type a display name for the facility'" [resetButton]="true">
               </ngds-text-input>
-              <div 
+              <div
                 *ngIf="form.hasError('invalidDisplayName') && (form.get('displayName')?.touched)"
                 class="alert alert-danger small p-2 mt-2"
               >
                 <strong>Invalid:</strong> please update the Display name; cannot use default value.
+              </div>
+              <div
+                *ngIf="form.hasError('duplicateDisplayName') && (form.get('displayName')?.touched)"
+                class="alert alert-danger small p-2 mt-2"
+              >
+                <strong>Invalid:</strong> a facility with this name already exists in this park.
               </div>
             </div>
           </div>
