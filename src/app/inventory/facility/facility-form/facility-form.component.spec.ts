@@ -57,4 +57,11 @@ describe('FacilityFormComponent duplicate display name (#392)', () => {
     expect(setName('Cheakamus North').displayNameCheckUnavailable).toBe(true);
     expect(component.form.valid).toBe(false);
   });
+
+  it('tells the user why submit is blocked when the sibling names could not be loaded', () => {
+    component['siblingFacilityNames'] = null;
+    setName('Cheakamus North');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain("Couldn't check whether this name is already used in this park");
+  });
 });

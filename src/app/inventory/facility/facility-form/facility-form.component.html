@@ -107,6 +107,12 @@
               >
                 <strong>Invalid:</strong> a facility with this name already exists in this park.
               </div>
+              <div
+                *ngIf="form.hasError('displayNameCheckUnavailable')"
+                class="alert alert-danger small p-2 mt-2"
+              >
+                <strong>Unavailable:</strong> Couldn't check whether this name is already used in this park. Reload the page to try again.
+              </div>
             </div>
           </div>
 
