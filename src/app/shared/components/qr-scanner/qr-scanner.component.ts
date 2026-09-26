@@ -183,8 +183,6 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error parsing verification URL:', error);
       return null;
-    } finally {
-      this.resetScanner()
     }
   }
 
@@ -201,13 +199,5 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   close(): void {
     this.stopScanning();
     this.closeScanner.emit();
-  }
-
-  resetScanner(): void {
-    this.isScanSuccess = false;
-    this.isScanFailure = false;
-    this.error = null;
-    this.lastScannedUrl = null;
-    this.loadCameras();
   }
 }
