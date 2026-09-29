@@ -52,6 +52,32 @@ export class CustomerService {
   }
 
   /**
+   * Given a page of customers, return the subset of their Cognito subs that hold a
+   * current (reserved or active) booking. One request per page: the booking search
+   * collapses its results to one hit per customer, so every sub that comes back has
+   * at least one booking they can still turn up and use.
+   */
+  async getSubsWithCurrentBooking(subs: string[]): Promise<Set<string>> {
+    if (!subs.length) return new Set();
+    try {
+      const res = await firstValueFrom(
+        this.apiService.post('bookings/search', {
+          userIds: subs,
+          checkinStatus: 'current',
+          size: subs.length,
+        })
+      ) as ApiResponse;
+      const hits = res?.data?.hits || [];
+      return new Set<string>(
+        hits.map((hit: any) => hit?.userId).filter(Boolean)
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch every booking belonging to a customer, identified by their Cognito sub.
    * `lastEvaluatedKey` is echoed back from a previous response to fetch the next page.
    */
