@@ -6,7 +6,7 @@ import { ApiService } from '../../services/api.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
 import { QrScannerComponent } from '../../shared/components/qr-scanner/qr-scanner.component';
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-qr-scanner',
@@ -14,9 +14,11 @@ import { Component, Output, EventEmitter } from '@angular/core';
   template: '<div>Mock Scanner</div>'
 })
 class MockQrScannerComponent {
+  @Input() verifying = false;
   @Output() scanSuccess = new EventEmitter<any>();
   @Output() scanError = new EventEmitter<any>();
   @Output() closeScanner = new EventEmitter<any>();
+  resetScanner = jest.fn();
 }
 
 describe('QrScannerPageComponent', () => {
@@ -106,6 +108,31 @@ describe('QrScannerPageComponent', () => {
 
     expect(toastSpy).toHaveBeenCalledWith('Error', 'QR code verification failed', ToastTypes.ERROR);
     expect(component.isLoading).toBe(false);
+  });
+
+  it('resets the scanner when verification of a scan fails', async () => {
+    setMockReturnValue(mockApiService.get, throwError(() => ({ message: 'Booking not found' })));
+    const scanner: MockQrScannerComponent = fixture.debugElement.query(
+      (el) => el.componentInstance instanceof MockQrScannerComponent
+    ).componentInstance;
+
+    scanner.scanSuccess.emit({ bookingId: '123', hash: 'abc', url: 'test-url' });
+    await fixture.whenStable();
+
+    expect(scanner.resetScanner).toHaveBeenCalledTimes(1);
+    expect(component.showVerificationResult).toBe(false);
+  });
+
+  it('does not reset the scanner when verification succeeds', async () => {
+    const scanner: MockQrScannerComponent = fixture.debugElement.query(
+      (el) => el.componentInstance instanceof MockQrScannerComponent
+    ).componentInstance;
+
+    scanner.scanSuccess.emit({ bookingId: '123', hash: 'abc', url: 'test-url' });
+    await fixture.whenStable();
+
+    expect(scanner.resetScanner).not.toHaveBeenCalled();
+    expect(component.showVerificationResult).toBe(true);
   });
 });
 
