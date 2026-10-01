@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeResult } from 'html5-qrcode';
@@ -18,6 +18,7 @@ export interface QRScanResult {
 })
 export class QrScannerComponent implements OnInit, OnDestroy {
   @ViewChild('reader', { static: false }) readerElement?: ElementRef;
+  @Input() verifying = false;
   @Output() scanSuccess = new EventEmitter<QRScanResult>();
   @Output() scanError = new EventEmitter<string>();
   @Output() closeScanner = new EventEmitter<void>();
@@ -32,12 +33,15 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   isScanFailure = false;
   error: string | null = null;
   lastScannedUrl: string | null = null;
+  private stopping: Promise<void> = Promise.resolve();
+  private destroyed = false;
 
   ngOnInit(): void {
     this.loadCameras();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.stopScanning();
   }
 
@@ -95,7 +99,8 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         await this.html5QrCode.stop();
       }
 
-      await this.html5QrCode.start(
+      const qrCode = this.html5QrCode;
+      await qrCode.start(
         this.selectedCameraId,
         {
           fps: 10, // Frames per second
@@ -105,6 +110,12 @@ export class QrScannerComponent implements OnInit, OnDestroy {
         this.onScanSuccess.bind(this),
         this.onScanFailure.bind(this)
       );
+
+      // Left the page while the camera was starting: ngOnDestroy could not stop it yet
+      if (this.destroyed) {
+        await qrCode.stop();
+        qrCode.clear();
+      }
       
     } catch (error: any) {
       console.error('Error starting scanner:', error);
@@ -131,8 +142,8 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   }
 
   onScanSuccess(decodedText: string, decodedResult: Html5QrcodeResult): void {
-    // Prevent duplicate scans
-    if (decodedText === this.lastScannedUrl) {
+    // Prevent duplicate scans, and late frames decoded while a scanned pass is being verified
+    if (this.isScanSuccess || decodedText === this.lastScannedUrl) {
       return;
     }
 
@@ -144,7 +155,7 @@ export class QrScannerComponent implements OnInit, OnDestroy {
     
     if (result) {
       // Stop scanning after successful scan
-      this.stopScanning();
+      this.stopping = this.stopScanning();
       this.isScanSuccess = true;
       this.scanSuccess.emit(result);
     } else {
@@ -199,5 +210,28 @@ export class QrScannerComponent implements OnInit, OnDestroy {
   close(): void {
     this.stopScanning();
     this.closeScanner.emit();
+  }
+
+  // Called by the host page when verifying a scanned pass fails, so staff can scan again.
+  // Only a successful scan stops the camera; otherwise it is still running.
+  async resetScanner(): Promise<void> {
+    if (!this.isScanSuccess) {
+      return;
+    }
+    await this.stopping;
+    if (this.destroyed) {
+      return;
+    }
+    this.isScanSuccess = false;
+    this.isScanFailure = false;
+    this.error = null;
+    // Keep ignoring the failed pass briefly so one held in front of the camera doesn't re-verify in a loop
+    const failedUrl = this.lastScannedUrl;
+    setTimeout(() => {
+      if (this.lastScannedUrl === failedUrl) {
+        this.lastScannedUrl = null;
+      }
+    }, 3000);
+    await this.loadCameras();
   }
 }

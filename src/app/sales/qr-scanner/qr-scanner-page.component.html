@@ -1,6 +1,8 @@
 <!-- Verification Result Modal -->
 <div *ngIf="!showVerificationResult" class="bg-white">
   <app-qr-scanner
+  #scanner
+  [verifying]="isLoading"
   (scanSuccess)="onQRScanSuccess($event)"
   (scanError)="onQRScanError($event)"
   (closeScanner)="closeQRScanner()">

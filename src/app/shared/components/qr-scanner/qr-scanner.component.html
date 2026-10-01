@@ -20,6 +20,12 @@
     <!-- Scanner Display -->
     <div class="scanner-wrapper">
       <div id="reader" #reader class="qr-reader"></div>
+      <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center pe-none" role="status">
+        <ng-container *ngIf="verifying">
+          <div class="spinner-border text-light" aria-hidden="true"></div>
+          <span class="visually-hidden">Verifying pass…</span>
+        </ng-container>
+      </div>
       <div *ngIf="isScanSuccess" class="pass-success text-white p-3"><i class="fa-solid fa-check-circle text-white me-3"></i>Pass scanned successfully.</div>
       <div *ngIf="isScanFailure" class="pass-danger text-white p-3"><i class="fa-solid fa-check-circle text-white me-3"></i>Unable to scan pass.</div>
     </div>

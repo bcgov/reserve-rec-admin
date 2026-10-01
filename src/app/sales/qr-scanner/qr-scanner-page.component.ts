@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
@@ -17,6 +17,8 @@ import { PassDetailsComponent } from '../pass-details/pass-details.component';
   styleUrl: './qr-scanner-page.component.scss'
 })
 export class QrScannerPageComponent implements OnInit {
+  @ViewChild('scanner') scanner?: QrScannerComponent;
+
   isLoading = false;
   
   showQRScanner = false;
@@ -93,6 +95,7 @@ export class QrScannerPageComponent implements OnInit {
         `QR code verification failed`,
         ToastTypes.ERROR
       );
+      this.scanner?.resetScanner();
       return null;
     } finally {
       this.isLoading = false;
