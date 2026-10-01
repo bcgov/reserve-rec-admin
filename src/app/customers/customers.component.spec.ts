@@ -73,4 +73,37 @@ describe('CustomersComponent', () => {
     expect(component.getValue(component.customers[0], 'activeBooking')).toBe('-');
     expect(mockLoggerService.error).toHaveBeenCalled();
   });
+
+  describe('load more', () => {
+    const user = (n: number) => ({ sub: `sub-${n}`, email: `u${n}@example.com` });
+    const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => user(from + i));
+
+    // Three signups between pages shift users 18-20 from the end of page one onto page two.
+    async function loadTwoPagesWithSignupsBetween() {
+      await setup(range(1, 20));
+      await create();
+      mockCustomerService.searchCustomers.mockResolvedValueOnce({ data: { hits: range(18, 37) } });
+      mockCustomerService.getSubsWithCurrentBooking.mockClear();
+      await component.loadMore();
+    }
+
+    it('does not repeat customers that shifted onto the next page', async () => {
+      await loadTwoPagesWithSignupsBetween();
+
+      expect(component.customers.map((c) => c.sub)).toEqual(range(1, 37).map((u) => u.sub));
+    });
+
+    it('advances the offset by the full page so the next page carries on from it', async () => {
+      await loadTwoPagesWithSignupsBetween();
+
+      expect(component.currentOffset).toBe(40);
+      expect(mockCustomerService.searchCustomers).toHaveBeenLastCalledWith(expect.objectContaining({ from: 20 }));
+    });
+
+    it('looks up booking flags only for the customers it added', async () => {
+      await loadTwoPagesWithSignupsBetween();
+
+      expect(mockCustomerService.getSubsWithCurrentBooking).toHaveBeenCalledWith(range(21, 37).map((u) => u.sub));
+    });
+  });
 });
