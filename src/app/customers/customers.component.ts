@@ -61,21 +61,26 @@ export class CustomersComponent implements OnInit {
       });
 
       const users = searchResults?.data?.hits || [];
+      let added = users;
 
       if (append) {
-        this.customers = [...this.customers, ...users];
+        // Results are newest-first by offset, so signups since the last page push
+        // already-listed customers onto this one.
+        const listed = new Set(this.customers.map((customer) => customer?.sub));
+        added = users.filter((user) => !user?.sub || !listed.has(user.sub));
+        this.customers = [...this.customers, ...added];
         this.currentOffset += users.length;
       } else {
         this.customers = users;
         this.currentOffset = users.length;
       }
-      
+
       // If we got fewer results than requested, there are no more
       this.hasMore = users.length === this.pageSize;
 
       this.logger.info(`Loaded ${this.customers.length} customers`);
 
-      await this.loadActiveBookingFlags(users);
+      await this.loadActiveBookingFlags(added);
     } catch (error) {
       this.logger.error(error);
     } finally {
