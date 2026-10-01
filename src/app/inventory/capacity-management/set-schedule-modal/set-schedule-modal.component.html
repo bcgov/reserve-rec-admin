@@ -68,7 +68,7 @@
       <div class="mb-4">
         <h6 class="fw-bold mb-1">Days when passes required</h6>
         <p class="small text-muted mb-3">Select the days when a pass is required and set the default capacity for each day.</p>
-        <div class="days-container d-grid gap-3" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="days-container d-grid gap-3">
           <div *ngFor="let day of days" class="day-item border rounded p-3 bg-light">
             <div class="day-name fw-bold text-dark mb-2">{{ day.day }}</div>
             <label class="toggle-label d-flex align-items-center gap-2 mb-2 cursor-pointer">

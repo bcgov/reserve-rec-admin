@@ -92,3 +92,83 @@
   outline: 2px solid #013366;
   outline-offset: 2px;
 }
+
+// Fit all 7 day columns on phone widths (#463)
+@media (max-width: 767.98px) {
+  .calendar-grid {
+    gap: 2px;
+    margin-top: 0;
+    padding: 2px;
+  }
+
+  .calendar-day {
+    min-width: 0;
+    min-height: 72px;
+    padding: 2px !important;
+    font-size: 0.6rem;
+
+    > .d-flex:first-child {
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-bottom: 2px !important;
+    }
+
+    .fa-pen {
+      font-size: 0.65rem !important;
+    }
+  }
+
+  .day-header {
+    font-size: 0.75rem;
+  }
+
+  .toggle-slider-container {
+    width: 28px;
+    height: 14px;
+  }
+
+  .toggle-slider::before {
+    width: 10px;
+    height: 10px;
+  }
+
+  .toggle-slider-checkbox:checked + .toggle-slider::before {
+    transform: translateX(14px);
+  }
+
+  .capacity-info,
+  .empty-capacity-placeholder {
+    width: 100% !important;
+    margin-top: 2px !important;
+    padding: 2px !important;
+  }
+
+  .capacity-info {
+    border-left-width: 2px !important;
+
+    .small {
+      flex-wrap: wrap;
+      font-size: inherit;
+    }
+
+    abbr {
+      text-decoration: none;
+    }
+  }
+
+  .empty-capacity-placeholder {
+    font-size: inherit !important;
+    overflow-wrap: anywhere;
+  }
+
+  .override-badge {
+    width: 100% !important;
+    min-height: 14px !important;
+    margin-top: 2px !important;
+
+    .badge {
+      font-size: 0.5rem;
+      padding: 2px 0;
+    }
+  }
+}
