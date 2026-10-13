@@ -12,7 +12,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { provideToastr } from 'ngx-toastr';
 import { AuthService } from './services/auth.service';
-import { WebsocketService } from './services/ws.service';
 import { ApiService } from './services/api.service';
 import { FeatureFlagService } from './services/feature-flag.service';
 
@@ -20,7 +19,6 @@ export function initConfig(
   configService: ConfigService,
   authService: AuthService,
   apiService: ApiService,
-  websocketService: WebsocketService,
   featureFlagService: FeatureFlagService
 ) {
   return async () => {
@@ -28,11 +26,6 @@ export function initConfig(
     await authService.init();
     await apiService.init();
     await featureFlagService.init();
-    const wsUrl = configService.config['WEBSOCKET_URL'];
-    if (wsUrl) {
-      const wsToken = authService.jwtToken;
-      await websocketService.init(wsToken ? `${wsUrl}?token=${wsToken}` : wsUrl);
-    }
   };
 }
 
@@ -45,7 +38,7 @@ export const appConfig: ApplicationConfig = {
       anchorScrolling: 'enabled',
     })),
     provideAppInitializer(() => {
-        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(WebsocketService), inject(FeatureFlagService));
+        const initializerFn = (initConfig)(inject(ConfigService), inject(AuthService), inject(ApiService), inject(FeatureFlagService));
         return initializerFn();
       }),
     { provide: RouteReuseStrategy, useClass: NoReuseRouteStrategy },

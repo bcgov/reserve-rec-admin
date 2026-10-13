@@ -50,7 +50,21 @@ export class CustomerDetailComponent implements OnInit {
     this.customer = this.customerService.selectedCustomer;
 
     if (this.customerId) {
-      await this.loadBookings();
+      await Promise.all([this.loadBookings(), this.loadFullLiveCustomer()]);
+    }
+  }
+
+  // A row pushed live by RealtimeService carries only the list fields; fetch the full
+  // row and keep the partial one if it is not indexed yet.
+  private async loadFullLiveCustomer() {
+    if (!this.customer?.live || !this.customerId) return;
+    try {
+      const full = await this.customerService.getCustomerBySub(this.customerId);
+      if (full) {
+        this.customer = full;
+      }
+    } catch (error) {
+      this.logger.error(error);
     }
   }
 

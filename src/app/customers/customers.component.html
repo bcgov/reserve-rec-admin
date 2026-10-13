@@ -55,7 +55,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let customer of customers">
+        <tr *ngFor="let customer of customers" [class.table-success]="highlightedIds.has(customer.sub)">
           <td *ngFor="let column of getVisibleColumns()">
             <span *ngIf="column.field === 'activeBooking'"
                   class="badge"

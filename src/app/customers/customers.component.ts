@@ -1,10 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CustomerService } from '../services/customer.service';
 import { LoggerService } from '../services/logger.service';
 import { LoadingService } from '../services/loading.service';
+import { RealtimeEvent, RealtimeService } from '../services/realtime.service';
+import { AuthService } from '../services/auth.service';
+
+const HIGHLIGHT_MS = 5000;
 
 @Component({
   selector: 'app-customers',
@@ -12,7 +17,7 @@ import { LoadingService } from '../services/loading.service';
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
-export class CustomersComponent implements OnInit {
+export class CustomersComponent implements OnInit, OnDestroy {
   customers: any[] = [];
   currentOffset = 0;
   pageSize = 20;
@@ -23,6 +28,14 @@ export class CustomersComponent implements OnInit {
   sortOrder: 'asc' | 'desc' = 'asc';
   showFilterModal = false;
   showingDetail = false;
+  highlightedIds = new Set<string>();
+  // The query whose results are on screen; live rows and Load More follow it.
+  private appliedQuery = '';
+  private loadSeq = 0;
+  // Live rows received since the latest reload started, kept if the reload misses them.
+  private arrivals = new Map<string, any>();
+  private subscriptions = new Subscription();
+  private highlightTimers = new Set<ReturnType<typeof setTimeout>>();
 
   // Column visibility configuration
   availableColumns = [
@@ -43,22 +56,107 @@ export class CustomersComponent implements OnInit {
     private customerService: CustomerService,
     private logger: LoggerService,
     private loadingService: LoadingService,
+    private realtimeService: RealtimeService,
+    private authService: AuthService,
   ) {}
 
   async ngOnInit() {
+    // The server refuses staff until REALTIME_STAFF_ADDED_ENABLED is on; drop this check when it is.
+    if (this.authService.isSuperAdmin()) {
+      this.subscriptions.add(this.realtimeService.topic$('customers')
+        .subscribe((event) => this.onCustomerEvent(event)));
+      this.subscriptions.add(this.realtimeService.reconnected$.subscribe(() => this.catchUp()));
+    }
     await this.loadCustomers();
   }
 
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    this.highlightTimers.forEach((timer) => clearTimeout(timer));
+    this.highlightTimers.clear();
+  }
+
+  onCustomerEvent(event: RealtimeEvent) {
+    if (event.type !== 'created' && event.type !== 'added') {
+      return;
+    }
+    const row = { ...event.data, sub: event.id, live: true, ...(event.type === 'created' && { hasActiveBooking: false }) };
+    this.arrivals.set(row.sub, row);
+    if (this.unlisted([row]).length && this.matchesSearch(row, this.appliedQuery)) {
+      this.prependCustomers([row]);
+    }
+  }
+
+  // Approximates the server search (any word, as a substring, without fuzziness).
+  private matchesSearch(customer: any, query: string) {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      return true;
+    }
+    const values = [
+      customer.givenName, customer.familyName, customer.email,
+      customer.mobilePhone,
+    ].filter((value) => typeof value === 'string').map((value) => value.toLowerCase());
+    return words.some((word) => values.some((value) => value.includes(word)));
+  }
+
+  // Events sent while the connection was down are lost; pick up any new customers on page 1.
+  private async catchUp() {
+    if (this.appliedQuery) {
+      return;
+    }
+    try {
+      const results = await this.customerService.searchCustomers({ limit: this.pageSize, from: 0 });
+      if (this.appliedQuery) {
+        return;
+      }
+      const fresh = this.unlisted(results?.data?.hits || []);
+      this.prependCustomers(fresh);
+      await this.loadActiveBookingFlags(fresh);
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  // Rows not already on screen, matched on sub; rows without a sub are kept.
+  private unlisted(rows: any[]) {
+    const listed = new Set(this.customers.map((customer) => customer?.sub));
+    return rows.filter((row) => !row?.sub || !listed.has(row.sub));
+  }
+
+  private prependCustomers(rows: any[]) {
+    if (!rows.length) {
+      return;
+    }
+    this.customers = [...rows, ...this.customers];
+    for (const row of rows) {
+      this.highlightedIds.add(row.sub);
+      const timer = setTimeout(() => {
+        this.highlightedIds.delete(row.sub);
+        this.highlightTimers.delete(timer);
+      }, HIGHLIGHT_MS);
+      this.highlightTimers.add(timer);
+    }
+  }
+
   async loadCustomers(append = false) {
+    const seq = ++this.loadSeq;
+    const query = append ? this.appliedQuery : this.searchQuery.trim();
+    if (!append) {
+      this.arrivals.clear();
+    }
     try {
       this.loading = true;
       this.loadingService.addToFetchList('customers');
-      
-      const searchResults = await this.customerService.searchCustomers({ 
-        query: this.searchQuery.trim() || undefined,
+
+      const searchResults = await this.customerService.searchCustomers({
+        query: query || undefined,
         limit: this.pageSize,
         from: append ? this.currentOffset : 0
       });
+      if (seq !== this.loadSeq) {
+        return; // a newer load replaced this one
+      }
 
       const users = searchResults?.data?.hits || [];
       let added = users;
@@ -66,13 +164,15 @@ export class CustomersComponent implements OnInit {
       if (append) {
         // Results are newest-first by offset, so signups since the last page push
         // already-listed customers onto this one.
-        const listed = new Set(this.customers.map((customer) => customer?.sub));
-        added = users.filter((user) => !user?.sub || !listed.has(user.sub));
+        added = this.unlisted(users);
         this.customers = [...this.customers, ...added];
         this.currentOffset += users.length;
       } else {
-        this.customers = users;
+        const arrived = [...this.arrivals.values()].filter((row) => this.matchesSearch(row, query)
+          && !users.some((user) => user.sub === row.sub));
+        this.customers = [...arrived, ...users];
         this.currentOffset = users.length;
+        this.appliedQuery = query;
       }
 
       // If we got fewer results than requested, there are no more
@@ -84,8 +184,10 @@ export class CustomersComponent implements OnInit {
     } catch (error) {
       this.logger.error(error);
     } finally {
-      this.loading = false;
-      this.loadingService.removeFromFetchList('customers');
+      if (seq === this.loadSeq) {
+        this.loading = false;
+        this.loadingService.removeFromFetchList('customers');
+      }
     }
   }
 

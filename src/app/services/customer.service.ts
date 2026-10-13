@@ -78,6 +78,15 @@ export class CustomerService {
   }
 
   /**
+   * Fetch one customer's indexed user row by Cognito sub, or null if it is not indexed yet.
+   * Extra body keys on users/search become exact `terms` filters; `sub` is a text field, so match its keyword subfield exactly.
+   */
+  async getCustomerBySub(sub: string) {
+    const res = await firstValueFrom(this.apiService.post('users/search', { 'sub.keyword': sub, size: 1 })) as ApiResponse;
+    return res?.data?.hits?.find((hit: any) => hit.sub === sub) || null;
+  }
+
+  /**
    * Fetch every booking belonging to a customer, identified by their Cognito sub.
    * `lastEvaluatedKey` is echoed back from a previous response to fetch the next page.
    */
