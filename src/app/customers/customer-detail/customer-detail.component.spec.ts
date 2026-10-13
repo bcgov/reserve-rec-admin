@@ -228,4 +228,52 @@ describe('CustomerDetailComponent', () => {
 
     expect(mockCustomerService.getCustomerBookings).toHaveBeenCalledTimes(1);
   });
+
+  describe('opened from a live row', () => {
+    const liveRow = { sub: SUB, givenName: 'Jane', familyName: 'Camper', email: 'jane@example.com', live: true };
+    const fullRecord = {
+      sub: SUB, givenName: 'Jane', familyName: 'Camper', email: 'jane@example.com',
+      mobilePhone: '250-555-0100', streetAddress: '1 Trail Rd', province: 'BC', postalCode: 'V8V 1A1',
+    };
+
+    async function openLive(lookup: Promise<any>) {
+      await setup();
+      mockCustomerService.selectedCustomer = liveRow;
+      mockCustomerService.getCustomerBySub = jest.fn().mockReturnValue(lookup);
+      await create();
+    }
+
+    function pageText(): string {
+      return fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    }
+
+    it('looks up the full record by sub and shows it', async () => {
+      await openLive(Promise.resolve(fullRecord));
+
+      expect(mockCustomerService.getCustomerBySub).toHaveBeenCalledWith(SUB);
+      expect(pageText()).toContain('Mobile: 250-555-0100');
+      expect(pageText()).toContain('1 Trail Rd');
+    });
+
+    it('keeps the live row when the record is not indexed yet', async () => {
+      await openLive(Promise.resolve(null));
+
+      expect(component.customer).toBe(liveRow);
+    });
+
+    it('keeps the live row and logs when the lookup fails', async () => {
+      await openLive(Promise.reject(new Error('search down')));
+
+      expect(component.customer).toBe(liveRow);
+      expect(mockLoggerService.error).toHaveBeenCalled();
+    });
+
+    it('does not look up a row that came from the search list', async () => {
+      await setup();
+      mockCustomerService.getCustomerBySub = jest.fn();
+      await create();
+
+      expect(mockCustomerService.getCustomerBySub).not.toHaveBeenCalled();
+    });
+  });
 });
