@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl }
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
-import { LoadalComponent } from '../../shared/components/loadal/loadal.component';
 import { CalendarComponent, CalendarDay, InventoryPoolData, CapacityEditEvent } from './calendar/calendar.component';
 import { CapacityEditModalComponent } from './capacity-edit-modal/capacity-edit-modal.component';
 import { SetScheduleModalComponent } from './set-schedule-modal/set-schedule-modal.component';
@@ -14,10 +13,11 @@ import { InventoryPoolService } from '../../services/inventory-pool.service';
 import { ProductService } from '../../services/product.service';
 import { ProductDateService } from '../../services/product-date.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
+import { LoadingService } from '../../services/loading.service';
 
 @Component({
   selector: 'app-capacity-management',
-  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule, LoadalComponent],
+  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule],
   templateUrl: './capacity-management.component.html',
   styleUrls: ['./capacity-management.component.scss']
 })
@@ -27,7 +27,9 @@ export class CapacityManagementComponent implements OnInit {
     { label: 'Pass Capacity' },
   ];
 
-  @ViewChild(LoadalComponent) loadal!: LoadalComponent;
+
+  // Loading indicator
+  loading$ = this.loadingService.loading;
 
   // Filter-related state (passed from filter component)
   filterForm!: FormGroup;
@@ -60,7 +62,8 @@ export class CapacityManagementComponent implements OnInit {
     protected productDateService: ProductDateService,
     private fb: FormBuilder,
     private modalService: NgbModal,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private loadingService: LoadingService
   ) {
     // Initialize currentMonth to today's date
     this.currentMonth = new Date();
@@ -145,6 +148,8 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async loadInventoryPoolData(preserveManualEdits: boolean = true) {
+    const requestId = 'load-inventory-pools';
+    this.loadingService.addToFetchList(requestId);
     try {
       const collectionId = this.collectionControl.value;
       const productKey = this.productControl.value;
@@ -205,6 +210,8 @@ export class CapacityManagementComponent implements OnInit {
       }
     } catch (error) {
       this.inventoryPoolsByDate.clear();
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
@@ -395,7 +402,6 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
-    this.loadal.show();
     try {
       const dateKey = day.date.toISOString().split('T')[0];
       const collectionId = this.collectionControl.value;
@@ -509,7 +515,7 @@ export class CapacityManagementComponent implements OnInit {
       );
       return false;
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList('apply-schedule');
     }
   }
 
@@ -538,6 +544,8 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async applySchedule(scheduleData: any): Promise<void> {
+    const requestId = 'apply-schedule';
+    this.loadingService.addToFetchList(requestId);
     try {
       const { startDate, endDate, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity } = scheduleData;
       const start = new Date(startDate);
@@ -583,11 +591,14 @@ export class CapacityManagementComponent implements OnInit {
       await this.updateSchedule(start, end, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity);
     } catch (error) {
       console.error('Schedule application error:', error);
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
   private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false): Promise<void> {
-    this.loadal.show();
+    const requestId = 'apply-schedule';
+    this.loadingService.addToFetchList(requestId);
     try {
       const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
       const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
@@ -623,23 +634,27 @@ export class CapacityManagementComponent implements OnInit {
           const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
           // If overwriting a manual override, clear the manual edit flag
           const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+          
           if (dayConfig?.passesRequired) {
+            // Ensure the date is open, then set capacity
+            const poolsForDay = this.inventoryPoolsByDate.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && !poolsForDay[0].isOpen) {
+              await this.toggleReservationStatus({ day, isOpen: true });
+            }
             await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit);
           } else if (hasExistingCapacity) {
-            // Unchecked day that already carries capacity from an earlier schedule:
-            // wind it down so the calendar matches what was just set. A day with no
-            // pool is left alone - creating one only to set it to zero is what
-            // turned every day on in #422. Booked passes hold the floor, matching
-            // what closing the day by its toggle does; the calendar will not let a
-            // booked day be closed by hand either.
-            await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
+            // Ensure the date is closed
+            const poolsForDay = this.inventoryPoolsByDate.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && poolsForDay[0].isOpen) {
+              await this.toggleReservationStatus({ day, isOpen: false });
+            }
           }
         }
         current.setDate(current.getDate() + 1);
       }
       await this.loadInventoryPoolData();
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
@@ -662,7 +677,8 @@ export class CapacityManagementComponent implements OnInit {
     const pool = pools[0];
     const finalNewState = newState !== undefined ? newState : !pool.isOpen;
 
-    this.loadal.show();
+    const requestId = 'toggle-reservation';
+    this.loadingService.addToFetchList(requestId);
     try {
       const collectionId = this.collectionControl.value;
       const productId = this.extractProductId(this.productControl.value);
@@ -735,7 +751,7 @@ export class CapacityManagementComponent implements OnInit {
         ToastTypes.ERROR
       );
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 

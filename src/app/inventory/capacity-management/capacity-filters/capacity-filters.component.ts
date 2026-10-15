@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, DestroyRef, inject } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, DestroyRef, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,6 +9,7 @@ import { ActivityService } from '../../../services/activity.service';
 import { ProductService } from '../../../services/product.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { DataService } from '../../../services/data.service';
+import { LoadingService } from '../../../services/loading.service';
 import { Constants } from '../../../app.constants';
 
 interface DropdownOption {
@@ -52,6 +53,13 @@ export class CapacityFiltersComponent implements OnInit {
   private facilitiesMap: Map<string, any> = new Map(); // Map to store facilities by pk 
   private productsMap: Map<string, any> = new Map(); // Map to store products by pk::sk
 
+  // Loading states for individual dropdowns
+  loadingFacilities = false;
+  loadingProducts = false;
+
+  // Global loading state from LoadingService
+  loading$ = this.loadingService.loading;
+
   // Output events
   @Output() productSelected = new EventEmitter<ProductSelectionEvent>();
   @Output() collectionChanged = new EventEmitter<void>();
@@ -64,7 +72,8 @@ export class CapacityFiltersComponent implements OnInit {
     protected productService: ProductService,
     protected relationshipService: RelationshipService,
     protected dataService: DataService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private loadingService: LoadingService
   ) {
     this.initializeForm();
   }
@@ -164,6 +173,9 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   private async loadFacilities(collectionId: string) {
+    const requestId = 'load-facilities';
+    this.loadingService.addToFetchList(requestId);
+    this.loadingFacilities = true;
     try {
       const facilitiesData = await this.facilityService.getFacilitiesByCollectionId(collectionId);
       this.facilities = this.extractArrayFromResponse(facilitiesData);
@@ -177,6 +189,9 @@ export class CapacityFiltersComponent implements OnInit {
     } catch (error) {
       this.facilities = [];
       this.facilitiesMap.clear();
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
+      this.loadingFacilities = false;
     }
   }
 
@@ -196,6 +211,9 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   private async loadProducts(facilityId: string) {
+    const requestId = 'load-products';
+    this.loadingService.addToFetchList(requestId);
+    this.loadingProducts = true;
     try {
       const collectionId = this.collectionControl.value;
       
@@ -264,6 +282,9 @@ export class CapacityFiltersComponent implements OnInit {
     } catch (error) {
       console.error('Error loading products:', error);
       this.products = [];
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
+      this.loadingProducts = false;
     }
   }
 

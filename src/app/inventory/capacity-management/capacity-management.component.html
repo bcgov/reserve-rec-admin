@@ -32,7 +32,14 @@
     </div>
 
     <!-- Calendar View -->
-    <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white">
+    <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white position-relative">
+      <!-- Loading Overlay -->
+      <div *ngIf="loading$()" class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center loading-overlay">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
       <!-- Day headers -->
       <div class="calendar-header d-grid gap-1 bg-light border-bottom" style="grid-template-columns: repeat(7, 1fr)">
         <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Sun</div>
@@ -57,6 +64,5 @@
       ></app-calendar>
     </div>
   </div>
-  <app-loadal></app-loadal>
 </section>
 
