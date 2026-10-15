@@ -10,11 +10,19 @@ import { CapacityManagementComponent } from './capacity-management.component';
 describe('CapacityManagementComponent - updateSchedule', () => {
   let component: CapacityManagementComponent;
   let updateSingleDaySpy: jest.SpyInstance;
+  let loadingServiceMock: any;
 
   beforeEach(() => {
     // updateSchedule skips dates before today, so pin "now" to the start of the
     // window instead of letting the clock age the fixture out.
     jest.useFakeTimers().setSystemTime(new Date('2026-09-14T00:00:00Z'));
+    
+    // Mock LoadingService
+    loadingServiceMock = {
+      addToFetchList: jest.fn(),
+      removeFromFetchList: jest.fn()
+    };
+    
     component = new CapacityManagementComponent(
       {} as any,
       {} as any,
@@ -23,9 +31,9 @@ describe('CapacityManagementComponent - updateSchedule', () => {
       {} as any,
       new FormBuilder(),
       {} as any,
-      {} as any
+      {} as any,
+      loadingServiceMock
     );
-    (component as any).loadal = { show: () => {}, hide: () => {} };
     updateSingleDaySpy = jest
       .spyOn(component as any, 'updateSingleDay')
       .mockResolvedValue(true);

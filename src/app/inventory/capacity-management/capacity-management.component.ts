@@ -643,10 +643,15 @@ export class CapacityManagementComponent implements OnInit {
             }
             await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit);
           } else if (hasExistingCapacity) {
-            // Ensure the date is closed
+            // Unchecked day that already carries capacity from an earlier schedule:
+            // If it's currently open, toggle it closed (which handles capacity and preCloseCapacity).
+            // If it's already closed, just update capacity to booked amount.
             const poolsForDay = this.inventoryPoolsByDate.get(dateKey);
             if (poolsForDay && poolsForDay[0] && poolsForDay[0].isOpen) {
               await this.toggleReservationStatus({ day, isOpen: false });
+            } else {
+              // edge case to handle a day that is already closed but has existing capacity.
+              await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
             }
           }
         }
