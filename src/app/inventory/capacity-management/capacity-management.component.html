@@ -1,4 +1,4 @@
-<section class="mx-3 mx-md-5 py-5 h-100">
+<section class="mx-3 mx-md-5 py-5 h-100 position-relative">
   <div class="col h-100 d-flex flex-column">
     <!-- Breadcrumbs -->
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
@@ -33,12 +33,6 @@
 
     <!-- Calendar View -->
     <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white position-relative">
-      <!-- Loading Overlay -->
-      <div *ngIf="loading$()" class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center loading-overlay">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
 
       <!-- Day headers -->
       <div class="calendar-header d-grid gap-1 bg-light border-bottom" style="grid-template-columns: repeat(7, 1fr)">
@@ -65,4 +59,3 @@
     </div>
   </div>
 </section>
-
