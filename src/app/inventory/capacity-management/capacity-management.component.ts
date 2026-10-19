@@ -408,6 +408,8 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
+    const requestId = 'update-single-day';
+    this.loadingService.addToFetchList(requestId);
     try {
       const dateKey = day.date.toISOString().split('T')[0];
       const collectionId = this.collectionControl.value;
@@ -520,6 +522,8 @@ export class CapacityManagementComponent implements OnInit {
         ToastTypes.ERROR
       );
       return false;
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
