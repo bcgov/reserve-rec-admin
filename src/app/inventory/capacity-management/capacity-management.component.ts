@@ -527,7 +527,7 @@ export class CapacityManagementComponent implements OnInit {
       return;
     }
 
-    const modalRef = this.modalService.open(SetScheduleModalComponent, { centered: true, size: 'lg', fullscreen: 'md' });
+    const modalRef = this.modalService.open(SetScheduleModalComponent, { centered: true, size: 'lg', fullscreen: 'md', ariaLabelledBy: 'set-schedule-title' });
     modalRef.componentInstance.productName = this.currentProductName;
     modalRef.componentInstance.collectionId = this.collectionControl.value;
     modalRef.componentInstance.activityType = this.currentActivityType;
