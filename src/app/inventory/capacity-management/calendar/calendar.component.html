@@ -1,6 +1,18 @@
 <div class="calendar-grid">
   <div *ngFor="let day of calendarDays" class="calendar-day bg-white border rounded p-2 d-flex flex-column" [class.not-current-month]="!day.isCurrentMonth">
-    
+
+    <!-- Mobile (#463): date and passes only; tapping opens the day panel below the grid -->
+    <button *ngIf="day.isCurrentMonth" type="button" class="mobile-day d-md-none" [class.selected]="isSelected(day)" [class.closed]="!getInventoryPoolDataForDay(day)?.isOpen" [attr.aria-pressed]="isSelected(day)" (click)="selectDay(day)">
+      <span class="d-flex justify-content-between align-items-center">
+        <span><span class="visually-hidden">{{ (day.date | date: 'MMMM') + ' ' }}</span>{{ getDayNumber(day) }}</span>
+        <ng-container *ngIf="hasBeenEdited(day)">
+          <i class="fa-solid fa-circle-exclamation override-icon" aria-hidden="true"></i><span class="visually-hidden">override</span>
+        </ng-container>
+      </span>
+      <span class="capacity-chip">{{ getInventoryPoolDataForDay(day)?.capacity ?? 0 }}<span class="visually-hidden"> passes</span></span>
+    </button>
+
+    <div class="d-none d-md-flex flex-column flex-grow-1 w-100">
     <!-- Top row: Date number, Toggle, Edit icon -->
     <div *ngIf="day.isCurrentMonth && isDateInProductRange(day)" class="d-flex justify-content-between align-items-start w-100 mb-2">
       <div class="day-header fw-bold text-dark">
@@ -49,15 +61,15 @@
     <!-- Passes info for existing inventory pools - centered at 75% width -->
     <div *ngIf="getInventoryPoolDataForDay(day) as poolData" class="capacity-info border-start border-4 border-info rounded p-2 mx-auto mt-3" style="width: 75%; background-color: #D8EAFD;" [class.opacity-50]="!poolData.isOpen" [style.cursor]="'default'">
       <div class="d-flex justify-content-between w-100 small">
-        <span class="fw-semibold"><span class="d-none d-md-inline">Passes:</span><abbr class="d-md-none" title="Passes">Cap</abbr></span>
+        <span class="fw-semibold">Passes:</span>
         <span>{{ poolData.capacity }}</span>
       </div>
       <div class="d-flex justify-content-between w-100 small">
-        <span class="fw-semibold"><span class="d-none d-md-inline">Reserved:</span><abbr class="d-md-none" title="Reserved">Res</abbr></span>
+        <span class="fw-semibold">Reserved:</span>
         <span>{{ poolData.capacity - poolData.available }}</span>
       </div>
       <div class="d-flex justify-content-between w-100 small">
-        <span class="fw-semibold"><span class="d-none d-md-inline">Checked in:</span><abbr class="d-md-none" title="Checked in">In</abbr></span>
+        <span class="fw-semibold">Checked in:</span>
         <span>{{ checkedInDisplay(day) }}</span>
       </div>
     </div>
@@ -75,5 +87,63 @@
     <div *ngIf="day.isCurrentMonth && isDateInProductRange(day)" class="override-badge w-50 mx-auto mt-2" style="min-height: 24px;">
       <span *ngIf="hasBeenEdited(day)" class="badge bg-warning text-dark w-100">override</span>
     </div>
+    </div>
   </div>
+</div>
+
+<!-- Mobile day panel (#463): details, open/close and inline passes edit for the tapped day -->
+<!-- Live region stays in the DOM so the first tap is announced too -->
+<div class="d-md-none" aria-live="polite">
+<section *ngIf="selectedDay as day" class="day-panel pt-3 px-1">
+  <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+    <h4 class="fs-5 fw-normal mb-0">
+      {{ day.date | date: 'd EEEE' }}
+      <span *ngIf="hasBeenEdited(day)" class="badge bg-warning text-dark ms-1">override</span>
+    </h4>
+    <div *ngIf="getInventoryPoolDataForDay(day) as poolData" class="d-flex align-items-center gap-2">
+      <label class="fs-6 mb-0" [for]="'panel-toggle-' + formatDateKey(day.date)">passes required</label>
+      <div class="toggle-slider-container" [class.opacity-50]="isToggleDisabled(day)">
+        <input
+          [id]="'panel-toggle-' + formatDateKey(day.date)"
+          type="checkbox"
+          class="toggle-slider-checkbox"
+          [checked]="poolData.isOpen"
+          (change)="onToggleReservation(day)"
+          [disabled]="isToggleDisabled(day)"
+          [title]="(poolData.isOpen && hasBookings(poolData)) ? 'Cannot close: passes are booked for this date' : ''"
+        />
+        <label [for]="'panel-toggle-' + formatDateKey(day.date)" class="toggle-slider" [ngClass]="'toggle-' + getToggleStatusClass(poolData)" aria-hidden="true"></label>
+      </div>
+    </div>
+  </div>
+
+  <form *ngIf="editing; else passesView" class="d-flex align-items-center gap-2 mb-3" (ngSubmit)="saveEdit(day, capacityInput.value)" (keydown.escape)="cancelEdit(true)">
+    <input
+      #capacityInput
+      type="number"
+      inputmode="numeric"
+      min="0"
+      class="form-control form-control-sm capacity-input"
+      [value]="getInventoryPoolDataForDay(day)?.capacity ?? 0"
+      [attr.aria-label]="'Passes for ' + (day.date | date: 'MMMM d')"
+      [attr.aria-invalid]="!!editError"
+      aria-describedby="capacity-edit-error"
+    />
+    <span>passes</span>
+    <button type="submit" class="btn btn-link p-0" aria-label="Save passes"><i class="fa-solid fa-floppy-disk"></i></button>
+  </form>
+  <div *ngIf="editing && editError" id="capacity-edit-error" class="text-danger small mb-2">{{ editError }}</div>
+
+  <ng-template #passesView>
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <span class="capacity-chip" [class.closed]="getInventoryPoolDataForDay(day)?.isOpen === false">{{ getInventoryPoolDataForDay(day)?.capacity ?? 0 }}</span>
+      <span>passes</span>
+      <!-- Same rule as the calendar pencil: no edits to past or closed days -->
+      <button #editButton *ngIf="!isDateInPast(day)" type="button" class="btn btn-link p-0" aria-label="Edit passes" [disabled]="getInventoryPoolDataForDay(day)?.isOpen === false" (click)="startEdit()"><i class="fa-solid fa-pen"></i></button>
+    </div>
+  </ng-template>
+
+  <div><strong>Reserved:</strong> {{ (getInventoryPoolDataForDay(day)?.capacity || 0) - (getInventoryPoolDataForDay(day)?.available || 0) }}</div>
+  <div><strong>Checked-in:</strong> {{ checkedInDisplay(day) }}</div>
+</section>
 </div>

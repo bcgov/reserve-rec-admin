@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 export interface CalendarDay {
   date: Date;
@@ -22,11 +23,11 @@ export interface CapacityEditEvent {
 
 @Component({
   selector: 'app-calendar',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnChanges {
   @Input() calendarDays: CalendarDay[] = [];
   @Input() inventoryPoolsByDate: Map<string, InventoryPoolData[]> = new Map();
   @Input() currentMonth: Date = new Date();
@@ -35,6 +36,74 @@ export class CalendarComponent {
   
   @Output() toggleReservation = new EventEmitter<{ day: CalendarDay; isOpen: boolean }>();
   @Output() editCapacity = new EventEmitter<CapacityEditEvent>();
+  @Output() saveCapacity = new EventEmitter<{ day: CalendarDay; capacity: number }>();
+
+  // Mobile layout (#463): the tapped day's details and inline edit sit under the grid
+  selectedDay: CalendarDay | null = null;
+  editing = false;
+  editError = '';
+  private refocusEditButton = false;
+
+  // Focus the passes input as it appears, since the pencil that opened it is gone
+  @ViewChild('capacityInput') set capacityInput(input: ElementRef<HTMLInputElement> | undefined) {
+    input?.nativeElement.focus();
+  }
+
+  // And hand focus back to the pencil when the editor closes on save or Escape
+  @ViewChild('editButton') set editButton(button: ElementRef<HTMLButtonElement> | undefined) {
+    if (button && this.refocusEditButton) {
+      button.nativeElement.focus();
+      this.refocusEditButton = false;
+    }
+  }
+
+  // This component is kept across month and product changes; only its days are
+  // swapped, so drop a selection that may no longer be on screen
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['calendarDays']) {
+      this.selectedDay = null;
+      this.cancelEdit();
+    }
+  }
+
+  selectDay(day: CalendarDay) {
+    this.selectedDay = day;
+    this.cancelEdit();
+  }
+
+  isSelected(day: CalendarDay): boolean {
+    return this.selectedDay?.date.getTime() === day.date.getTime();
+  }
+
+  startEdit() {
+    this.editing = true;
+    this.editError = '';
+  }
+
+  cancelEdit(refocus = false) {
+    this.editing = false;
+    this.editError = '';
+    this.refocusEditButton = refocus;
+  }
+
+  saveEdit(day: CalendarDay, value: string) {
+    const capacity = Number(value);
+    if (value.trim() === '' || !Number.isInteger(capacity) || capacity < 0) {
+      this.editError = 'Enter a whole number of passes.';
+      return;
+    }
+    const poolData = this.getInventoryPoolDataForDay(day);
+    // Same floor as the edit modal: capacity cannot drop below booked passes
+    const booked = (poolData?.capacity || 0) - (poolData?.available || 0);
+    if (capacity < booked) {
+      this.editError = `Passes cannot be less than ${booked} (currently booked).`;
+      return;
+    }
+    if (capacity !== (poolData?.capacity ?? 0)) {
+      this.saveCapacity.emit({ day, capacity });
+    }
+    this.cancelEdit(true);
+  }
 
   formatDateKey(date: Date): string {
     return date.toISOString().split('T')[0];
@@ -47,6 +116,7 @@ export class CalendarComponent {
   }
 
   onToggleReservation(day: CalendarDay) {
+    this.cancelEdit();
     const poolData = this.getInventoryPoolDataForDay(day);
     if (poolData) {
       const newState = !poolData.isOpen;

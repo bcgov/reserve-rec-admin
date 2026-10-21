@@ -1,4 +1,4 @@
-<div class="modal-header">
+<div class="modal-header d-none d-md-flex">
   <h4 class="modal-title">Set Schedule</h4>
   <button type="button" class="btn-close" aria-label="Close modal" (click)="activeModal.dismiss()"></button>
 </div>
@@ -6,10 +6,10 @@
 <form [formGroup]="form">
   <div class="modal-body">
     <!-- Main container with border -->
-    <div class="border rounded p-4 bg-light">
+    <div class="schedule-body border rounded p-3 p-md-4 bg-light">
       
       <!-- Product Name -->
-      <h5 class="mb-3">{{ productName }}</h5>
+      <h5 class="product-name mb-3">{{ productName }}</h5>
       
       <!-- Intro Description -->
       <p class="small text-muted mb-4">
@@ -99,7 +99,7 @@
       </div>
 
       <!-- Active Days Section -->
-      <div class="alert alert-info mt-4 mb-0">
+      <div class="active-days alert alert-info mt-4 mb-0">
         <strong>Active Days:</strong> {{ getActiveDaysCount() }} of {{ days.length }} days require a pass
       </div>
 
@@ -200,7 +200,7 @@
         (click)="onSave()"
         [disabled]="!isValidDateRange() || isStartDateInPast()"
       >
-        Save Schedule
+        <span class="d-md-none">Save updates</span><span class="d-none d-md-inline">Save Schedule</span>
       </button>
       <button type="button" class="btn btn-secondary" (click)="onCancel()" style="background-color: #FFFFFF00; border: 2px solid #003366; color: #003366;">Cancel</button>
     </div>

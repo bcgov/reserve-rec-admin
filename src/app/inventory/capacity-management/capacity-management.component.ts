@@ -24,7 +24,7 @@ import { ToastService, ToastTypes } from '../../services/toast.service';
 export class CapacityManagementComponent implements OnInit {
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Inventory', link: '/inventory' },
-    { label: 'Pass Capacity' },
+    { label: 'Pass capacity' },
   ];
 
   @ViewChild(LoadalComponent) loadal!: LoadalComponent;
@@ -272,6 +272,11 @@ export class CapacityManagementComponent implements OnInit {
       },
       () => {}
     );
+  }
+
+  // Inline passes edit from the mobile day panel (#463); same save as the edit modal
+  onSaveCapacity(event: { day: CalendarDay; capacity: number }): Promise<boolean> {
+    return this.updateSingleDay(event.day, event.capacity, true);
   }
 
   /**
@@ -522,7 +527,7 @@ export class CapacityManagementComponent implements OnInit {
       return;
     }
 
-    const modalRef = this.modalService.open(SetScheduleModalComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(SetScheduleModalComponent, { centered: true, size: 'lg', fullscreen: 'md' });
     modalRef.componentInstance.productName = this.currentProductName;
     modalRef.componentInstance.collectionId = this.collectionControl.value;
     modalRef.componentInstance.activityType = this.currentActivityType;

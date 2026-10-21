@@ -126,3 +126,20 @@ describe('CapacityManagementComponent - updateSchedule', () => {
     expect(updateSingleDaySpy).not.toHaveBeenCalled();
   });
 });
+
+// #463: the mobile day panel saves passes inline. It must go through the same
+// manual-edit save as the edit modal, so the override badge and range
+// extension behave the same.
+describe('CapacityManagementComponent - onSaveCapacity', () => {
+  it('saves the day as a manual edit', async () => {
+    const component = new CapacityManagementComponent(
+      {} as any, {} as any, {} as any, {} as any, {} as any, new FormBuilder(), {} as any, {} as any
+    );
+    const updateSingleDaySpy = jest.spyOn(component as any, 'updateSingleDay').mockResolvedValue(true);
+    const day = { date: new Date(2026, 4, 2), isCurrentMonth: true };
+
+    await component.onSaveCapacity({ day, capacity: 60 });
+
+    expect(updateSingleDaySpy).toHaveBeenCalledWith(day, 60, true);
+  });
+});
