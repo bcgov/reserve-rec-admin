@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl }
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
-import { LoadalComponent } from '../../shared/components/loadal/loadal.component';
 import { CalendarComponent, CalendarDay, InventoryPoolData, CapacityEditEvent } from './calendar/calendar.component';
 import { CapacityEditModalComponent } from './capacity-edit-modal/capacity-edit-modal.component';
 import { SetScheduleModalComponent } from './set-schedule-modal/set-schedule-modal.component';
@@ -14,10 +13,11 @@ import { InventoryPoolService } from '../../services/inventory-pool.service';
 import { ProductService } from '../../services/product.service';
 import { ProductDateService } from '../../services/product-date.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
+import { LoadingService } from '../../services/loading.service';
 
 @Component({
   selector: 'app-capacity-management',
-  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule, LoadalComponent],
+  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule],
   templateUrl: './capacity-management.component.html',
   styleUrls: ['./capacity-management.component.scss']
 })
@@ -27,7 +27,9 @@ export class CapacityManagementComponent implements OnInit {
     { label: 'Pass Capacity' },
   ];
 
-  @ViewChild(LoadalComponent) loadal!: LoadalComponent;
+
+  // Loading indicator
+  loading$ = this.loadingService.loading;
 
   // Filter-related state (passed from filter component)
   filterForm!: FormGroup;
@@ -60,7 +62,8 @@ export class CapacityManagementComponent implements OnInit {
     protected productDateService: ProductDateService,
     private fb: FormBuilder,
     private modalService: NgbModal,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private loadingService: LoadingService
   ) {
     // Initialize currentMonth to today's date
     this.currentMonth = new Date();
@@ -145,6 +148,8 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async loadInventoryPoolData(preserveManualEdits: boolean = true) {
+    const requestId = 'load-inventory-pools';
+    this.loadingService.addToFetchList(requestId);
     try {
       const collectionId = this.collectionControl.value;
       const productKey = this.productControl.value;
@@ -205,6 +210,8 @@ export class CapacityManagementComponent implements OnInit {
       }
     } catch (error) {
       this.inventoryPoolsByDate.clear();
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
@@ -267,8 +274,14 @@ export class CapacityManagementComponent implements OnInit {
     modalRef.componentInstance.day = event.day;
     modalRef.componentInstance.poolData = event.poolData;
     modalRef.result.then(
-      (updatedData: InventoryPoolData) => {
-        this.updateSingleDay(event.day, updatedData.capacity, true, updatedData['notes']);
+      async (updatedData: InventoryPoolData) => {
+        const requestId = 'edit-capacity';
+        this.loadingService.addToFetchList(requestId);
+        try {
+          await this.updateSingleDay(event.day, updatedData.capacity, true, updatedData['notes']);
+        } finally {
+          this.loadingService.removeFromFetchList(requestId);
+        }
       },
       () => {}
     );
@@ -395,7 +408,8 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
-    this.loadal.show();
+    const requestId = 'update-single-day';
+    this.loadingService.addToFetchList(requestId);
     try {
       const dateKey = day.date.toISOString().split('T')[0];
       const collectionId = this.collectionControl.value;
@@ -509,7 +523,7 @@ export class CapacityManagementComponent implements OnInit {
       );
       return false;
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
@@ -538,6 +552,15 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async applySchedule(scheduleData: any): Promise<void> {
+    const requestId = 'apply-schedule';
+    this.loadingService.addToFetchList(requestId);
+    
+    // Capture context once at the start to prevent changes during processing
+    const capturedCollectionId = this.collectionControl.value;
+    const capturedActivityType = this.currentActivityType;
+    const capturedActivityId = this.currentActivityId;
+    const capturedProductId = this.extractProductId(this.productControl.value);
+    
     try {
       const { startDate, endDate, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity } = scheduleData;
       const start = new Date(startDate);
@@ -550,10 +573,10 @@ export class CapacityManagementComponent implements OnInit {
           const startDateForProductDates = currentRangeEndDate.toISOString().split('T')[0];
 
           const extensionResult = await this.productService.extendProductDateRange(
-            this.collectionControl.value,
-            this.currentActivityType,
-            this.currentActivityId,
-            this.extractProductId(this.productControl.value),
+            capturedCollectionId,
+            capturedActivityType,
+            capturedActivityId,
+            capturedProductId,
             this.currentProduct,
             endDateString,
             startDateForProductDates
@@ -580,14 +603,17 @@ export class CapacityManagementComponent implements OnInit {
         }
       }
 
-      await this.updateSchedule(start, end, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity);
+      await this.updateSchedule(start, end, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity, capturedCollectionId, capturedActivityType, capturedActivityId, capturedProductId);
     } catch (error) {
       console.error('Schedule application error:', error);
+    } finally {
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
-  private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false): Promise<void> {
-    this.loadal.show();
+  private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false, collectionId: string, activityType: string, activityId: string, productId: string): Promise<void> {
+    const requestId = 'update-schedule';
+    this.loadingService.addToFetchList(requestId);
     try {
       const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
       const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
@@ -596,6 +622,52 @@ export class CapacityManagementComponent implements OnInit {
       const bookedByDate = new Map<string, number>(
         existingCapacityDates.map((ed: any) => [ed.date, ed.booked || 0])
       );
+      
+      // Fetch inventory pools for the entire schedule range upfront
+      // so we can properly toggle dates outside the visible month
+      // DONT USE SAME MAP AS CALENDAR! 
+      const scheduleRangePoolsMap = new Map<string, any[]>();
+      const scheduleStartStr = start.toISOString().split('T')[0];
+      const scheduleEndStr = end.toISOString().split('T')[0];
+      try {
+        const scheduleRangePools = await this.inventoryPoolService.getInventoryPools(
+          collectionId,
+          activityType,
+          activityId,
+          productId,
+          scheduleStartStr,
+          scheduleEndStr,
+          undefined,
+          true // include checked-in tally
+        );
+        
+        // Store schedule range pools in a separate map
+        if (scheduleRangePools && Array.isArray(scheduleRangePools)) {
+          scheduleRangePools.forEach((pool: any) => {
+            const dateKey = pool.date;
+            if (!scheduleRangePoolsMap.has(dateKey)) {
+              scheduleRangePoolsMap.set(dateKey, []);
+            }
+            const poolData = {
+              date: dateKey,
+              capacity: pool.capacity || 0,
+              availability: pool.availability || 0,
+              available: pool.availability || 0,
+              isOpen: pool.isOpen !== false,
+              ...pool
+            };
+            scheduleRangePoolsMap.get(dateKey)!.push(poolData);
+          });
+        }
+      } catch (fetchError) {
+        this.toastService.addMessage(
+          `Failed to fetch schedule range pools: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}. Schedule application cancelled.`,
+          'Schedule Error',
+          ToastTypes.ERROR
+        );
+        // Cannot continue safely - dates outside the visible month cannot be processed
+        throw new Error('Failed to fetch schedule range pools');
+      }
       
       // Get today's date string for comparison (YYYY-MM-DD format)
       const today = new Date();
@@ -623,38 +695,103 @@ export class CapacityManagementComponent implements OnInit {
           const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
           // If overwriting a manual override, clear the manual edit flag
           const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+          
           if (dayConfig?.passesRequired) {
+            // Ensure the date is open, then set capacity
+            const poolsForDay = scheduleRangePoolsMap.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && !poolsForDay[0].isOpen) {
+              // Pass the fetched pool data to toggleReservationStatus
+              await this.toggleReservationStatus({ day, isOpen: true, pool: poolsForDay });
+            }
             await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit);
           } else if (hasExistingCapacity) {
             // Unchecked day that already carries capacity from an earlier schedule:
-            // wind it down so the calendar matches what was just set. A day with no
-            // pool is left alone - creating one only to set it to zero is what
-            // turned every day on in #422. Booked passes hold the floor, matching
-            // what closing the day by its toggle does; the calendar will not let a
-            // booked day be closed by hand either.
-            await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
+            // If it's currently open, toggle it closed (which handles capacity and preCloseCapacity).
+            // If it's already closed, just update capacity to booked amount.
+            // Check schedule range pools first, then fall back to visible month pools
+            const poolsForDay = scheduleRangePoolsMap.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && poolsForDay[0].isOpen) {
+              // Pass the fetched pool data to toggleReservationStatus
+              await this.toggleReservationStatus({ day, isOpen: false, pool: poolsForDay });
+            } else if (!poolsForDay || !poolsForDay[0]) {
+              // No data in schedule range map - try to fetch or use cached data
+              // toggleReservationStatus will handle the fallback
+              await this.toggleReservationStatus({ day, isOpen: false });
+            } else {
+              // edge case to handle a day that is already closed but has existing capacity.
+              await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
+            }
           }
         }
         current.setDate(current.getDate() + 1);
       }
       await this.loadInventoryPoolData();
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 
 
-  async toggleReservationStatus(event: { day: CalendarDay; isOpen: boolean } | CalendarDay) {
+  async toggleReservationStatus(event: { day: CalendarDay; isOpen: boolean; pool?: any[] } | CalendarDay, providedPool?: any) {
     let day: CalendarDay;
     let newState: boolean | undefined;
+    let poolData: any[] | undefined;
+    
     if ('day' in event) {
       day = event.day;
       newState = event.isOpen;
+      poolData = event.pool; // Optional pool data passed from schedule operation
     } else {
       day = event;
     }
+    
     const dateKey = day.date.toISOString().split('T')[0];
-    const pools = this.inventoryPoolsByDate.get(dateKey);
+    
+    // Try to get pools from provided data first, then from cache, then fetch if needed
+    let pools = poolData || providedPool;
+    if (!pools) {
+      pools = this.inventoryPoolsByDate.get(dateKey);
+    }
+    
+    // If still no pools and we're in a schedule context, try to fetch for this specific date
+    if (!pools || pools.length === 0) {
+      const collectionId = this.collectionControl.value;
+      const productId = this.extractProductId(this.productControl.value);
+      
+      if (collectionId && this.currentActivityType && this.currentActivityId && productId) {
+        try {
+          const fetchedPools = await this.inventoryPoolService.getInventoryPools(
+            collectionId,
+            this.currentActivityType,
+            this.currentActivityId,
+            productId,
+            dateKey,
+            dateKey,
+            undefined,
+            true
+          );
+          
+          if (fetchedPools && Array.isArray(fetchedPools) && fetchedPools.length > 0) {
+            pools = fetchedPools.map((pool: any) => ({
+              date: dateKey,
+              capacity: pool.capacity || 0,
+              availability: pool.availability || 0,
+              available: pool.availability || 0,
+              isOpen: pool.isOpen !== false,
+              ...pool
+            }));
+          }
+        } catch (fetchError) {
+          this.toastService.addMessage(
+            `Cannot toggle ${dateKey}: unable to fetch pool data.`,
+            'Toggle Failed',
+            ToastTypes.ERROR
+          );
+          return;
+        }
+      }
+    }
+    
     if (!pools || pools.length === 0) {
       return;
     }
@@ -662,7 +799,8 @@ export class CapacityManagementComponent implements OnInit {
     const pool = pools[0];
     const finalNewState = newState !== undefined ? newState : !pool.isOpen;
 
-    this.loadal.show();
+    const requestId = 'toggle-reservation';
+    this.loadingService.addToFetchList(requestId);
     try {
       const collectionId = this.collectionControl.value;
       const productId = this.extractProductId(this.productControl.value);
@@ -735,7 +873,7 @@ export class CapacityManagementComponent implements OnInit {
         ToastTypes.ERROR
       );
     } finally {
-      this.loadal.hide();
+      this.loadingService.removeFromFetchList(requestId);
     }
   }
 

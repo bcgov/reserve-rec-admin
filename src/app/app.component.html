@@ -10,4 +10,10 @@
       </div>
   </div>
     <app-footer></app-footer>
+
+  <div class="loading-overlay" *ngIf="loading$()">
+    <div class="spinner-border text-light" style="width: 5rem; height: 5rem;" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
 </div>
