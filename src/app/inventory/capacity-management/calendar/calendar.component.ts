@@ -172,6 +172,12 @@ export class CalendarComponent implements OnChanges {
     return dateKey >= this.productRangeStart && dateKey <= this.productRangeEnd;
   }
 
+  // Mobile grey-out: a day with no pool has no passes either, so it greys like a
+  // closed one; the cell and the panel both read this so they cannot disagree
+  isGreyedOut(day: CalendarDay): boolean {
+    return !this.getInventoryPoolDataForDay(day)?.isOpen;
+  }
+
   hasBeenEdited(day: CalendarDay): boolean {
     const poolData = this.getInventoryPoolDataForDay(day);
     return poolData?.['manuallyEdited'] === true;

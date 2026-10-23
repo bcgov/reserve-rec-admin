@@ -1,4 +1,5 @@
 import { SimpleChange } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CalendarComponent, CalendarDay, InventoryPoolData } from './calendar.component';
 
 // #391: the calendar shows Passes and Reserved; this adds Checked in, with NA
@@ -162,5 +163,94 @@ describe('CalendarComponent mobile day panel', () => {
     component.startEdit();
     component.onToggleReservation(may2);
     expect(component.editing).toBe(false);
+  });
+});
+
+// #476 review: the past-day and closed-day rules on mobile live in the
+// template, so these render it rather than calling the class.
+describe('CalendarComponent mobile template', () => {
+  let fixture: ComponentFixture<CalendarComponent>;
+  let component: CalendarComponent;
+
+  function day(offsetDays: number): CalendarDay {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offsetDays);
+    return { date, isCurrentMonth: true };
+  }
+
+  function render(d: CalendarDay, pool: Partial<InventoryPoolData> | null): HTMLElement {
+    const pools = new Map<string, InventoryPoolData[]>();
+    if (pool) {
+      pools.set(component.formatDateKey(d.date), [{ capacity: 50, available: 50, isOpen: true, ...pool } as InventoryPoolData]);
+    }
+    fixture.componentRef.setInput('calendarDays', [d]);
+    fixture.componentRef.setInput('inventoryPoolsByDate', pools);
+    fixture.detectChanges();
+    component.selectDay(d);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  const editButton = (el: HTMLElement) => el.querySelector<HTMLButtonElement>('button[aria-label="Edit passes"]');
+  const dayButton = (el: HTMLElement) => el.querySelector<HTMLButtonElement>('button.mobile-day')!;
+  const panelChip = (el: HTMLElement) => el.querySelector('.day-panel .capacity-chip')!;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [CalendarComponent] }).compileComponents();
+    fixture = TestBed.createComponent(CalendarComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('offers no passes edit on a past day', () => {
+    expect(editButton(render(day(-1), {}))).toBeNull();
+  });
+
+  it('disables the passes edit on a closed day', () => {
+    expect(editButton(render(day(2), { isOpen: false }))!.disabled).toBe(true);
+  });
+
+  it('allows the passes edit on an open future day', () => {
+    expect(editButton(render(day(2), {}))!.disabled).toBe(false);
+  });
+
+  // A day with no pool yet is how capacity gets added on mobile.
+  it('allows the passes edit on a day with no pool yet', () => {
+    expect(editButton(render(day(2), null))!.disabled).toBe(false);
+  });
+
+  it('disables the toggle on a past day', () => {
+    const toggle = render(day(-1), {}).querySelector<HTMLInputElement>('.day-panel input[type="checkbox"]')!;
+    expect(toggle.disabled).toBe(true);
+  });
+
+  // Grey alone does not reach a screen reader.
+  it('names a closed day as closed', () => {
+    expect(dayButton(render(day(2), { isOpen: false })).textContent).toContain('closed');
+  });
+
+  it('does not name an open day as closed', () => {
+    expect(dayButton(render(day(2), {})).textContent).not.toContain('closed');
+  });
+
+  // The cell and the panel used different rules for a day with no pool.
+  it.each([
+    ['closed', { isOpen: false }, true],
+    ['with no pool', null, true],
+    ['open', {}, false],
+  ])('greys the cell and the panel alike for a day %s', (_label, pool, grey) => {
+    const el = render(day(2), pool);
+    expect(dayButton(el).classList.contains('closed')).toBe(grey);
+    expect(panelChip(el).classList.contains('closed')).toBe(grey);
+  });
+
+  // The live region used to wrap the whole panel, so opening the editor
+  // re-announced everything; only the selected-day line should be live.
+  it('announces only the selected day', () => {
+    const el = render(day(2), {});
+    const live = el.querySelectorAll('[aria-live]');
+    expect(live.length).toBe(1);
+    expect(live[0].querySelector('form, button, input')).toBeNull();
+    expect(live[0].textContent).toContain('selected');
   });
 });

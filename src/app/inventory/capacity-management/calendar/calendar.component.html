@@ -2,7 +2,7 @@
   <div *ngFor="let day of calendarDays" class="calendar-day bg-white border rounded p-2 d-flex flex-column" [class.not-current-month]="!day.isCurrentMonth">
 
     <!-- Mobile (#463): date and passes only; tapping opens the day panel below the grid -->
-    <button *ngIf="day.isCurrentMonth" type="button" class="mobile-day d-md-none" [class.selected]="isSelected(day)" [class.closed]="!getInventoryPoolDataForDay(day)?.isOpen" [attr.aria-pressed]="isSelected(day)" (click)="selectDay(day)">
+    <button *ngIf="day.isCurrentMonth" type="button" class="mobile-day d-md-none" [class.selected]="isSelected(day)" [class.closed]="isGreyedOut(day)" [attr.aria-pressed]="isSelected(day)" (click)="selectDay(day)">
       <span class="d-flex justify-content-between align-items-center">
         <span><span class="visually-hidden">{{ (day.date | date: 'MMMM') + ' ' }}</span>{{ getDayNumber(day) }}</span>
         <ng-container *ngIf="hasBeenEdited(day)">
@@ -10,6 +10,7 @@
         </ng-container>
       </span>
       <span class="capacity-chip">{{ getInventoryPoolDataForDay(day)?.capacity ?? 0 }}<span class="visually-hidden"> passes</span></span>
+      <span *ngIf="getInventoryPoolDataForDay(day)?.isOpen === false" class="visually-hidden">closed</span>
     </button>
 
     <div class="d-none d-md-flex flex-column flex-grow-1 w-100">
@@ -92,8 +93,10 @@
 </div>
 
 <!-- Mobile day panel (#463): details, open/close and inline passes edit for the tapped day -->
-<!-- Live region stays in the DOM so the first tap is announced too -->
-<div class="d-md-none" aria-live="polite">
+<div class="d-md-none">
+<!-- Only this line is live, so opening the editor or a reload does not re-read the panel;
+     it stays in the DOM so the first tap is announced too -->
+<div class="visually-hidden" aria-live="polite">{{ selectedDay ? (selectedDay.date | date: 'EEEE, MMMM d') + ' selected' : '' }}</div>
 <section *ngIf="selectedDay as day" class="day-panel pt-3 px-1">
   <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
     <h4 class="fs-5 fw-normal mb-0">
@@ -136,7 +139,7 @@
 
   <ng-template #passesView>
     <div class="d-flex align-items-center gap-2 mb-3">
-      <span class="capacity-chip" [class.closed]="getInventoryPoolDataForDay(day)?.isOpen === false">{{ getInventoryPoolDataForDay(day)?.capacity ?? 0 }}</span>
+      <span class="capacity-chip" [class.closed]="isGreyedOut(day)">{{ getInventoryPoolDataForDay(day)?.capacity ?? 0 }}</span>
       <span>passes</span>
       <!-- Same rule as the calendar pencil: no edits to past or closed days -->
       <button #editButton *ngIf="!isDateInPast(day)" type="button" class="btn btn-link p-0" aria-label="Edit passes" [disabled]="getInventoryPoolDataForDay(day)?.isOpen === false" (click)="startEdit()"><i class="fa-solid fa-pen"></i></button>
