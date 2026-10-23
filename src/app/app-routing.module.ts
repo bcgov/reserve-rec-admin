@@ -43,6 +43,7 @@ export const routes: Routes = [
     // Sales QR scanner instead of rendering directly (bcgov/reserve-rec-admin#335).
     path: 'verify/:bookingId/:hash',
     canActivate: [UserGuard, VerifyRedirectGuard],
+    children: [],
   },
   {
     path: 'sales',
