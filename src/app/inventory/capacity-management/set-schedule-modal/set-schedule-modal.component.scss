@@ -40,3 +40,97 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+// Mobile design (#463): plain full-screen page, white day cards with the
+// toggle on the right, actions bottom-left
+@media (max-width: 767.98px) {
+  // Full-screen modal scrolls .modal-body, which only works when the host
+  // element and form wrapping it pass the height down
+  :host,
+  form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .schedule-body {
+    padding: 0 !important;
+    border: 0 !important;
+    background-color: transparent !important;
+  }
+
+  h6 {
+    font-size: 1rem;
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+
+  .days-container {
+    gap: 8px !important;
+  }
+
+  .day-item {
+    background-color: #fff !important;
+    border-color: #8a8886 !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+
+    .day-name {
+      font-weight: 400 !important;
+    }
+
+    .toggle-label {
+      flex-direction: row-reverse;
+      justify-content: space-between;
+    }
+
+    .toggle-text {
+      font-size: 0.875rem !important;
+    }
+
+    .toggle-switch {
+      width: 28px;
+      height: 16px;
+
+      &::before {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    .toggle-checkbox:checked + .toggle-switch::before {
+      transform: translateX(12px);
+    }
+
+    .form-label {
+      font-size: 0.875rem !important;
+      font-weight: 400 !important;
+      color: #2D2D2D;
+    }
+  }
+
+  .active-days {
+    border: 0;
+    background-color: #F1F8FE;
+    color: #2D2D2D;
+  }
+
+  .modal-footer {
+    justify-content: flex-start;
+    border-top: 0;
+    padding: 0 24px 24px;
+
+    // Holds only the commented-out "Add another schedule" option (PRDT-421)
+    .form-check:empty {
+      display: none;
+    }
+  }
+}

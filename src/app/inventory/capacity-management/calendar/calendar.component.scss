@@ -29,7 +29,11 @@
 }
 
 .toggle-slider-checkbox {
-  display: none;
+  // Hidden but still focusable, so the toggle works from the keyboard
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
 }
 
 .toggle-slider {
@@ -88,87 +92,124 @@
   transform: translateX(0);
 }
 
-.toggle-slider-checkbox:focus + .toggle-slider {
+.toggle-slider-checkbox:focus-visible + .toggle-slider {
   outline: 2px solid #013366;
   outline-offset: 2px;
 }
 
-// Fit all 7 day columns on phone widths (#463)
+// Mobile design (#463): table-style grid inside the card, date and passes only;
+// details live in the day panel
+$grid-line: #E5E7EB;
+
 @media (max-width: 767.98px) {
   .calendar-grid {
-    gap: 2px;
+    gap: 0;
     margin-top: 0;
-    padding: 2px;
+    padding: 0 8px 8px;
+    background-color: #fff;
+    border: 1px solid #ECEDF0;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
   }
 
-  .calendar-day {
+  .calendar-day,
+  .calendar-day.not-current-month {
     min-width: 0;
-    min-height: 72px;
-    padding: 2px !important;
-    font-size: 0.6rem;
+    min-height: 67px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    opacity: 1;
+  }
 
-    > .d-flex:first-child {
-      flex-wrap: wrap;
-      gap: 2px;
-      margin-bottom: 2px !important;
-    }
+  .calendar-day:hover {
+    box-shadow: none;
+  }
 
-    .fa-pen {
-      font-size: 0.65rem !important;
+  // Every day boxes itself and overlaps its neighbours by 1px, so the lines stay
+  // whole whatever weekday the month starts or ends on; blank days get none
+  .calendar-day:not(.not-current-month) {
+    border: 1px solid $grid-line !important;
+    margin: 0 -1px -1px 0;
+  }
+}
+
+.mobile-day {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 3px;
+  width: 100%;
+  padding: 6px 2px;
+  border: 0;
+  background-color: #fff;
+  color: #2D2D2D;
+  font-size: 1rem;
+  line-height: 24px;
+  text-align: left;
+
+  &.closed {
+    background-color: #FAF9F8;
+    color: #707070;
+
+    .capacity-chip {
+      background-color: #EDEBE9;
+      color: #707070;
     }
   }
 
-  .day-header {
-    font-size: 0.75rem;
+  &.selected {
+    box-shadow: inset 0 0 0 2px #1a5a96;
   }
 
+  // A day is ~44px wide on a 360px phone; slim the chip so 4-digit counts fit
+  .capacity-chip {
+    align-self: center;
+    max-width: 100%;
+    padding: 0 3px;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.capacity-chip {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #D8EAFD;
+  color: #2D2D2D;
+  line-height: 24px;
+  text-align: center;
+
+  &.closed {
+    background-color: #EDEBE9;
+    color: #707070;
+  }
+}
+
+.override-icon {
+  color: #fcba19;
+  font-size: 14px;
+}
+
+.day-panel {
+  // flex-shrink: at 360px the override badge squeezed the toggle and clipped its thumb
   .toggle-slider-container {
-    width: 28px;
-    height: 14px;
+    flex-shrink: 0;
+    width: 32px;
+    height: 18px;
   }
 
   .toggle-slider::before {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
   }
 
   .toggle-slider-checkbox:checked + .toggle-slider::before {
     transform: translateX(14px);
   }
+}
 
-  .capacity-info,
-  .empty-capacity-placeholder {
-    width: 100% !important;
-    margin-top: 2px !important;
-    padding: 2px !important;
-  }
-
-  .capacity-info {
-    border-left-width: 2px !important;
-
-    .small {
-      flex-wrap: wrap;
-      font-size: inherit;
-    }
-
-    abbr {
-      text-decoration: none;
-    }
-  }
-
-  .empty-capacity-placeholder {
-    font-size: inherit !important;
-    overflow-wrap: anywhere;
-  }
-
-  .override-badge {
-    width: 100% !important;
-    min-height: 14px !important;
-    margin-top: 2px !important;
-
-    .badge {
-      font-size: 0.5rem;
-      padding: 2px 0;
-    }
-  }
+.capacity-input {
+  width: 5rem;
 }
