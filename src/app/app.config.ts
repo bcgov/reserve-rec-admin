@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection, inject, provideAppInitializer } from '@angular/core';
-import { provideRouter, withInMemoryScrolling, RouteReuseStrategy } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, RouteReuseStrategy, TitleStrategy } from '@angular/router';
 import { NoReuseRouteStrategy } from './no-reuse-route-strategy';
+import { PageTitleStrategy } from './page-title.strategy';
 
 import { routes } from './app-routing.module';
 import { ConfigService } from './services/config.service';
@@ -42,6 +43,7 @@ export const appConfig: ApplicationConfig = {
         return initializerFn();
       }),
     { provide: RouteReuseStrategy, useClass: NoReuseRouteStrategy },
+    { provide: TitleStrategy, useClass: PageTitleStrategy },
     ConfigService,
     AutoFetchService,
     ToastService,
