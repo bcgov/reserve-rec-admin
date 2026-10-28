@@ -44,8 +44,11 @@ export class SetScheduleModalComponent implements OnInit {
   // Dates with override badges (locked from bulk operations)
   editedDates: EditedDate[] = [];
   
-  // Dates with existing capacity assigned
+  // Use this for warning of overrides
   existingCapacityDates: EditedDate[] = [];
+  
+  // All dates with existing pools
+  allExistingCapacityDates: EditedDate[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -129,6 +132,7 @@ export class SetScheduleModalComponent implements OnInit {
     if (!this.isValidDateRange()) {
       this.editedDates = [];
       this.existingCapacityDates = [];
+      this.allExistingCapacityDates = [];
       return;
     }
     const startVal = this.form.get('startDate')?.value;
@@ -145,6 +149,7 @@ export class SetScheduleModalComponent implements OnInit {
       if (!inventoryPoolsData || !Array.isArray(inventoryPoolsData)) {
         this.editedDates = [];
         this.existingCapacityDates = [];
+        this.allExistingCapacityDates = [];
         return;
       }
       this.editedDates = inventoryPoolsData
@@ -164,8 +169,17 @@ export class SetScheduleModalComponent implements OnInit {
           booked: Math.max(existing.booked, booked)
         });
       });
+      // For UI display: only show dates with capacity > 0
       this.existingCapacityDates = Array.from(dateCapacityMap.entries())
         .filter(([, pool]) => pool.capacity > 0)
+        .map(([date, pool]) => ({
+          date,
+          capacity: pool.capacity,
+          booked: pool.booked,
+          lastUpdated: ''
+        }));
+      // For schedule logic: include ALL dates (even those with 0 capacity that need closing)
+      this.allExistingCapacityDates = Array.from(dateCapacityMap.entries())
         .map(([date, pool]) => ({
           date,
           capacity: pool.capacity,
@@ -175,6 +189,7 @@ export class SetScheduleModalComponent implements OnInit {
     } catch (error) {
       this.editedDates = [];
       this.existingCapacityDates = [];
+      this.allExistingCapacityDates = [];
     }
   }
 
@@ -186,6 +201,7 @@ export class SetScheduleModalComponent implements OnInit {
       editedDates: this.editedDates,
       overwriteOverrides: this.overwriteOverrides,
       existingCapacityDates: this.existingCapacityDates,
+      allExistingCapacityDates: this.allExistingCapacityDates,
       overwriteExistingCapacity: this.overwriteExistingCapacity
     };
   }

@@ -10,15 +10,3 @@ body, .app-root {
   min-height: calc(100vh - 195px);
   padding-top: auto;
 }
-
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  margin: 0;
-  padding: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}

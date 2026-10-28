@@ -255,6 +255,13 @@ describe('CustomerDetailComponent', () => {
       expect(pageText()).toContain('1 Trail Rd');
     });
 
+    it('shows the stored country', async () => {
+      await openLive(Promise.resolve({ ...fullRecord, province: 'Arkansas', country: 'United States of America' }));
+
+      expect(pageText()).toContain('United States of America');
+      expect(pageText()).not.toContain('Canada');
+    });
+
     it('keeps the live row when the record is not indexed yet', async () => {
       await openLive(Promise.resolve(null));
 

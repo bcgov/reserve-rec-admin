@@ -95,7 +95,8 @@ export class CustomerDetailComponent implements OnInit {
         lastEvaluatedKey: append ? this.bookingsLastEvaluatedKey : undefined,
       });
 
-      const items = res?.data?.items || [];
+      // TODO: #630 We should not need to include TIMED_OUT bookings for admin sales/customers
+      const items = res?.data?.items.filter((booking) => booking?.status !== "TIMED_OUT") || [];
       this.bookingsLastEvaluatedKey = res?.data?.lastEvaluatedKey || null;
 
       for (const booking of items) {

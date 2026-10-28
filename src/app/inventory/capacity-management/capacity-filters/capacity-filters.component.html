@@ -10,7 +10,7 @@
   </div>
   <div class="col-md-4">
     <label for="facility-select" class="form-label mb-2">Facility</label>
-    <select id="facility-select" class="form-select" [formControl]="facilityControl" [disabled]="loading$()">
+    <select id="facility-select" class="form-select" [formControl]="facilityControl">
       <option value="">Please Select</option>
       <option *ngFor="let facility of facilities" [value]="facility['pk'] + '::' + facility['sk']">
         {{ facility.displayName }}
@@ -19,7 +19,7 @@
   </div>
   <div class="col-md-4">
     <label for="product-select" class="form-label mb-2">Product</label>
-    <select id="product-select" class="form-select" [formControl]="productControl" [disabled]="loading$()">
+    <select id="product-select" class="form-select" [formControl]="productControl">
       <option value="">Please Select</option>
       <option *ngFor="let product of products" [value]="product['pk'] + '::' + product['sk']">
         {{ product.displayName }}

@@ -5,7 +5,6 @@ import { FooterComponent } from './footer/footer.component';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { AuthService } from './services/auth.service';
-import { LoadingService } from './services/loading.service';
 
 
 @Component({
@@ -17,6 +16,4 @@ import { LoadingService } from './services/loading.service';
 export class AppComponent {
   title = 'reserve-rec-admin';
   protected authService = inject(AuthService);
-  protected loadingService = inject(LoadingService);
-  loading$ = this.loadingService.loading;
 }

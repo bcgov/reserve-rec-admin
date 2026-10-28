@@ -10,19 +10,12 @@ import { CapacityManagementComponent } from './capacity-management.component';
 describe('CapacityManagementComponent - updateSchedule', () => {
   let component: CapacityManagementComponent;
   let updateSingleDaySpy: jest.SpyInstance;
-  let loadingServiceMock: any;
   let inventoryPoolServiceMock: any;
 
   beforeEach(() => {
     // updateSchedule skips dates before today, so pin "now" to the start of the
     // window instead of letting the clock age the fixture out.
     jest.useFakeTimers().setSystemTime(new Date('2026-09-14T00:00:00Z'));
-    
-    // Mock LoadingService
-    loadingServiceMock = {
-      addToFetchList: jest.fn(),
-      removeFromFetchList: jest.fn()
-    };
     
     // Mock ToastService
     const toastServiceMock = {
@@ -42,8 +35,7 @@ describe('CapacityManagementComponent - updateSchedule', () => {
       {} as any,
       new FormBuilder(),
       {} as any,
-      toastServiceMock,
-      loadingServiceMock
+      toastServiceMock
     );
     updateSingleDaySpy = jest
       .spyOn(component as any, 'updateSingleDay')
@@ -183,9 +175,13 @@ describe('CapacityManagementComponent - updateSchedule', () => {
     const end = new Date('2026-09-20T00:00:00Z');
     const days = buildDays([1]);
 
+    const initialLoadingState = (component as any).loadingIds();
+    const initialSize = initialLoadingState.size;
+
     await (component as any).updateSchedule(start, end, days, [], false, [], false);
 
-    expect(loadingServiceMock.addToFetchList).toHaveBeenCalledWith('update-schedule');
-    expect(loadingServiceMock.removeFromFetchList).toHaveBeenCalledWith('update-schedule');
+    // After updateSchedule completes, loading state should be restored
+    const finalLoadingState = (component as any).loadingIds();
+    expect(finalLoadingState.size).toBe(initialSize);
   });
 });

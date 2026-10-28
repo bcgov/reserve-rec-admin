@@ -1,4 +1,4 @@
-<section class="mx-3 mx-md-5 py-5 h-100 position-relative">
+<section class="mx-3 mx-md-5 py-5 h-100">
   <div class="col h-100 d-flex flex-column">
     <!-- Breadcrumbs -->
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
@@ -7,7 +7,7 @@
     <h3 class="mb-4">Pass Capacity</h3>
 
     <!-- Filters -->
-    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()"></app-capacity-filters>
+    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()" (loadingStateChanged)="onFiltersLoadingStateChanged($event)"></app-capacity-filters>
 
     <!-- Calendar Navigation -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -20,7 +20,7 @@
           <i class="fa fa-chevron-right"></i>
         </button>
       </div>
-      <button class="btn btn-sm btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value">
+      <button class="btn btn-sm btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value || loading$()">
         Set Schedule
       </button>
     </div>
@@ -59,3 +59,10 @@
     </div>
   </div>
 </section>
+
+<!-- Loading overlay Big big-->
+<div class="loading-overlay" *ngIf="loading$()">
+  <div class="spinner-border text-light" style="width: 5rem; height: 5rem;" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>

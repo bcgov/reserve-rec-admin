@@ -102,11 +102,14 @@ export class PassSearchComponent {
       this.totalHits = res['data']?.['total']?.['value'] || 0;
       const hits = res['data']?.['hits'] || [];
       const bookingsSearch = hits.map((hit: any) => hit._source || hit);
+     
+      // TODO: #630 We should not need to include TIMED_OUT bookings for admin sales/customers
+      const filteredBookingSearch = bookingsSearch.filter((booking) => booking?.status !== "TIMED_OUT");
 
       if (newSearch) {
-        this.bookings = bookingsSearch;
+        this.bookings = filteredBookingSearch;
       } else {
-        this.bookings = [...this.bookings, ...bookingsSearch];
+        this.bookings = [...this.bookings, ...filteredBookingSearch];
       }
 
     } catch (error) {
