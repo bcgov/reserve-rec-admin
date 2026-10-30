@@ -64,7 +64,7 @@ export class FeatureFlagService {
    */
   async getFeatureFlagsAdmin(): Promise<FeatureFlagAdminResponse> {
     const response: any = await lastValueFrom(
-      this.apiService.get('featureFlags', { admin: true })
+      this.apiService.get('featureFlags/admin')
     );
     return response.data as FeatureFlagAdminResponse;
   }
