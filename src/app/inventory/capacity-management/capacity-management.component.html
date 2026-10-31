@@ -3,14 +3,16 @@
     <!-- Breadcrumbs -->
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
 
-    <!-- Title -->
-    <h3 class="mb-4">Pass Capacity</h3>
+    <div class="filters-area">
+      <!-- Title -->
+      <h3 class="page-title mb-4">Pass capacity</h3>
 
-    <!-- Filters -->
-    <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()" (loadingStateChanged)="onFiltersLoadingStateChanged($event)"></app-capacity-filters>
+      <!-- Filters -->
+      <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()" (loadingStateChanged)="onFiltersLoadingStateChanged($event)"></app-capacity-filters>
+    </div>
 
     <!-- Calendar Navigation -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-none d-md-flex justify-content-between align-items-center mb-3">
       <div class="d-flex gap-2 align-items-center" style="flex: 0 0 25%;">
         <button class="btn btn-sm btn-outline-primary" (click)="previousMonth()">
           <i class="fa fa-chevron-left"></i>
@@ -26,26 +28,43 @@
     </div>
 
     <!-- Product Date Range Info -->
-    <div *ngIf="productControl.value && currentProductRangeStart && currentProductRangeEnd" class="alert alert-info mb-3">
+    <div *ngIf="productControl.value && currentProductRangeStart && currentProductRangeEnd" class="alert alert-info mb-3 d-none d-md-block">
       <strong>{{ currentProductName }}</strong> is active from 
       <span class="fw-semibold">{{ currentProductRangeStart | date: 'MMM d, yyyy' }} to {{ currentProductRangeEnd | date: 'MMM d, yyyy' }}</span>
     </div>
 
     <!-- Calendar View -->
     <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white position-relative">
+      <!-- Mobile (#463): product name and month navigation sit inside the calendar card -->
+      <div class="mobile-calendar-header d-md-none">
+        <h4 *ngIf="productControl.value" class="fs-5 fw-normal mb-3">{{ currentProductName }}</h4>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-link btn-sm text-body" aria-label="Previous month" (click)="previousMonth()">
+              <i class="fa fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <span>{{ currentMonth | date: 'MMMM yyyy' }}</span>
+            <button type="button" class="btn btn-link btn-sm text-body" aria-label="Next month" (click)="nextMonth()">
+              <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value || loading$()">
+            <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Set schedule
+          </button>
+        </div>
+      </div>
 
       <!-- Day headers -->
       <div class="calendar-header d-grid gap-1 bg-light border-bottom" style="grid-template-columns: repeat(7, 1fr)">
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Sun</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Mon</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Tue</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Wed</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Thu</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Fri</div>
-        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted">Sat</div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Sun</span><abbr class="d-md-none text-decoration-none" title="Sunday">S</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Mon</span><abbr class="d-md-none text-decoration-none" title="Monday">M</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Tue</span><abbr class="d-md-none text-decoration-none" title="Tuesday">T</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Wed</span><abbr class="d-md-none text-decoration-none" title="Wednesday">W</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Thu</span><abbr class="d-md-none text-decoration-none" title="Thursday">Th</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Fri</span><abbr class="d-md-none text-decoration-none" title="Friday">F</abbr></div>
+        <div class="calendar-day-header py-2 px-0 p-md-3 fw-bold text-center text-muted"><span class="d-none d-md-inline">Sat</span><abbr class="d-md-none text-decoration-none" title="Saturday">S</abbr></div>
       </div>
 
-      <!-- Calendar component - destroyed and recreated on month navigation via calendarKey -->
       <app-calendar
         *ngIf="calendarKey && productControl.value"
         [calendarDays]="calendarDays"
@@ -55,6 +74,7 @@
         [productRangeEnd]="currentProductRangeEnd"
         (toggleReservation)="toggleReservationStatus($event)"
         (editCapacity)="onEditCapacity($event)"
+        (saveCapacity)="onSaveCapacity($event)"
       ></app-calendar>
     </div>
   </div>

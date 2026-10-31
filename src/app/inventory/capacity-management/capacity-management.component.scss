@@ -11,3 +11,54 @@
   z-index: 1000;
 }
 
+// Mobile design (#463): header, weekday row and grid read as one white card
+// (8px inner padding), with the day panel sitting below it on the page
+@media (max-width: 767.98px) {
+  // The design has a white page; the app shell behind it is grey
+  :host {
+    display: block;
+    min-height: 100%;
+    background-color: #fff;
+  }
+
+  .filters-area {
+    padding: 0 2.25rem;
+  }
+
+  .page-title {
+    margin-top: 3rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .calendar-container {
+    border: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .mobile-calendar-header,
+  .calendar-header {
+    background-color: #fff !important;
+    border: 1px solid #ECEDF0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  .mobile-calendar-header {
+    border-top: 1px solid #ECEDF0 !important;
+    border-radius: 8px 8px 0 0;
+    padding: 12px 8px 16px;
+  }
+
+  .calendar-header {
+    gap: 0 !important;
+    padding: 0 8px 8px;
+  }
+
+  .calendar-day-header {
+    padding: 0 !important;
+    color: #2D2D2D !important;
+    font-weight: 400 !important;
+    line-height: 24px;
+  }
+}

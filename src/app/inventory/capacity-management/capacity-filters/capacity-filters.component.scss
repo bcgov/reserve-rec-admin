@@ -5,3 +5,14 @@
   }
 }
 
+// Mobile design (#463): smaller field labels
+@media (max-width: 767.98px) {
+  .row {
+    --bs-gutter-y: 1.5rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 4px !important;
+  }
+}
