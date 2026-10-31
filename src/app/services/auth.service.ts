@@ -142,18 +142,19 @@ export class AuthService {
     const exp = this.session()?.tokens?.accessToken?.payload?.exp;
     if (exp && exp * 1000 - Date.now() > bufferMs) return;
     if (!this.session()?.tokens) return; // not signed in
+    if (!navigator.onLine) return; // a failed renewal logs the user out, so wait until back online
     await this.setRefresh(true);
   }
 
   private refreshTimer: any;
 
   async setRefresh(forceRefresh = false) {
-    clearTimeout(this.refreshTimer); // avoid stacking timers on repeated renewals
     try {
       this.session.set(await fetchAuthSession({ forceRefresh: forceRefresh }));
       if (this.session().tokens) {
         this.loggerService.debug(JSON.stringify(this.session(), null, 2));
         await this.permissionsService.load(this.session().tokens.accessToken.toString());
+        clearTimeout(this.refreshTimer); // right before re-arming so overlapping renewals leave one timer
         const refreshInterval = ((this.session().tokens.accessToken.payload.exp * 1000) - Date.now()) / 2;
         if (refreshInterval > 0) {
           this.refreshTimer = setTimeout(async () => {
