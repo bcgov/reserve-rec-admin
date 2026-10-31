@@ -1,3 +1,10 @@
+.form-select {
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // Mobile design (#463): smaller field labels
 @media (max-width: 767.98px) {
   .row {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, DestroyRef, inject } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, DestroyRef, inject, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -52,10 +52,18 @@ export class CapacityFiltersComponent implements OnInit {
   private facilitiesMap: Map<string, any> = new Map(); // Map to store facilities by pk 
   private productsMap: Map<string, any> = new Map(); // Map to store products by pk::sk
 
+  // Loading states for individual dropdowns
+  loadingFacilities = false;
+  loadingProducts = false;
+
+  // Track external loading state
+  private externalLoading = false;
+
   // Output events
   @Output() productSelected = new EventEmitter<ProductSelectionEvent>();
   @Output() collectionChanged = new EventEmitter<void>();
   @Output() facilityChanged = new EventEmitter<void>();
+  @Output() loadingStateChanged = new EventEmitter<boolean>();
 
   constructor(
     protected collectionService: CollectionService,
@@ -110,7 +118,42 @@ export class CapacityFiltersComponent implements OnInit {
       )
       .subscribe((value) => {this.onProductChange();});
   }
- 
+
+  /**
+   * Public method for parent to call when external loading state changes
+   * This ensures filter controls are properly enabled/disabled
+   */
+  updateFilterStates(parentLoading: boolean = false): void {
+    this.externalLoading = parentLoading;
+    this.updateFilterControlsState();
+  }
+
+  /**
+   * Update all filter control states based on internal and external loading
+   */
+  private updateFilterControlsState() {
+    const isLoading = this.loadingFacilities || this.loadingProducts || this.externalLoading;
+    if (isLoading) {
+      this.collectionControl.disable({ emitEvent: false });
+      this.facilityControl.disable({ emitEvent: false });
+      this.productControl.disable({ emitEvent: false });
+    } else {
+      this.collectionControl.enable({ emitEvent: false });
+      // Facility is enabled if collection is selected
+      if (this.collectionControl.value) {
+        this.facilityControl.enable({ emitEvent: false });
+      } else {
+        this.facilityControl.disable({ emitEvent: false });
+      }
+      // Product is enabled if facility is selected
+      if (this.facilityControl.value) {
+        this.productControl.enable({ emitEvent: false });
+      } else {
+        this.productControl.disable({ emitEvent: false });
+      }
+    }
+  }
+
   private async loadCollections() {
     try {
       // Try cache first
@@ -164,6 +207,8 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   private async loadFacilities(collectionId: string) {
+    this.loadingFacilities = true;
+    this.loadingStateChanged.emit(true);
     try {
       const facilitiesData = await this.facilityService.getFacilitiesByCollectionId(collectionId);
       this.facilities = this.extractArrayFromResponse(facilitiesData);
@@ -177,6 +222,10 @@ export class CapacityFiltersComponent implements OnInit {
     } catch (error) {
       this.facilities = [];
       this.facilitiesMap.clear();
+    } finally {
+      this.loadingFacilities = false;
+      this.updateFilterControlsState();
+      this.loadingStateChanged.emit(this.loadingProducts);
     }
   }
 
@@ -196,6 +245,8 @@ export class CapacityFiltersComponent implements OnInit {
   }
 
   private async loadProducts(facilityId: string) {
+    this.loadingProducts = true;
+    this.loadingStateChanged.emit(true);
     try {
       const collectionId = this.collectionControl.value;
       
@@ -264,6 +315,10 @@ export class CapacityFiltersComponent implements OnInit {
     } catch (error) {
       console.error('Error loading products:', error);
       this.products = [];
+    } finally {
+      this.loadingProducts = false;
+      this.updateFilterControlsState();
+      this.loadingStateChanged.emit(this.loadingFacilities);
     }
   }
 

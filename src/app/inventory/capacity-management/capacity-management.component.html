@@ -8,7 +8,7 @@
       <h3 class="page-title mb-4">Pass capacity</h3>
 
       <!-- Filters -->
-      <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()"></app-capacity-filters>
+      <app-capacity-filters (productSelected)="onProductSelected($event)" (collectionChanged)="onCollectionChange()" (facilityChanged)="onFacilityChange()" (loadingStateChanged)="onFiltersLoadingStateChanged($event)"></app-capacity-filters>
     </div>
 
     <!-- Calendar Navigation -->
@@ -22,7 +22,7 @@
           <i class="fa fa-chevron-right"></i>
         </button>
       </div>
-      <button class="btn btn-sm btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value">
+      <button class="btn btn-sm btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value || loading$()">
         Set Schedule
       </button>
     </div>
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Calendar View -->
-    <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white">
+    <div class="calendar-container d-flex flex-column flex-grow-1 border rounded-1 bg-white position-relative">
       <!-- Mobile (#463): product name and month navigation sit inside the calendar card -->
       <div class="mobile-calendar-header d-md-none">
         <h4 *ngIf="productControl.value" class="fs-5 fw-normal mb-3">{{ currentProductName }}</h4>
@@ -48,7 +48,7 @@
               <i class="fa fa-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
-          <button type="button" class="btn btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value">
+          <button type="button" class="btn btn-primary" (click)="openSetScheduleModal()" [disabled]="!productControl.value || loading$()">
             <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Set schedule
           </button>
         </div>
@@ -78,6 +78,11 @@
       ></app-calendar>
     </div>
   </div>
-  <app-loadal></app-loadal>
 </section>
 
+<!-- Loading overlay Big big-->
+<div class="loading-overlay" *ngIf="loading$()">
+  <div class="spinner-border text-light" style="width: 5rem; height: 5rem;" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>

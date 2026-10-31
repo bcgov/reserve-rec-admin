@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../shared/components/breadcrumb/breadcrumb.component';
-import { LoadalComponent } from '../../shared/components/loadal/loadal.component';
 import { CalendarComponent, CalendarDay, InventoryPoolData, CapacityEditEvent } from './calendar/calendar.component';
 import { CapacityEditModalComponent } from './capacity-edit-modal/capacity-edit-modal.component';
 import { SetScheduleModalComponent } from './set-schedule-modal/set-schedule-modal.component';
@@ -17,7 +16,7 @@ import { ToastService, ToastTypes } from '../../services/toast.service';
 
 @Component({
   selector: 'app-capacity-management',
-  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule, LoadalComponent],
+  imports: [CommonModule, BreadcrumbComponent, CapacityFiltersComponent, CalendarComponent, FormsModule, ReactiveFormsModule],
   templateUrl: './capacity-management.component.html',
   styleUrls: ['./capacity-management.component.scss']
 })
@@ -27,7 +26,12 @@ export class CapacityManagementComponent implements OnInit {
     { label: 'Pass capacity' },
   ];
 
-  @ViewChild(LoadalComponent) loadal!: LoadalComponent;
+  // track component loading
+  private loadingIds = signal<Set<string>>(new Set());
+  loading$ = (() => this.loadingIds().size > 0);
+
+  // Reference to child filters component
+  @ViewChild(CapacityFiltersComponent) filtersComponent!: CapacityFiltersComponent;
 
   // Filter-related state (passed from filter component)
   filterForm!: FormGroup;
@@ -78,6 +82,39 @@ export class CapacityManagementComponent implements OnInit {
     });
     this.collectionControl = this.filterForm.get('collection') as FormControl;
     this.productControl = this.filterForm.get('product') as FormControl;
+  }
+
+
+  private addLoadingId(id: string) {
+    this.loadingIds.update(ids => new Set([...ids, id]));
+    this.updateFormControlsState();
+  }
+
+  private removeLoadingId(id: string) {
+    this.loadingIds.update(ids => {
+      const newIds = new Set(ids);
+      newIds.delete(id);
+      return newIds;
+    });
+    this.updateFormControlsState();
+    // Notify child component to update its filter states when external loading completes
+    if (this.filtersComponent) {
+      this.filtersComponent.updateFilterStates(this.loading$());
+    }
+  }
+
+  /**
+   * Disable/enable form controls based on loading state
+   */
+  private updateFormControlsState() {
+    const isLoading = this.loading$();
+    if (isLoading) {
+      this.collectionControl.disable({ emitEvent: false });
+      this.productControl.disable({ emitEvent: false });
+    } else {
+      this.collectionControl.enable({ emitEvent: false });
+      this.productControl.enable({ emitEvent: false });
+    }
   }
 
   ngOnInit() {
@@ -144,7 +181,17 @@ export class CapacityManagementComponent implements OnInit {
     this.updateCalendarKey();
   }
 
+  onFiltersLoadingStateChanged(isLoading: boolean) {
+    if (isLoading) {
+      this.addLoadingId('filters-loading');
+    } else {
+      this.removeLoadingId('filters-loading');
+    }
+  }
+
   private async loadInventoryPoolData(preserveManualEdits: boolean = true) {
+    const requestId = 'load-inventory-pools';
+    this.addLoadingId(requestId);
     try {
       const collectionId = this.collectionControl.value;
       const productKey = this.productControl.value;
@@ -205,6 +252,8 @@ export class CapacityManagementComponent implements OnInit {
       }
     } catch (error) {
       this.inventoryPoolsByDate.clear();
+    } finally {
+      this.removeLoadingId(requestId);
     }
   }
 
@@ -267,8 +316,14 @@ export class CapacityManagementComponent implements OnInit {
     modalRef.componentInstance.day = event.day;
     modalRef.componentInstance.poolData = event.poolData;
     modalRef.result.then(
-      (updatedData: InventoryPoolData) => {
-        this.updateSingleDay(event.day, updatedData.capacity, true, updatedData['notes']);
+      async (updatedData: InventoryPoolData) => {
+        const requestId = 'edit-capacity';
+        this.addLoadingId(requestId);
+        try {
+          await this.updateSingleDay(event.day, updatedData.capacity, true, updatedData['notes']);
+        } finally {
+          this.removeLoadingId(requestId);
+        }
       },
       () => {}
     );
@@ -282,14 +337,17 @@ export class CapacityManagementComponent implements OnInit {
   /**
    * Ensure ProductDate exists for a given date, creating it if necessary
    */
-  private async ensureProductDateExists(collectionId: string, dateKey: string): Promise<boolean> {
+  private async ensureProductDateExists(collectionId: string, dateKey: string, activityType?: string, activityId?: string, productId?: string): Promise<boolean> {
     try {
-      const productId = this.extractProductId(this.productControl.value);
+      const finalActivityType = activityType || this.currentActivityType;
+      const finalActivityId = activityId || this.currentActivityId;
+      const finalProductId = productId || this.extractProductId(this.productControl.value);
+      
       const productDates = await this.productDateService.getProductDates(
         collectionId,
-        this.currentActivityType,
-        this.currentActivityId,
-        productId,
+        finalActivityType,
+        finalActivityId,
+        finalProductId,
         dateKey,
         dateKey
       );
@@ -299,9 +357,9 @@ export class CapacityManagementComponent implements OnInit {
         try {
           const pdResult = await this.productService.createProductDates(
             collectionId,
-            this.currentActivityType,
-            this.currentActivityId,
-            productId,
+            finalActivityType,
+            finalActivityId,
+            finalProductId,
             { startDate: dateKey, endDate: dateKey },
             false  // Don't show success toast
           );
@@ -340,12 +398,15 @@ export class CapacityManagementComponent implements OnInit {
   /**
    * Ensure InventoryPool exists for a given date, creating it if necessary
    */
-  private async ensureInventoryPoolExists(collectionId: string, productId: string, dateKey: string): Promise<InventoryPoolData[] | null> {
+  private async ensureInventoryPoolExists(collectionId: string, productId: string, dateKey: string, activityType?: string, activityId?: string): Promise<InventoryPoolData[] | null> {
     try {
+      const finalActivityType = activityType || this.currentActivityType;
+      const finalActivityId = activityId || this.currentActivityId;
+      
       const pools = await this.inventoryPoolService.getInventoryPools(
         collectionId,
-        this.currentActivityType,
-        this.currentActivityId,
+        finalActivityType,
+        finalActivityId,
         productId,
         dateKey,
         dateKey
@@ -356,8 +417,8 @@ export class CapacityManagementComponent implements OnInit {
         try {
           const createResult = await this.productService.createInventoryPools(
             collectionId,
-            this.currentActivityType,
-            this.currentActivityId,
+            finalActivityType,
+            finalActivityId,
             productId,
             dateKey,
             dateKey,
@@ -399,14 +460,17 @@ export class CapacityManagementComponent implements OnInit {
     }
   }
 
-  private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false): Promise<boolean> {
-    this.loadal.show();
+  private async updateSingleDay(day: CalendarDay, capacity: number, isManualEdit: boolean = false, notes?: string, clearManualEdit: boolean = false, capturedCollectionId?: string, capturedActivityType?: string, capturedActivityId?: string, capturedProductId?: string): Promise<boolean> {
+    const requestId = 'update-single-day';
+    this.addLoadingId(requestId);
     try {
       const dateKey = day.date.toISOString().split('T')[0];
-      const collectionId = this.collectionControl.value;
-      const productId = this.extractProductId(this.productControl.value);
+      const collectionId = capturedCollectionId || this.collectionControl.value;
+      const activityType = capturedActivityType || this.currentActivityType;
+      const activityId = capturedActivityId || this.currentActivityId;
+      const productId = capturedProductId || this.extractProductId(this.productControl.value);
 
-      if (!collectionId || !this.currentActivityType || !this.currentActivityId || !productId) {
+      if (!collectionId || !activityType || !activityId || !productId) {
         return false;
       }
 
@@ -418,8 +482,8 @@ export class CapacityManagementComponent implements OnInit {
 
           const extensionResult = await this.productService.extendProductDateRange(
             collectionId,
-            this.currentActivityType,
-            this.currentActivityId,
+            activityType,
+            activityId,
             productId,
             this.currentProduct,
             dateKey,
@@ -448,11 +512,11 @@ export class CapacityManagementComponent implements OnInit {
         }
       }
 
-      const productDateExists = await this.ensureProductDateExists(collectionId, dateKey);
+      const productDateExists = await this.ensureProductDateExists(collectionId, dateKey, activityType, activityId, productId);
       if (!productDateExists) {
         return false;
       }
-      const pools = await this.ensureInventoryPoolExists(collectionId, productId, dateKey);
+      const pools = await this.ensureInventoryPoolExists(collectionId, productId, dateKey, activityType, activityId);
       if (!pools) {
         return false;
       }
@@ -463,8 +527,8 @@ export class CapacityManagementComponent implements OnInit {
         const oldCapacity = existingPool?.capacity || 0;
         const response = await this.inventoryPoolService.updateInventoryPool(
           collectionId,
-          this.currentActivityType,
-          this.currentActivityId,
+          activityType,
+          activityId,
           productId,
           dateKey,
           capacity,
@@ -514,7 +578,7 @@ export class CapacityManagementComponent implements OnInit {
       );
       return false;
     } finally {
-      this.loadal.hide();
+      this.removeLoadingId(requestId);
     }
   }
 
@@ -543,8 +607,17 @@ export class CapacityManagementComponent implements OnInit {
   }
 
   private async applySchedule(scheduleData: any): Promise<void> {
+    const requestId = 'apply-schedule';
+    this.addLoadingId(requestId);
+    
+    // Capture context once at the start to prevent changes during processing
+    const capturedCollectionId = this.collectionControl.value;
+    const capturedActivityType = this.currentActivityType;
+    const capturedActivityId = this.currentActivityId;
+    const capturedProductId = this.extractProductId(this.productControl.value);
+    
     try {
-      const { startDate, endDate, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity } = scheduleData;
+      const { startDate, endDate, days, editedDates, overwriteOverrides, existingCapacityDates, allExistingCapacityDates, overwriteExistingCapacity } = scheduleData;
       const start = new Date(startDate);
       const end = new Date(endDate);
       const endDateString = end.toISOString().split('T')[0];
@@ -555,10 +628,10 @@ export class CapacityManagementComponent implements OnInit {
           const startDateForProductDates = currentRangeEndDate.toISOString().split('T')[0];
 
           const extensionResult = await this.productService.extendProductDateRange(
-            this.collectionControl.value,
-            this.currentActivityType,
-            this.currentActivityId,
-            this.extractProductId(this.productControl.value),
+            capturedCollectionId,
+            capturedActivityType,
+            capturedActivityId,
+            capturedProductId,
             this.currentProduct,
             endDateString,
             startDateForProductDates
@@ -585,14 +658,17 @@ export class CapacityManagementComponent implements OnInit {
         }
       }
 
-      await this.updateSchedule(start, end, days, editedDates, overwriteOverrides, existingCapacityDates, overwriteExistingCapacity);
+      await this.updateSchedule(start, end, days, editedDates, overwriteOverrides, allExistingCapacityDates, overwriteExistingCapacity, capturedCollectionId, capturedActivityType, capturedActivityId, capturedProductId);
     } catch (error) {
       console.error('Schedule application error:', error);
+    } finally {
+      this.removeLoadingId(requestId);
     }
   }
 
-  private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false): Promise<void> {
-    this.loadal.show();
+  private async updateSchedule(start: Date, end: Date, days: any[], editedDates: any[], overwriteOverrides: boolean = false, existingCapacityDates: any[] = [], overwriteExistingCapacity: boolean = false, collectionId: string, activityType: string, activityId: string, productId: string): Promise<void> {
+    const requestId = 'update-schedule';
+    this.addLoadingId(requestId);
     try {
       const overrideBadgeDateSet = new Set<string>(editedDates.map((ed: any) => ed.date));
       const existingCapacityDateSet = new Set<string>(existingCapacityDates.map((ed: any) => ed.date));
@@ -601,6 +677,57 @@ export class CapacityManagementComponent implements OnInit {
       const bookedByDate = new Map<string, number>(
         existingCapacityDates.map((ed: any) => [ed.date, ed.booked || 0])
       );
+      
+      // Fetch inventory pools for the entire schedule range upfront
+      // so we can properly toggle dates outside the visible month
+      // DONT USE SAME MAP AS CALENDAR! 
+      const scheduleRangePoolsMap = new Map<string, any[]>();
+      const scheduleStartStr = start.toISOString().split('T')[0];
+      const scheduleEndStr = end.toISOString().split('T')[0];
+      try {
+        const scheduleRangePools = await this.inventoryPoolService.getInventoryPools(
+          collectionId,
+          activityType,
+          activityId,
+          productId,
+          scheduleStartStr,
+          scheduleEndStr,
+          undefined,
+          true // include checked-in tally
+        );
+        
+        // Treat null as a failure (getInventoryPools catches errors and returns null)
+        if (!scheduleRangePools) {
+          throw new Error('Failed to fetch schedule range pools');
+        }
+        
+        // Store schedule range pools in a separate map
+        if (Array.isArray(scheduleRangePools)) {
+          scheduleRangePools.forEach((pool: any) => {
+            const dateKey = pool.date;
+            if (!scheduleRangePoolsMap.has(dateKey)) {
+              scheduleRangePoolsMap.set(dateKey, []);
+            }
+            const poolData = {
+              date: dateKey,
+              capacity: pool.capacity || 0,
+              availability: pool.availability || 0,
+              available: pool.availability || 0,
+              isOpen: pool.isOpen !== false,
+              ...pool
+            };
+            scheduleRangePoolsMap.get(dateKey)!.push(poolData);
+          });
+        }
+      } catch (fetchError) {
+        this.toastService.addMessage(
+          `Failed to fetch schedule range pools: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}. Schedule application cancelled.`,
+          'Schedule Error',
+          ToastTypes.ERROR
+        );
+        // Cannot continue safely - dates outside the visible month cannot be processed
+        throw new Error('Failed to fetch schedule range pools');
+      }
       
       // Get today's date string for comparison (YYYY-MM-DD format)
       const today = new Date();
@@ -628,38 +755,114 @@ export class CapacityManagementComponent implements OnInit {
           const day: CalendarDay = { date: new Date(current), isCurrentMonth: true };
           // If overwriting a manual override, clear the manual edit flag
           const clearManualEdit = hasOverrideBadge && overwriteOverrides;
+          
           if (dayConfig?.passesRequired) {
-            await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit);
+            // Ensure the date is open, then set capacity
+            const poolsForDay = scheduleRangePoolsMap.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && !poolsForDay[0].isOpen) {
+              // Pass both the pool data and the new capacity to do it all in one write
+              await this.toggleReservationStatus({ day, isOpen: true, pool: poolsForDay, newCapacity: dayConfig.defaultCapacity }, undefined, collectionId, activityType, activityId, productId);
+            } else {
+              // Day is already open, just update capacity
+              await this.updateSingleDay(day, dayConfig.defaultCapacity, false, undefined, clearManualEdit, collectionId, activityType, activityId, productId);
+            }
           } else if (hasExistingCapacity) {
             // Unchecked day that already carries capacity from an earlier schedule:
-            // wind it down so the calendar matches what was just set. A day with no
-            // pool is left alone - creating one only to set it to zero is what
-            // turned every day on in #422. Booked passes hold the floor, matching
-            // what closing the day by its toggle does; the calendar will not let a
-            // booked day be closed by hand either.
-            await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit);
+            // If it's currently open, toggle it closed (which handles capacity and preCloseCapacity).
+            // If it's already closed, just update capacity to booked amount.
+            // Check schedule range pools first, then fall back to visible month pools
+            const poolsForDay = scheduleRangePoolsMap.get(dateKey);
+            if (poolsForDay && poolsForDay[0] && poolsForDay[0].isOpen) {
+              // Pass the fetched pool data to toggleReservationStatus
+              await this.toggleReservationStatus({ day, isOpen: false, pool: poolsForDay }, undefined, collectionId, activityType, activityId, productId);
+            } else if (!poolsForDay || !poolsForDay[0]) {
+              // No data in schedule range map - try to fetch or use cached data
+              // toggleReservationStatus will handle the fallback
+              await this.toggleReservationStatus({ day, isOpen: false }, undefined, collectionId, activityType, activityId, productId);
+            } else {
+              // edge case to handle a day that is already closed but has existing capacity.
+              await this.updateSingleDay(day, bookedByDate.get(dateKey) || 0, false, undefined, clearManualEdit, collectionId, activityType, activityId, productId);
+            }
           }
         }
         current.setDate(current.getDate() + 1);
       }
       await this.loadInventoryPoolData();
     } finally {
-      this.loadal.hide();
+      this.removeLoadingId(requestId);
     }
   }
 
 
-  async toggleReservationStatus(event: { day: CalendarDay; isOpen: boolean } | CalendarDay) {
+  async toggleReservationStatus(event: { day: CalendarDay; isOpen: boolean; pool?: any[]; newCapacity?: number } | CalendarDay, providedPool?: any, capturedCollectionId?: string, capturedActivityType?: string, capturedActivityId?: string, capturedProductId?: string) {
     let day: CalendarDay;
     let newState: boolean | undefined;
+    let poolData: any[] | undefined;
+    let newCapacityOverride: number | undefined;
+    
     if ('day' in event) {
       day = event.day;
       newState = event.isOpen;
+      poolData = event.pool; // Optional pool data passed from schedule operation
+      newCapacityOverride = event.newCapacity; // Optional capacity to set when opening
     } else {
       day = event;
     }
+    
     const dateKey = day.date.toISOString().split('T')[0];
-    const pools = this.inventoryPoolsByDate.get(dateKey);
+    
+    // Try to get pools from provided data first, then from cache, then fetch if needed
+    let pools = poolData || providedPool;
+    if (!pools) {
+      pools = this.inventoryPoolsByDate.get(dateKey);
+    }
+    
+    // If still no pools and we're in a schedule context, try to fetch for this specific date
+    if (!pools || pools.length === 0) {
+      const collectionId = capturedCollectionId || this.collectionControl.value;
+      const activityType = capturedActivityType || this.currentActivityType;
+      const activityId = capturedActivityId || this.currentActivityId;
+      const productId = capturedProductId || this.extractProductId(this.productControl.value);
+      
+      if (collectionId && activityType && activityId && productId) {
+        try {
+          const fetchedPools = await this.inventoryPoolService.getInventoryPools(
+            collectionId,
+            activityType,
+            activityId,
+            productId,
+            dateKey,
+            dateKey,
+            undefined,
+            true
+          );
+          
+          // Treat null as a failure (getInventoryPools catches errors and returns null)
+          if (!fetchedPools) {
+            throw new Error('Failed to fetch pool data');
+          }
+          
+          if (Array.isArray(fetchedPools) && fetchedPools.length > 0) {
+            pools = fetchedPools.map((pool: any) => ({
+              date: dateKey,
+              capacity: pool.capacity || 0,
+              availability: pool.availability || 0,
+              available: pool.availability || 0,
+              isOpen: pool.isOpen !== false,
+              ...pool
+            }));
+          }
+        } catch (fetchError) {
+          this.toastService.addMessage(
+            `Cannot toggle ${dateKey}: unable to fetch pool data.`,
+            'Toggle Failed',
+            ToastTypes.ERROR
+          );
+          return;
+        }
+      }
+    }
+    
     if (!pools || pools.length === 0) {
       return;
     }
@@ -667,12 +870,15 @@ export class CapacityManagementComponent implements OnInit {
     const pool = pools[0];
     const finalNewState = newState !== undefined ? newState : !pool.isOpen;
 
-    this.loadal.show();
+    const requestId = 'toggle-reservation';
+    this.addLoadingId(requestId);
     try {
-      const collectionId = this.collectionControl.value;
-      const productId = this.extractProductId(this.productControl.value);
+      const collectionId = capturedCollectionId || this.collectionControl.value;
+      const activityType = capturedActivityType || this.currentActivityType;
+      const activityId = capturedActivityId || this.currentActivityId;
+      const productId = capturedProductId || this.extractProductId(this.productControl.value);
 
-      if (!collectionId || !this.currentActivityType || !this.currentActivityId || !productId) {
+      if (!collectionId || !activityType || !activityId || !productId) {
         return;
       }
 
@@ -685,11 +891,13 @@ export class CapacityManagementComponent implements OnInit {
         newCapacity = bookedPasses;
         preCloseCapacityValue = pool.capacity; 
       } else if (finalNewState === true) {
-        // Reopening: restore from server-persisted preCloseCapacity
-        if (pool['preCloseCapacity'] !== undefined) {
+        // Reopening: use provided newCapacity if available, otherwise restore from server-persisted preCloseCapacity
+        if (newCapacityOverride !== undefined) {
+          newCapacity = newCapacityOverride;
+        } else if (pool['preCloseCapacity'] !== undefined) {
           newCapacity = pool['preCloseCapacity'];
         }
-        // If no preCloseCapacity, keep current capacity (could be 0 from schedule)
+        // If no preCloseCapacity and no override, keep current capacity (could be 0 from schedule)
         preCloseCapacityValue = null; 
       }
       
@@ -701,8 +909,8 @@ export class CapacityManagementComponent implements OnInit {
         try {
           const response = await this.inventoryPoolService.updateInventoryPool(
             collectionId,
-            this.currentActivityType,
-            this.currentActivityId,
+            activityType,
+            activityId,
             productId,
             dateKey,
             newCapacity,
@@ -740,7 +948,7 @@ export class CapacityManagementComponent implements OnInit {
         ToastTypes.ERROR
       );
     } finally {
-      this.loadal.hide();
+      this.removeLoadingId(requestId);
     }
   }
 
