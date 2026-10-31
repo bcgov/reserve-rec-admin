@@ -39,8 +39,8 @@ export class ToastService implements OnDestroy {
               break;
             case ToastTypes.ERROR:
               this.toastr.error(msg.body, msg.title, {
-                extendedTimeOut: 0,
-                timeOut: 0,
+                extendedTimeOut: 2000,
+                timeOut: 5000,
                 closeButton: true,
               });
               break;

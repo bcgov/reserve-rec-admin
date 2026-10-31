@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { QrScannerPageComponent } from './qr-scanner-page.component';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
 import { QrScannerComponent } from '../../shared/components/qr-scanner/qr-scanner.component';
@@ -26,6 +27,7 @@ describe('QrScannerPageComponent', () => {
   let fixture: ComponentFixture<QrScannerPageComponent>;
 
   let mockApiService: any;
+  let mockAuthService: any;
   let mockToastService: any;
   let mockLoggerService: any;
 
@@ -43,6 +45,7 @@ describe('QrScannerPageComponent', () => {
   }
 
   beforeEach(() => {
+    mockAuthService = { ensureFreshToken: jest.fn().mockResolvedValue(undefined) };
     mockApiService = {
       get: createMockFn((path: string, options: any) => of({ data: { bookingId: '123', status: 'confirmed' } }))
     };
@@ -61,6 +64,7 @@ describe('QrScannerPageComponent', () => {
       imports: [QrScannerPageComponent, FormsModule],
       providers: [
         { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: mockAuthService },
         { provide: ToastService, useValue: mockToastService },
         { provide: LoggerService, useValue: mockLoggerService }
       ]
@@ -99,6 +103,16 @@ describe('QrScannerPageComponent', () => {
     expect(component.showQRScanner).toBe(false);
   });
 
+  it('renews the token before calling the verify endpoint', async () => {
+    const order: string[] = [];
+    mockAuthService.ensureFreshToken.mockImplementation(async () => { order.push('renew'); });
+    mockApiService.get.mockImplementation(() => { order.push('verify'); return of({ data: {} }); });
+
+    await component.onQRScanSuccess({ bookingId: '123', hash: 'abc', url: 'test-url' });
+
+    expect(order).toEqual(['renew', 'verify']);
+  });
+
   it('should handle QR scan failure', async () => {
     const error = { message: 'Error' };
     setMockReturnValue(mockApiService.get, throwError(() => error));
@@ -118,6 +132,7 @@ describe('QrScannerPageComponent', () => {
 
     scanner.scanSuccess.emit({ bookingId: '123', hash: 'abc', url: 'test-url' });
     await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve)); // let the token renewal await settle
 
     expect(scanner.resetScanner).toHaveBeenCalledTimes(1);
     expect(component.showVerificationResult).toBe(false);
@@ -130,6 +145,7 @@ describe('QrScannerPageComponent', () => {
 
     scanner.scanSuccess.emit({ bookingId: '123', hash: 'abc', url: 'test-url' });
     await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve)); // let the token renewal await settle
 
     expect(scanner.resetScanner).not.toHaveBeenCalled();
     expect(component.showVerificationResult).toBe(true);

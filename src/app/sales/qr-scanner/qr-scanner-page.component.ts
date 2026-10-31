@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { LoggerService } from '../../services/logger.service';
 import { PendingScanService } from '../../services/pending-scan.service';
@@ -31,6 +32,7 @@ export class QrScannerPageComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private authService: AuthService,
     private toastService: ToastService,
     private loggerService: LoggerService,
     private pendingScanService: PendingScanService
@@ -74,6 +76,8 @@ export class QrScannerPageComponent implements OnInit {
       this.isLoading = true;
       this.closeQRScanner();
 
+      // Renew the staff token first if it has expired (e.g. phone was locked)
+      await this.authService.ensureFreshToken();
       // Call the verification endpoint
       const verificationResponse = await lastValueFrom(
         this.apiService.get(`verify/${result.bookingId}/${result.hash}`, {})
