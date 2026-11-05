@@ -162,8 +162,8 @@ export class CustomersComponent implements OnInit, OnDestroy {
       let added = users;
 
       if (append) {
-        // Results are newest-first by offset, so signups since the last page push
-        // already-listed customers onto this one.
+        // Pages come by offset, so new signups or a shifting match order can push
+        // already-listed customers onto this page.
         added = this.unlisted(users);
         this.customers = [...this.customers, ...added];
         this.currentOffset += users.length;
