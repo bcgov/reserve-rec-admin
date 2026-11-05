@@ -15,7 +15,12 @@
 </head>
 
 <body>
-  <app-root></app-root>
+  <app-root>
+    <style>@keyframes boot-spin{to{transform:rotate(360deg)}}</style>
+    <div role="status" aria-label="Loading" style="display:flex;justify-content:center;align-items:center;height:100vh">
+      <div style="width:48px;height:48px;border:5px solid #d9dde4;border-top-color:#003366;border-radius:50%;animation:boot-spin 1s linear infinite"></div>
+    </div>
+  </app-root>
 </body>
 
 </html>
