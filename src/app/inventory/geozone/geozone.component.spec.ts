@@ -1,41 +1,32 @@
-/*
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
 import { GeozoneComponent } from './geozone.component';
-import { ConfigService } from '../../services/config.service';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
-import { provideToastr } from 'ngx-toastr';
+import { GeozoneService } from '../../services/geozone.service';
 
-describe('GeozoneComponent', () => {
-  let component: GeozoneComponent;
-  let fixture: ComponentFixture<GeozoneComponent>;
-
-  beforeEach(async () => {
+describe('GeozoneComponent header', () => {
+  async function render(url: string): Promise<HTMLElement> {
     await TestBed.configureTestingModule({
       imports: [GeozoneComponent],
       providers: [
-        ConfigService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([]),
-        provideToastr()
-      ]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(GeozoneComponent);
-    component = fixture.componentInstance;
+        { provide: ActivatedRoute, useValue: { data: of({ geozone: { collectionId: 'c', geozoneId: '1', displayName: 'G' } }) } },
+        { provide: Router, useValue: { url, navigate: jest.fn(), events: of(), createUrlTree: jest.fn(), serializeUrl: () => '' } },
+        { provide: GeozoneService, useValue: {} },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(GeozoneComponent);
     fixture.detectChanges();
+    return fixture.nativeElement;
+  }
+
+  const buttonLabels = (el: HTMLElement) =>
+    Array.from(el.querySelectorAll('button')).map((b) => b.textContent?.trim());
+
+  it('shows Edit on the details page', async () => {
+    expect(buttonLabels(await render('/inventory/geozone/c/1'))).toContain('Edit');
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('hides Edit on the edit page', async () => {
+    expect(buttonLabels(await render('/inventory/geozone/c/1/edit'))).not.toContain('Edit');
   });
-});
-*/
-
-xdescribe('geozone.component legacy placeholder', () => {
-  it('skipped', () => {});
 });
