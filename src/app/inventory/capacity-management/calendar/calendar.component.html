@@ -2,7 +2,7 @@
   <div *ngFor="let day of calendarDays" class="calendar-day bg-white border rounded p-2 d-flex flex-column" [class.not-current-month]="!day.isCurrentMonth">
 
     <!-- Mobile (#463): date and passes only; tapping opens the day panel below the grid -->
-    <button *ngIf="day.isCurrentMonth" type="button" class="mobile-day d-md-none" [class.selected]="isSelected(day)" [class.closed]="isGreyedOut(day)" [attr.aria-pressed]="isSelected(day)" (click)="selectDay(day)">
+    <button *ngIf="day.isCurrentMonth" type="button" class="mobile-day d-xl-none" [class.selected]="isSelected(day)" [class.closed]="isGreyedOut(day)" [attr.aria-pressed]="isSelected(day)" (click)="selectDay(day)">
       <span class="d-flex justify-content-between align-items-center">
         <span><span class="visually-hidden">{{ (day.date | date: 'MMMM') + ' ' }}</span>{{ getDayNumber(day) }}</span>
         <ng-container *ngIf="hasBeenEdited(day)">
@@ -13,7 +13,7 @@
       <span *ngIf="getInventoryPoolDataForDay(day)?.isOpen === false" class="visually-hidden">closed</span>
     </button>
 
-    <div class="d-none d-md-flex flex-column flex-grow-1 w-100">
+    <div class="d-none d-xl-flex flex-column flex-grow-1 w-100">
     <!-- Top row: Date number, Toggle, Edit icon -->
     <div *ngIf="day.isCurrentMonth && isDateInProductRange(day)" class="d-flex justify-content-between align-items-start w-100 mb-2">
       <div class="day-header fw-bold text-dark">
@@ -93,7 +93,7 @@
 </div>
 
 <!-- Mobile day panel (#463): details, open/close and inline passes edit for the tapped day -->
-<div class="d-md-none">
+<div class="d-xl-none">
 <!-- Only this line is live, so opening the editor or a reload does not re-read the panel;
      it stays in the DOM so the first tap is announced too -->
 <div class="visually-hidden" aria-live="polite">{{ selectedDay ? (selectedDay.date | date: 'EEEE, MMMM d') + ' selected' : '' }}</div>

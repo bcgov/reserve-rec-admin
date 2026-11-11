@@ -13,7 +13,7 @@
 
 // Mobile design (#463): header, weekday row and grid read as one white card
 // (8px inner padding), with the day panel sitting below it on the page
-@media (max-width: 767.98px) {
+@media (max-width: 1199.98px) {
   // The design has a white page; the app shell behind it is grey
   :host {
     display: block;

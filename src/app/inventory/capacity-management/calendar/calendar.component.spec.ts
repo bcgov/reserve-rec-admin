@@ -149,6 +149,41 @@ describe('CalendarComponent mobile day panel', () => {
     expect(component.editing).toBe(false);
   });
 
+  // #463 QA: on phones Reserved and Checked-in only show in the panel, which
+  // stayed empty until a day was tapped. Open it on a day as the month loads.
+  describe('default selection', () => {
+    function month(year: number, monthIndex: number): CalendarDay[] {
+      const blank: CalendarDay = { date: new Date(year, monthIndex, 0), isCurrentMonth: false };
+      const days = Array.from({ length: 3 }, (_, i) => ({ date: new Date(year, monthIndex, i + 1), isCurrentMonth: true }));
+      return [blank, ...days];
+    }
+
+    function load(days: CalendarDay[]) {
+      component.calendarDays = days;
+      component.ngOnChanges({ calendarDays: new SimpleChange([], days, false) });
+    }
+
+    afterEach(() => jest.useRealTimers());
+
+    it('selects today when today is in the month shown', () => {
+      jest.useFakeTimers({ now: new Date(2026, 4, 2, 15, 30) });
+      load(month(2026, 4));
+      expect(component.isSelected(may2)).toBe(true);
+    });
+
+    it('selects the first of the month when today is not in it', () => {
+      jest.useFakeTimers({ now: new Date(2026, 6, 10) });
+      load(month(2026, 4));
+      expect(component.selectedDay?.date).toEqual(new Date(2026, 4, 1));
+    });
+
+    it('never selects a day from the next or previous month', () => {
+      jest.useFakeTimers({ now: new Date(2026, 3, 30) });
+      load(month(2026, 4));
+      expect(component.selectedDay?.isCurrentMonth).toBe(true);
+    });
+  });
+
   it('keeps the selection when other inputs change', () => {
     component.selectDay(may2);
     component.ngOnChanges({ productRangeEnd: new SimpleChange('', '2026-06-01', false) });
@@ -242,6 +277,15 @@ describe('CalendarComponent mobile template', () => {
     const el = render(day(2), pool);
     expect(dayButton(el).classList.contains('closed')).toBe(grey);
     expect(panelChip(el).classList.contains('closed')).toBe(grey);
+  });
+
+  // #463 QA: the desktop cells overflowed and hid Saturday on tablets up to
+  // ~1074px, so the compact layout now runs up to the xl breakpoint (1200px).
+  it('uses the compact layout below the xl breakpoint', () => {
+    const el = render(day(2), {});
+    expect(dayButton(el).classList).toContain('d-xl-none');
+    expect(el.querySelector('.day-panel')!.parentElement!.classList).toContain('d-xl-none');
+    expect(el.querySelector('.calendar-day > .d-none')!.classList).toContain('d-xl-flex');
   });
 
   // The live region used to wrap the whole panel, so opening the editor
