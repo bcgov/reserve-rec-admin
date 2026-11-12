@@ -97,11 +97,11 @@
   outline-offset: 2px;
 }
 
-// Mobile design (#463): table-style grid inside the card, date and passes only;
+// Mobile design (#463), also used on tablets up to 1199px where the desktop cells overflow: table-style grid inside the card, date and passes only;
 // details live in the day panel
 $grid-line: #E5E7EB;
 
-@media (max-width: 767.98px) {
+@media (max-width: 1199.98px) {
   .calendar-grid {
     gap: 0;
     margin-top: 0;

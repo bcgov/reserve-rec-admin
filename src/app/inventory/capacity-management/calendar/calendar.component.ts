@@ -58,10 +58,13 @@ export class CalendarComponent implements OnChanges {
   }
 
   // This component is kept across month and product changes; only its days are
-  // swapped, so drop a selection that may no longer be on screen
+  // swapped, so drop a selection that may no longer be on screen. Then open the
+  // panel on today (or the 1st) so Reserved and Checked-in show without a tap
   ngOnChanges(changes: SimpleChanges) {
     if (changes['calendarDays']) {
-      this.selectedDay = null;
+      const days = this.calendarDays.filter(d => d.isCurrentMonth);
+      const today = new Date().toDateString();
+      this.selectedDay = days.find(d => d.date.toDateString() === today) ?? days[0] ?? null;
       this.cancelEdit();
     }
   }
