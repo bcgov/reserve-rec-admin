@@ -13,6 +13,7 @@ interface FlagDefinition {
   key: string;
   displayName: string;
   description: string;
+  icon: string;
 }
 
 @Component({
@@ -35,7 +36,14 @@ export class FeatureFlagsComponent implements OnInit, OnDestroy {
     {
       key: 'enablePayments',
       displayName: 'Enable Payments',
-      description: 'Toggle global payment functionality throughout the application'
+      description: 'Toggle global payment functionality throughout the application',
+      icon: 'fa-solid fa-money-check-dollar'
+    },
+    {
+      key: 'enableMigrations',
+      displayName: 'Enable BCSC Migrations',
+      description: 'Toggle migration capability. Allows users to migrate from a BC Parks account to a BCSC account and transfer all data',
+      icon: 'fa-solid fa-left-right'
     }
     // Add new flags here as they are created
   ];
