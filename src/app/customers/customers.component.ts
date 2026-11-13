@@ -8,6 +8,13 @@ import { LoggerService } from '../services/logger.service';
 import { LoadingService } from '../services/loading.service';
 import { RealtimeEvent, RealtimeService } from '../services/realtime.service';
 import { AuthService } from '../services/auth.service';
+import { Utils, csvField } from '../utils/utils';
+import { ToastService, ToastTypes } from '../services/toast.service';
+import { DateTime } from 'luxon';
+
+// The API returns at most 100 users per search; OpenSearch pages no deeper than 10,000.
+const EXPORT_PAGE_SIZE = 100;
+const EXPORT_MAX_ROWS = 10000;
 
 const HIGHLIGHT_MS = 5000;
 
@@ -23,6 +30,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
   pageSize = 20;
   hasMore = false;
   loading = false;
+  exporting = false;
   searchQuery = '';
   sortField: string = 'email';
   sortOrder: 'asc' | 'desc' = 'asc';
@@ -36,6 +44,8 @@ export class CustomersComponent implements OnInit, OnDestroy {
   private arrivals = new Map<string, any>();
   private subscriptions = new Subscription();
   private highlightTimers = new Set<ReturnType<typeof setTimeout>>();
+
+  private utils = new Utils();
 
   // Column visibility configuration
   availableColumns = [
@@ -58,6 +68,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private realtimeService: RealtimeService,
     private authService: AuthService,
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit() {
@@ -191,9 +202,8 @@ export class CustomersComponent implements OnInit, OnDestroy {
     }
   }
 
-  // The customer search reads the user index, which carries no booking data, so the
-  // "Active Booking" column is filled in from the booking search afterwards - one
-  // request for the page that was just loaded.
+  // The user index has no booking data, so Active Booking comes from the booking
+  // search: one request per batch of customers.
   private async loadActiveBookingFlags(customers: any[]) {
     const subs = customers.map((customer) => customer?.sub).filter(Boolean);
     if (!subs.length) return;
@@ -278,24 +288,59 @@ export class CustomersComponent implements OnInit, OnDestroy {
     }
   }
 
-  editCustomer(customer: any) {
-    if (customer.sub) {
-      this.router.navigate(['/customers', customer.sub, 'edit'], {
-        state: { customer: customer }
-      });
-    } else {
-      this.logger.error('Customer ID (sub) not found');
+
+  // Exports the visible columns for every customer matching the search on screen.
+  async downloadCSV() {
+    if (this.exporting) return;
+    this.exporting = true;
+    try {
+      const rows = await this.fetchAllForExport();
+      const columns = this.getVisibleColumns();
+      const cell = (customer: any, field: string) => {
+        const value = this.getValue(customer, field);
+        return csvField(value === '-' ? '' : value);
+      };
+      const lines = [
+        columns.map(column => csvField(column.label)).join(','),
+        ...rows.map(customer => columns.map(column => cell(customer, column.field)).join(',')),
+      ];
+      this.utils.downloadCSV(`customers-${DateTime.now().toFormat('yyyy-LL-dd')}.csv`, lines.join('\n'));
+      if (rows.length >= EXPORT_MAX_ROWS) {
+        this.toastService.addMessage(
+          `Only the first ${EXPORT_MAX_ROWS.toLocaleString()} customers were downloaded. Search to narrow the list.`,
+          'Customers',
+          ToastTypes.WARNING,
+        );
+      }
+    } catch (error) {
+      this.logger.error(error);
+      this.toastService.addMessage('The customer download failed. Try again.', 'Customers', ToastTypes.ERROR);
+    } finally {
+      this.exporting = false;
     }
   }
 
-  copyCustomer(customer: any) {
-    console.log('Copy customer button clicked');
-    // TODO: Implement copy functionality once requirements are determined
-  }
-
-  downloadCSV() {
-    console.log('Download to CSV button clicked');
-    // TODO: Implement CSV download functionality
+  private async fetchAllForExport(): Promise<any[]> {
+    const query = this.appliedQuery || undefined;
+    const rows: any[] = [];
+    const seen = new Set<string>();
+    let from = 0;
+    while (rows.length < EXPORT_MAX_ROWS) {
+      const page = (await this.customerService.searchCustomers({ query, limit: EXPORT_PAGE_SIZE, from }))?.data?.hits || [];
+      from += page.length;
+      const fresh = page.filter((customer: any) => !seen.has(customer.sub));
+      // An empty page, or one holding only rows already seen, means the matches have run out.
+      if (!fresh.length) break;
+      fresh.forEach((customer: any) => seen.add(customer.sub));
+      rows.push(...fresh);
+    }
+    const exported = rows.slice(0, EXPORT_MAX_ROWS);
+    if (this.getVisibleColumns().some(column => column.field === 'activeBooking')) {
+      for (let i = 0; i < exported.length; i += EXPORT_PAGE_SIZE) {
+        await this.loadActiveBookingFlags(exported.slice(i, i + EXPORT_PAGE_SIZE));
+      }
+    }
+    return exported;
   }
 
   openFilters() {
