@@ -8,6 +8,7 @@ import { LoggerService } from '../services/logger.service';
 import { LoadingService } from '../services/loading.service';
 import { RealtimeEvent, RealtimeService } from '../services/realtime.service';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 describe('CustomersComponent', () => {
   let component: CustomersComponent;
@@ -15,6 +16,7 @@ describe('CustomersComponent', () => {
 
   let mockCustomerService: any;
   let mockLoggerService: any;
+  let mockToastService: any;
 
   // Fresh objects per test - the component writes hasActiveBooking onto the customer.
   const withBooking = () => ({ sub: 'sub-1', email: 'a@example.com', givenName: 'A', familyName: 'Camper' });
@@ -26,6 +28,7 @@ describe('CustomersComponent', () => {
       getSubsWithCurrentBooking: jest.fn().mockResolvedValue(new Set(subsWithBooking)),
     };
     mockLoggerService = { info: jest.fn(), error: jest.fn() };
+    mockToastService = { addMessage: jest.fn() };
 
     return TestBed.configureTestingModule({
       imports: [CustomersComponent],
@@ -36,6 +39,7 @@ describe('CustomersComponent', () => {
         { provide: Router, useValue: { navigate: jest.fn() } },
         { provide: RealtimeService, useValue: { topic$: jest.fn(), reconnected$: new Subject<void>() } },
         { provide: AuthService, useValue: { isSuperAdmin: () => false } },
+        { provide: ToastService, useValue: mockToastService },
       ],
     }).compileComponents();
   }
@@ -111,6 +115,65 @@ describe('CustomersComponent', () => {
       expect(mockCustomerService.getSubsWithCurrentBooking).toHaveBeenCalledWith(range(21, 37).map((u) => u.sub));
     });
   });
+
+  describe('download to CSV', () => {
+    const customer = (n: number) => ({ sub: `sub-${n}`, email: `u${n}@example.com`, givenName: `U${n}` });
+    const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => customer(from + i));
+
+    // The page loads its first 20; the export then pages through every match, 100 at a time.
+    function serveMatches(total: number) {
+      const all = range(1, total);
+      mockCustomerService.searchCustomers.mockImplementation(async ({ limit, from }) => ({
+        data: { hits: all.slice(from, from + limit) },
+      }));
+    }
+
+    async function downloadedCsv() {
+      const download = jest.spyOn(component['utils'], 'downloadCSV').mockImplementation(() => undefined);
+      await component.downloadCSV();
+      expect(download).toHaveBeenCalledTimes(1);
+      return download.mock.calls[0];
+    }
+
+    it('exports every matching customer, not just the loaded page', async () => {
+      await setup(range(1, 20), ['sub-1']);
+      await create();
+      serveMatches(250);
+
+      const [filename, csv] = await downloadedCsv();
+      const lines = csv.split('\n');
+
+      expect(filename).toMatch(/^customers-\d{4}-\d{2}-\d{2}\.csv$/);
+      expect(lines[0]).toBe('Email,Name,Mobile Phone,Active Booking');
+      expect(lines).toHaveLength(251);
+      expect(lines[1]).toBe('u1@example.com,U1,,yes');
+      expect(lines[250]).toBe('u250@example.com,U250,,no');
+      expect(mockCustomerService.searchCustomers).toHaveBeenCalledWith(expect.objectContaining({ limit: 100, from: 200 }));
+    });
+
+    it('follows the Columns picker and skips the booking lookup when that column is hidden', async () => {
+      await setup([withBooking()], []);
+      await create();
+      component.availableColumns.forEach((column) => (column.visible = column.field === 'name'));
+      mockCustomerService.getSubsWithCurrentBooking.mockClear();
+
+      const [, csv] = await downloadedCsv();
+
+      expect(csv).toBe('Name\nA Camper');
+      expect(mockCustomerService.getSubsWithCurrentBooking).not.toHaveBeenCalled();
+    });
+
+    it('stops at 10,000 customers and says so', async () => {
+      await setup(range(1, 20), []);
+      await create();
+      serveMatches(10050);
+
+      const [, csv] = await downloadedCsv();
+
+      expect(csv.split('\n')).toHaveLength(10001);
+      expect(mockToastService.addMessage).toHaveBeenCalledWith(expect.stringContaining('first 10,000'), 'Customers', expect.anything());
+    });
+  });
 });
 
 describe('CustomersComponent live updates', () => {
@@ -180,6 +243,7 @@ describe('CustomersComponent live updates', () => {
         { provide: CustomerService, useValue: mockCustomerService },
         { provide: RealtimeService, useValue: { topic$: jest.fn(() => events.asObservable()), reconnected$: reconnected } },
         { provide: AuthService, useValue: { isSuperAdmin: () => superAdmin } },
+        { provide: ToastService, useValue: { addMessage: jest.fn() } },
         { provide: LoggerService, useValue: { info: jest.fn(), error: jest.fn(), debug: jest.fn() } },
       ],
     }).compileComponents();

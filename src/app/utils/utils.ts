@@ -111,6 +111,7 @@ export class Utils {
     a.href = url;
     a.download = filename;
     a.click();
+    window.URL.revokeObjectURL(url);
   }
 
 
@@ -157,11 +158,17 @@ export class Utils {
   }
 }
 
-/**
- * Pulls a human-readable string out of an error of unknown shape.
- * Without this, `${error}` on an HttpErrorResponse renders as
- * "[object Object]" in toasts (issue #190 — session timeout case).
- */
+/** One CSV cell: quoted when it holds a comma, quote or line break. */
+export function csvField(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  let text = String(value);
+  // Spreadsheets run a cell starting with these as a formula, and customers type their own names.
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+// Pulls readable text out of an error of unknown shape; `${error}` on an
+// HttpErrorResponse would show "[object Object]" in a toast.
 export function errorMessage(error: any, fallback = 'An unexpected error occurred'): string {
   if (!error) return fallback;
   if (typeof error === 'string') return error;
