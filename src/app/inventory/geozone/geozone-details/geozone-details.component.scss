@@ -1,0 +1,5 @@
+// Long unwrapped JSON lines otherwise stretch the page wider than the viewport.
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
