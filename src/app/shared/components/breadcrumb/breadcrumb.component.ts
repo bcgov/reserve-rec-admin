@@ -16,4 +16,6 @@ export interface BreadcrumbItem {
 })
 export class BreadcrumbComponent {
   @Input() items: BreadcrumbItem[] = [];
+
+  trackByIndex = (index: number) => index;
 }

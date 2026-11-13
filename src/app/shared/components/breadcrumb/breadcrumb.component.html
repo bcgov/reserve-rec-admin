@@ -1,7 +1,7 @@
 <nav *ngIf="items?.length" aria-label="breadcrumb" class="app-breadcrumb">
   <ol class="breadcrumb mb-0">
     <li
-      *ngFor="let item of items; let last = last"
+      *ngFor="let item of items; let last = last; trackBy: trackByIndex"
       class="breadcrumb-item"
       [class.active]="last"
       [attr.aria-current]="last ? 'page' : null"
