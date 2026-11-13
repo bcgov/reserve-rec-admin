@@ -32,7 +32,9 @@ jobs:
           scanners: "vuln,secret,config"
           severity: "CRITICAL,HIGH"
 
+      # On large PR diffs code scanning reports existing alerts from main as new.
       - name: Upload Trivy scan results to GitHub Security tab
+        if: github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: "trivy-results.sarif"
