@@ -15,6 +15,19 @@ import { FacilityService } from '../../../services/facility.service';
 import { EntityFormBaseComponent } from '../../../shared/components/entity/entity-base/entity-form-base.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { PermissionDirective } from '../../../shared/directives/permission.directive';
+import { PermissionsService } from '../../../services/permissions.service';
+
+// Puts the ORCS input on a request body: a number, the API's remove form when a
+// stored value is cleared, or nothing when empty and none is stored.
+export function setOrcsField(props: any, value: any, storedOrcs: number | null = null) {
+  delete props['orcs'];
+  if (value !== null && value !== undefined && value !== '') {
+    const parsed = Number(value);
+    props['orcs'] = isNaN(parsed) ? value : parsed;
+  } else if (storedOrcs !== null && storedOrcs !== undefined) {
+    props['orcs'] = { value: null, action: 'remove' };
+  }
+}
 
 @Component({
   selector: 'app-facility-form',
@@ -80,7 +93,8 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
     protected facilityService: FacilityService,
     protected router: Router,
     protected route: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    protected permissionsService: PermissionsService
   ) {
     super(cdr);
     if (this.route?.parent?.snapshot?.data?.['facility']) {
@@ -141,6 +155,7 @@ export class FacilityFormComponent extends EntityFormBaseComponent implements On
       }),
       maxMapZoom: [this.facility?.maxMapZoom || this._maxMapZoom(), [Validators.required]],
       minMapZoom: [this.facility?.minMapZoom || this._minMapZoom(), [Validators.required]],
+      orcs: [this.facility?.orcs ?? null, [Validators.min(1)]],
       meta: this.fb.group({
         enforceZoomVisibility: [false]
       }),

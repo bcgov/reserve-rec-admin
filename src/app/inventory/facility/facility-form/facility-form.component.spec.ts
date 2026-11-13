@@ -6,6 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideToastr } from 'ngx-toastr';
 import { provideRouter } from '@angular/router';
+import { PermissionsService } from '../../../services/permissions.service';
 
 describe('FacilityFormComponent duplicate display name (#392)', () => {
   let component: FacilityFormComponent;
@@ -63,5 +64,33 @@ describe('FacilityFormComponent duplicate display name (#392)', () => {
     setName('Cheakamus North');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain("Couldn't check whether this name is already used in this park");
+  });
+});
+
+describe('FacilityFormComponent ORCS input', () => {
+  async function renderOrcsAs(permissions) {
+    await TestBed.configureTestingModule({
+      imports: [FacilityFormComponent],
+      providers: [
+        ConfigService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideToastr(),
+        provideRouter([])
+      ]
+    })
+    .compileComponents();
+    TestBed.inject(PermissionsService).permissions.set(permissions);
+    const fixture = TestBed.createComponent(FacilityFormComponent);
+    fixture.detectChanges();
+    return fixture.componentInstance.form.get('orcs');
+  }
+
+  it('is locked for users who are not superadmin', async () => {
+    expect((await renderOrcsAs({ bcparks_1: 'staff' })).disabled).toBe(true);
+  });
+
+  it('is editable for superadmins', async () => {
+    expect((await renderOrcsAs({ superadmin: 'superadmin' })).enabled).toBe(true);
   });
 });

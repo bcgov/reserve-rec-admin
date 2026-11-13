@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { FacilityService } from '../../../services/facility.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilityFormComponent } from '../../facility/facility-form/facility-form.component';
+import { FacilityFormComponent, setOrcsField } from '../../facility/facility-form/facility-form.component';
 import { NgIf } from '@angular/common';
 
 @Component({
@@ -100,6 +100,7 @@ export class FacilityCreateComponent {
     delete props['geozones'];
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
+    setOrcsField(props, this.facilityForm.get('orcs')?.value);
 
     return props;
   }

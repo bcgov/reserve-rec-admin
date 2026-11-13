@@ -88,10 +88,6 @@ export class ActivityFormComponent implements OnInit, AfterViewInit {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      facilities: new UntypedFormControl(this.mapEntityPkSk(this.activity?.facilities) || '', {
-      }),
-      geozones: new UntypedFormControl(this.mapEntityPkSk(this.activity?.geozones) || '', {
-      }),
       displayName: new UntypedFormControl(this.activity?.displayName || this.defaultActivityName, {
         nonNullable: true,
         validators: [Validators.required]
@@ -121,17 +117,6 @@ export class ActivityFormComponent implements OnInit, AfterViewInit {
     });
   }
 
-
-  // Generic utility method to map entities to pk/sk objects
-  mapEntityPkSk(entities: any[]): { pk: string; sk: string }[] {
-    if (!entities?.length) {
-      return [];
-    }
-    return entities.map(entity => ({
-      pk: entity.pk,
-      sk: entity.sk
-    }));
-  }
 
   // Build the sub-type options for a given activity type (used both during
   // initial form setup and when the user changes activity type).
