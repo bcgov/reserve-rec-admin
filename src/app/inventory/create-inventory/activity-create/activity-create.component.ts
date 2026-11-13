@@ -29,18 +29,6 @@ export class ActivityCreateComponent {
     this.activityForm = event;
   }
 
-  onRelationshipsChanged(type: string, relationships: any[]) {
-    console.log(`Relationships changed for ${type}:`, relationships);
-    // Update form controls directly - the form already tracks these
-    if (type === 'facilities') {
-      this.activityForm?.get('facilities')?.setValue(relationships);
-      this.activityForm?.get('facilities')?.markAsDirty();
-    } else if (type === 'geozones') {
-      this.activityForm?.get('geozones')?.setValue(relationships);
-      this.activityForm?.get('geozones')?.markAsDirty();
-    }
-  }
-
   // Submit new activity
   async submit(): Promise<void> {
     // For creating new activities, use .get to get the values from the form instead of route data

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
-import { FacilityFormComponent } from '../facility-form/facility-form.component';
+import { FacilityFormComponent, setOrcsField } from '../facility-form/facility-form.component';
 import { FacilityService } from '../../../services/facility.service';
 import { RelationshipService } from '../../../services/relationship.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -113,6 +113,10 @@ export class FacilityEditComponent extends EntityEditBaseComponent {
     delete props['geozones'];
     delete props['collectionId']; // Remove collectionId from the props
     delete props['meta']; // Remove meta fields from the props
+    const orcs = this.facilityForm.get('orcs');
+    if (orcs?.dirty) {
+      setOrcsField(props, orcs.value, this.facility?.orcs);
+    }
     return props;
   }
 

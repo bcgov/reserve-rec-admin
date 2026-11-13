@@ -116,6 +116,19 @@
             </div>
           </div>
 
+          <div class="row mt-2">
+            <div class="col-12 col-lg-6">
+              <ngds-number-input class="mb-4"
+                [control]="form.get('orcs')"
+                [label]="'ORCS'"
+                [placeholder]="'Enter the park ORCS number'"
+                [decimalPlaces]="0"
+                [allowNegative]="false"
+                [disabled]="!permissionsService.isSuperAdmin()">
+              </ngds-number-input>
+            </div>
+          </div>
+
           <div class="row mt-4 pb-2">
             <div class="col-12 col-lg-6">
               <ngds-text-input class="mb-4"
