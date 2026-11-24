@@ -30,7 +30,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
     steps:
       ### Restore cdk.out cache
       - name: Restore cdk.out cache

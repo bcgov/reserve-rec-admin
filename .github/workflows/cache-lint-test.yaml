@@ -21,7 +21,7 @@ jobs:
       - run: yarn install --silent --frozen-lockfile
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
   lint:
     name: Lint
     needs: install
@@ -38,7 +38,7 @@ jobs:
       - run: yarn lint
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
   test:
     name: Test
     needs: install
@@ -56,4 +56,4 @@ jobs:
       - run: yarn test
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]

@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, Input, OnDestroy, Output, Signal, signal, ViewChild, WritableSignal } from '@angular/core';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { Map } from 'maplibre-gl';
 
 @Component({
@@ -127,7 +127,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           'type': 'Polygon',
           'coordinates': [coordinates]
         },
-        'properties': options // Optional properties for the polygon
+        'properties': {} // options hold grip DOM elements, which maplibre cannot send to its worker
       }
     });
     this.map.addLayer({

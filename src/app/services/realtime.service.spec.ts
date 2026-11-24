@@ -61,7 +61,7 @@ describe('RealtimeService', () => {
   let logger: { warn: jest.Mock; error: jest.Mock; info: jest.Mock };
   let service: RealtimeService;
   let subscriptions: Subscription;
-  const originalWebSocket = (global as any).WebSocket;
+  const originalWebSocket = (globalThis as any).WebSocket;
 
   const sockets = () => MockWebSocket.instances;
   const latest = () => MockWebSocket.instances[MockWebSocket.instances.length - 1];
@@ -87,7 +87,7 @@ describe('RealtimeService', () => {
     jest.setSystemTime(NOW);
     MockWebSocket.instances = [];
     MockWebSocket.throwOnCreate = null;
-    (global as any).WebSocket = MockWebSocket;
+    (globalThis as any).WebSocket = MockWebSocket;
     config = { WEBSOCKET_URL: 'wss://rt.example/ws' };
     session = signal<any>(null);
     logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn() };
@@ -117,7 +117,7 @@ describe('RealtimeService', () => {
     logout();
     jest.restoreAllMocks();
     jest.useRealTimers();
-    (global as any).WebSocket = originalWebSocket;
+    (globalThis as any).WebSocket = originalWebSocket;
   });
 
   describe('connecting', () => {
