@@ -57,12 +57,9 @@
     "aws-cdk-lib": "2.278.0",
     "bootstrap-icons": "^1.13.1",
     "constructs": "^10.0.0",
-    "glob": "^10.5.0",
-    "global": "^4.4.0",
     "guid-typescript": "^1.0.9",
     "html5-qrcode": "^2.3.8",
     "luxon": "^3.6.1",
-    "mapbox-gl": "^3.6.0",
     "maplibre-gl": "^6.19.0",
     "ngx-bootstrap": "^19.0.2",
     "ngx-toastr": "^19.0.0",
@@ -70,7 +67,6 @@
     "tinymce": "^8.10.2",
     "tslib": "^2.3.0",
     "winston": "^3.18.3",
-    "ws": "^8.23.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
