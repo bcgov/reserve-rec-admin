@@ -34,7 +34,8 @@ export class CustomerService {
   }) {
     try {
       const body: any = {
-        limit: params.limit || 20,
+        // Not `limit`: requests carrying it are rejected before they reach the API.
+        size: params.limit || 20,
         from: params.from || 0
       };
       
