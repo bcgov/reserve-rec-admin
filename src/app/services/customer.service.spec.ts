@@ -42,3 +42,19 @@ describe('CustomerService.getCustomerBySub', () => {
     expect(await service.getCustomerBySub('sub-1')).toBeNull();
   });
 });
+
+describe('CustomerService.searchCustomers', () => {
+  it('sends the page size as size, not limit', async () => {
+    const post = jest.fn().mockReturnValue(of({ data: { hits: [] } }));
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: { post } },
+        { provide: LoggerService, useValue: { error: jest.fn() } },
+      ],
+    });
+
+    await TestBed.inject(CustomerService).searchCustomers({ query: 'ann', limit: 100, from: 200 });
+
+    expect(post).toHaveBeenCalledWith('users/search', { size: 100, from: 200, query: 'ann' });
+  });
+});
