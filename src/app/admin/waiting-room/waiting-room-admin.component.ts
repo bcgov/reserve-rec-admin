@@ -7,6 +7,8 @@ import { WaitingRoomAdminService, QueueSummary, QueueMetrics, OpeningTimeEntry }
 import { ToastService, ToastTypes } from '../../services/toast.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
+const MODE2_MAX_FIRST_RELEASE_MS = 24 * 60 * 60 * 1000;
+
 @Component({
   selector: 'app-waiting-room-admin',
   standalone: true,
@@ -26,6 +28,8 @@ export class WaitingRoomAdminComponent implements OnInit {
   mode2BatchSize = 50;
   mode2IntervalMinutes = 5; // display in minutes; send as seconds
   mode2ReleaseMode: 'auto' | 'manual' = 'auto';
+  mode2FirstReleaseAt = ''; // datetime-local value; optional
+  mode2FirstReleaseError = '';
 
   queues: QueueSummary[] = [];
   expandedMetrics: Record<string, QueueMetrics | null> = {};
@@ -66,11 +70,18 @@ export class WaitingRoomAdminComponent implements OnInit {
 
   async toggleMode2(): Promise<void> {
     const next = !this.mode2Active;
+    let firstReleaseAt: string | undefined;
+    if (next) {
+      this.mode2FirstReleaseError = this.firstReleaseError();
+      if (this.mode2FirstReleaseError) return;
+      firstReleaseAt = this.firstReleaseIso();
+    }
+    const firstReleaseNote = firstReleaseAt ? ` The first batch goes out at ${this.formatIso(firstReleaseAt)}.` : '';
     const modalRef = this.modalService.show(ConfirmationModalComponent, {
       initialState: {
         title: next ? 'Activate Full-Site Gating (Mode 2)' : 'Deactivate Full-Site Gating',
         body: next
-          ? `All visitors without an admission token will be queued. Batches of ${this.mode2BatchSize} will be admitted every ${this.mode2IntervalMinutes} minute(s). Activate?`
+          ? `All visitors without an admission token will be queued. Batches of ${this.mode2BatchSize} will be admitted every ${this.mode2IntervalMinutes} minute(s).${firstReleaseNote} Activate?`
           : 'Normal browsing will resume. Deactivate Mode 2?',
         confirmText: next ? 'Activate' : 'Deactivate',
         confirmClass: next ? 'btn btn-warning' : 'btn btn-primary',
@@ -84,8 +95,10 @@ export class WaitingRoomAdminComponent implements OnInit {
           batchSize: this.mode2BatchSize,
           releaseIntervalSeconds: this.mode2IntervalMinutes * 60,
           releaseMode: this.mode2ReleaseMode,
+          firstReleaseAt,
         } : undefined);
         this.mode2Active = next;
+        this.mode2FirstReleaseAt = '';
         if (next && result?.queueId) {
           // Reload to get the fresh Mode 2 queue record
           this.mode2Queue = await this.wrService.getMode2Queue();
@@ -104,6 +117,30 @@ export class WaitingRoomAdminComponent implements OnInit {
         this.mode2Saving = false;
       }
     });
+  }
+
+  /** Error text for the "First release at" input, or '' when empty (optional) or valid. */
+  firstReleaseError(): string {
+    const iso = this.firstReleaseIso();
+    if (this.mode2ReleaseMode !== 'auto' || !this.mode2FirstReleaseAt) return '';
+    if (!iso) return 'Enter a valid date and time.';
+    const ms = Date.parse(iso) - Date.now();
+    if (ms <= 0) return 'The first release time must be in the future.';
+    if (ms > MODE2_MAX_FIRST_RELEASE_MS) return 'The first release time must be within 24 hours.';
+    return '';
+  }
+
+  /** ISO form of the "First release at" input; undefined when unset, invalid or in manual mode. */
+  firstReleaseIso(): string | undefined {
+    if (this.mode2ReleaseMode !== 'auto' || !this.mode2FirstReleaseAt) return undefined;
+    const d = new Date(this.mode2FirstReleaseAt);
+    return isNaN(d.getTime()) ? undefined : d.toISOString();
+  }
+
+  /** True while the active Mode 2 queue still has a first release time ahead. */
+  isFirstReleasePending(): boolean {
+    const at = this.mode2Queue?.firstReleaseAt;
+    return !!at && Date.parse(at) > Date.now();
   }
 
   // ── Mode 2 manual release ─────────────────────────────────────────────────
