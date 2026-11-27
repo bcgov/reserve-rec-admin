@@ -15,6 +15,7 @@ export interface QueueSummary {
   releaseIntervalSeconds?: number;
   releaseMode?: 'auto' | 'manual';
   lastReleasedAt?: number;
+  firstReleaseAt?: string; // ISO 8601
 }
 
 export interface QueueMetrics extends QueueSummary {
@@ -43,6 +44,7 @@ export interface Mode2Options {
   batchSize?: number;
   releaseIntervalSeconds?: number;
   releaseMode?: 'auto' | 'manual';
+  firstReleaseAt?: string; // ISO 8601
 }
 
 @Injectable({ providedIn: 'root' })
@@ -78,6 +80,7 @@ export class WaitingRoomAdminService {
       if (options.batchSize != null) payload.batchSize = options.batchSize;
       if (options.releaseIntervalSeconds != null) payload.releaseIntervalSeconds = options.releaseIntervalSeconds;
       if (options.releaseMode != null) payload.releaseMode = options.releaseMode;
+      if (options.firstReleaseAt) payload.firstReleaseAt = options.firstReleaseAt;
     }
     const resp: any = await lastValueFrom(this.apiService.post('waiting-room/mode2', payload));
     return resp?.data;

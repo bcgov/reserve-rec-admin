@@ -53,6 +53,21 @@
                 <input id="mode2IntervalMinutes" type="number" class="form-control form-control-sm" [(ngModel)]="mode2IntervalMinutes"
                        min="1" max="60" step="1">
               </div>
+              <div class="col-12" *ngIf="mode2ReleaseMode === 'auto'">
+                <label for="mode2FirstReleaseAt" class="form-label small mb-1">First release at (optional)</label>
+                <input id="mode2FirstReleaseAt" type="datetime-local" class="form-control form-control-sm"
+                       [class.is-invalid]="mode2FirstReleaseError" [(ngModel)]="mode2FirstReleaseAt"
+                       (ngModelChange)="mode2FirstReleaseError = ''"
+                       aria-describedby="mode2FirstReleaseHelp mode2FirstReleaseErrorMsg"
+                       [attr.aria-invalid]="mode2FirstReleaseError ? 'true' : null">
+                <div id="mode2FirstReleaseHelp" class="form-text">
+                  Optional. The site is gated as soon as you activate; the first batch goes out at this time.
+                  Leave empty to start releasing right away.
+                </div>
+                <div *ngIf="mode2FirstReleaseError" id="mode2FirstReleaseErrorMsg" class="text-danger small mt-1" role="alert">
+                  {{ mode2FirstReleaseError }}
+                </div>
+              </div>
             </div>
 
             <!-- Live stats when active -->
@@ -80,6 +95,10 @@
               <div *ngIf="mode2Queue['releaseMode'] !== 'manual' && mode2Queue.releaseIntervalSeconds">
                 <div class="fw-bold fs-5">{{ mode2Queue.releaseIntervalSeconds / 60 }}m</div>
                 <div class="text-muted small">Interval</div>
+              </div>
+              <div *ngIf="isFirstReleasePending()">
+                <div class="fw-bold fs-5">{{ formatIso(mode2Queue.firstReleaseAt!) }}</div>
+                <div class="text-muted small">First release</div>
               </div>
               <div *ngIf="mode2Queue.lastReleasedAt">
                 <div class="small text-muted">Last release</div>
